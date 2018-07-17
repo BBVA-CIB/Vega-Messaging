@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<vega_config xmlns="http://www.bbva.com/vega/config">
+
+	<driver_type>EMBEDDED</driver_type>
+
+	<rcv_poller_config name="default_poller"> 
+		<idle_strategy_type>BACK_OFF</idle_strategy_type>
+	</rcv_poller_config>
+
+	<responses_config>
+		<rcv_poller>default_poller</rcv_poller>
+	</responses_config>	
+
+	<autodisc_config> 
+		<autodisc_type>MULTICAST</autodisc_type>
+	</autodisc_config>
+
+	<topic_template name="default_multicast">
+		<transport_type>MULTICAST</transport_type>
+		<rcv_poller>default_poller</rcv_poller>
+	</topic_template>
+
+	<topic_pattern pattern=".*" template="default_multicast" />
+</vega_config>
