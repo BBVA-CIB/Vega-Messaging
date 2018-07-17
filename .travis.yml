@@ -1,6 +1,4 @@
 language: java
-jdk:
-  - oraclejdk8
-
-before_install:
-- mount -t tmpfs -o remount,rw,nosuid,nodev,noexec,relatime,size=1024M tmpfs /dev/shm
+jdk: oraclejdk8
+sudo: true
+before_install: mount -t tmpfs -o remount,rw,nosuid,nodev,noexec,relatime,size=1024M tmpfs /dev/shm
