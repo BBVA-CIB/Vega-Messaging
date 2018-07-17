@@ -7,7 +7,7 @@ In order to attain this objective we have developed a messaging library on top o
 
 # ¿What is Aeron?
 
-[Aeron](https://github.com/real-logic/aeron) is an Open Source low latency messaging library that provides basic capabilities for publication / subscription in multiple protocols.
+[Aeron](https://github.com/real-logic/aeron) is an Open Source low latency messaging library that provides capabilities for publication / subscription in multiple protocols.
 
 The supported protocols are:
 * Reliable UDP
@@ -16,9 +16,9 @@ The supported protocols are:
 
 The reliable protocols are light weight and allows for very fast transfer with minimum overhead and error control and recovery. 
 
-There is no compromise in Aeron between latency and throughput, the library handles it automatically and there is no need to specify if we need to flush or not the messages like we do for Ultra Messaging and other mechanism.
+There is no compromise in Aeron between latency and throughput, the library handles it automatically and there is no need to specify if we need to flush or not the messages.
 
-Aeron does not support topics, request / response, auto-discovery, file configuration,  or other advance features that we use in our daily basis, this has motivated the creation of a library on top of Aeron in order to provide this necessary features.
+Aeron does not support topics, request / response, auto-discovery, file configuration,  or other similar features. This has motivated the creation of a library on top of Aeron in order to provide this and other usefull features.
 
 # ¿Why Aeron?
 
