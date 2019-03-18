@@ -1,4 +1,4 @@
-# ¿What is VegaMessaing?
+# ¿What is VegaMessaging?
 
 
 The objective of Vega Messaging Library is to provide a low latency communication mechanism with similar or better performance that the best commercial solutions of the market.
