@@ -28,12 +28,11 @@ public interface ITopicSubListener
     void onRequestReceived(final IRcvRequest receivedRequest);
     
     /**
-     * The method is invoked when a gap in the sequence number of the last two messages received from the same topicPublisherId is detected
+     * The method is invoked when a gap in the sequence number of the last two messages received from the same topicPublisherId is detected {@link com.bbva.kyof.vega.protocol.subscriber.TopicSubscriber#checkMessageLoss(com.bbva.kyof.vega.msg.RcvMessage) }.
      * This sequence number is located at the message data header of Vega {@link com.bbva.kyof.vega.msg.MsgDataHeader }
      * 
      * Vega is implemented over Aeron, that provides a reliable connection for unreliable protocols.
-     * Even so, there may be messages that Aeron can not recover. For this reason, this functionality has been implemented,
-     * allowing the user to know when a message is lost.
+     * Even so, there may be messages that Aeron can not recover. For this reason, this functionality has been implemented, allowing the user to know when a message is lost.
      *
      * The sequence numbers are shared by messages and requests and therefore this callback applies to any of both cases.
      *

@@ -299,6 +299,6 @@ public final class VegaInstance implements IVegaInstance, AvailableImageHandler,
         }
 
         // Call the default implementation
-        Aeron.DEFAULT_ERROR_HANDLER.onError(throwable);
+        Aeron.Configuration.DEFAULT_ERROR_HANDLER.onError(throwable);
     }
 }

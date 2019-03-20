@@ -15,7 +15,7 @@ public class VersionTest
     {
         // Create 3 versions
         final int version = Version.toIntegerRepresentation((byte)34, (byte)45, (byte)67);
-        final int localVersionCompatible = Version.toIntegerRepresentation((byte)1, (byte)3, (byte)6);
+        final int localVersionCompatible = Version.toIntegerRepresentation((byte)2, (byte)0, (byte)0);
         final int compatibleVersion = Version.toIntegerRepresentation((byte)34, (byte)50, (byte)32);
         final int incompatibleVersion = Version.toIntegerRepresentation((byte)36, (byte)45, (byte)67);
 

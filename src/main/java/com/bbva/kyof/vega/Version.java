@@ -6,9 +6,9 @@ package com.bbva.kyof.vega;
 public final class Version
 {
     /** Mayor library version of current code */
-    private static final byte LOCAL_MAYOR = 1;
+    private static final byte LOCAL_MAYOR = 2;
     /** Minor library version of current code */
-    private static final byte LOCAL_MINOR = 5;
+    private static final byte LOCAL_MINOR = 0;
     /** Patch library version of current code */
     private static final byte LOCAL_PATCH = 0;
 
