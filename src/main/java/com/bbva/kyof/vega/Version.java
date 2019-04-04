@@ -18,7 +18,7 @@ public final class Version
     /** Private constructor to avoid instantiation */
     private Version()
     {
-        // Nothing to do
+        //Nothing to do
     }
 
     /**
