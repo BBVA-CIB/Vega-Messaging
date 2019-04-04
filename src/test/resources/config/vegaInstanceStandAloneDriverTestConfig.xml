@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<vega_config xmlns="http://www.bbva.com/vega/config">
+
+    <driver_type>EXTERNAL</driver_type>
+
+    <rcv_poller_config name="poller1">
+        <idle_strategy_type>SLEEP_NANOS</idle_strategy_type>
+        <idleStrategy_sleep_nanos>1000000</idleStrategy_sleep_nanos>
+    </rcv_poller_config>
+
+    <rcv_poller_config name="poller2">
+        <idle_strategy_type>SLEEP_NANOS</idle_strategy_type>
+        <idleStrategy_sleep_nanos>1000000</idleStrategy_sleep_nanos>
+    </rcv_poller_config>
+
+    <responses_config>
+        <rcv_poller>poller1</rcv_poller>
+    </responses_config>
+
+    <autodisc_config>
+        <autodisc_type>MULTICAST</autodisc_type>
+    </autodisc_config>
+
+    <topic_template name="mcast">
+        <transport_type>MULTICAST</transport_type>
+        <rcv_poller>poller1</rcv_poller>
+        <min_port>23330</min_port>
+        <max_port>23335</max_port>
+        <num_streams_per_port>1</num_streams_per_port>
+        <multicast_address_low>224.0.0.9</multicast_address_low>
+        <multicast_address_high>224.0.0.10</multicast_address_high>
+    </topic_template>
+
+    <topic_template name="ucast">
+        <transport_type>UNICAST</transport_type>
+        <rcv_poller>poller1</rcv_poller>
+        <min_port>23336</min_port>
+        <max_port>23340</max_port>
+        <num_streams_per_port>2</num_streams_per_port>
+    </topic_template>
+
+    <topic_template name="ipc">
+        <transport_type>IPC</transport_type>
+        <rcv_poller>poller2</rcv_poller>
+        <num_streams_per_port>2</num_streams_per_port>
+    </topic_template>
+
+
+    <topic_pattern pattern="i.*" template="ipc" />
+    <topic_pattern pattern="m.*" template="mcast" />
+    <topic_pattern pattern="u.*" template="ucast" />
+</vega_config>

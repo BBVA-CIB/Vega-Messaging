@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<vega_config xmlns="http://www.bbva.com/vega/config">
+
+    <driver_type>EXTERNAL</driver_type>
+
+    <rcv_poller_config name="poller1">
+        <idle_strategy_type>SLEEP_NANOS</idle_strategy_type>
+        <idleStrategy_sleep_nanos>1000000</idleStrategy_sleep_nanos>
+    </rcv_poller_config>
+
+    <rcv_poller_config name="poller2">
+        <idle_strategy_type>SLEEP_NANOS</idle_strategy_type>
+        <idleStrategy_sleep_nanos>1000000</idleStrategy_sleep_nanos>
+    </rcv_poller_config>
+
+    <responses_config>
+        <rcv_poller>poller1</rcv_poller>
+    </responses_config>
+
+    <autodisc_config>
+        <autodisc_type>MULTICAST</autodisc_type>
+    </autodisc_config>
+
+    <topic_template name="ucast">
+        <transport_type>UNICAST</transport_type>
+        <rcv_poller>poller1</rcv_poller>
+        <min_port>23336</min_port>
+        <max_port>23340</max_port>
+        <num_streams_per_port>2</num_streams_per_port>
+    </topic_template>
+
+    <topic_pattern pattern="s.*" template="ucast" />
+
+    <!-- Security configuration -->
+    <topic_security_template name="securityTemplate">
+        <pub_sec_id>22222</pub_sec_id>
+        <sub_sec_id>11111</sub_sec_id>
+    </topic_security_template>
+
+    <topic_security_pattern pattern="s.*" template="securityTemplate"/>
+
+</vega_config>
