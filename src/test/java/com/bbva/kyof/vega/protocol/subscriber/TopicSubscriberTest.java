@@ -9,7 +9,12 @@ import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by cnebrera on 11/08/16.
@@ -17,7 +22,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class TopicSubscriberTest
 {
     final TopicTemplateConfig config = new TopicTemplateConfig();
-    final TopicSubscriber topicSubscriber = new TopicSubscriber("topic1", config);
+    private final TopicSubscriber topicSubscriber = new TopicSubscriber("topic1", config);
 
     @Test
     public void testBasicGetSet()
@@ -39,45 +44,45 @@ public class TopicSubscriberTest
         final AeronSubscriber aeronSubscriber2 = EasyMock.createNiceMock(AeronSubscriber.class);
         EasyMock.replay(aeronSubscriber, aeronSubscriber2);
 
-        Assert.assertTrue(this.getAeronSubsCount() == 0);
+        Assert.assertEquals(0, this.getAeronSubsCount());
 
         topicSubscriber.addAeronSubscriber(aeronSubscriber);
-        Assert.assertTrue(this.getAeronSubsCount() == 1);
+        Assert.assertEquals(1, this.getAeronSubsCount());
 
         topicSubscriber.addAeronSubscriber(aeronSubscriber);
-        Assert.assertTrue(this.getAeronSubsCount() == 1);
+        Assert.assertEquals(1, this.getAeronSubsCount());
 
         topicSubscriber.addAeronSubscriber(aeronSubscriber2);
-        Assert.assertTrue(this.getAeronSubsCount() == 2);
+        Assert.assertEquals(2, this.getAeronSubsCount());
 
         topicSubscriber.removeAeronSubscriber(aeronSubscriber);
-        Assert.assertTrue(this.getAeronSubsCount() == 1);
+        Assert.assertEquals(1, this.getAeronSubsCount());
 
         topicSubscriber.removeAeronSubscriber(aeronSubscriber2);
-        Assert.assertTrue(this.getAeronSubsCount() == 0);
+        Assert.assertEquals(0, this.getAeronSubsCount());
     }
 
     @Test
     public void testAddRemoveListeners()
     {
-        Assert.assertTrue(topicSubscriber.hasNoListeners());
+        assertTrue(topicSubscriber.hasNoListeners());
 
         final Listener listener1 = new Listener();
-        Assert.assertTrue(topicSubscriber.setNormalListener(listener1));
+        assertTrue(topicSubscriber.setNormalListener(listener1));
         Assert.assertFalse(topicSubscriber.setNormalListener(listener1));
 
         Assert.assertFalse(topicSubscriber.hasNoListeners());
-        Assert.assertTrue(topicSubscriber.removeNormalListener());
+        assertTrue(topicSubscriber.removeNormalListener());
         Assert.assertFalse(topicSubscriber.removeNormalListener());
 
-        Assert.assertTrue(topicSubscriber.hasNoListeners());
+        assertTrue(topicSubscriber.hasNoListeners());
 
-        Assert.assertTrue(topicSubscriber.addPatternListener("a.*", listener1));
+        assertTrue(topicSubscriber.addPatternListener("a.*", listener1));
         Assert.assertFalse(topicSubscriber.addPatternListener("a.*", listener1));
         Assert.assertFalse(topicSubscriber.hasNoListeners());
 
-        Assert.assertTrue(topicSubscriber.removePatternListener("a.*"));
-        Assert.assertTrue(topicSubscriber.hasNoListeners());
+        assertTrue(topicSubscriber.removePatternListener("a.*"));
+        assertTrue(topicSubscriber.hasNoListeners());
         Assert.assertFalse(topicSubscriber.removePatternListener("a.*"));
     }
 
@@ -94,8 +99,8 @@ public class TopicSubscriberTest
 
         topicSubscriber.close();
 
-        Assert.assertTrue(topicSubscriber.hasNoListeners());
-        Assert.assertTrue(this.getAeronSubsCount() == 0);
+        assertTrue(topicSubscriber.hasNoListeners());
+        assertEquals(0, this.getAeronSubsCount());
     }
 
     @Test
@@ -107,25 +112,63 @@ public class TopicSubscriberTest
 
         topicSubscriber.setNormalListener(normalListener);
 
-        topicSubscriber.onMessageReceived(new RcvMessage());
-        topicSubscriber.onMessageReceived(new RcvMessage());
-        topicSubscriber.onRequestReceived(new RcvRequest());
+        final RcvMessage testMsg = new RcvMessage();
+        testMsg.setSequenceNumber(1234);
+        testMsg.setTopicPublisherId(UUID.randomUUID());
 
-        Assert.assertTrue(normalListener.msgsReceived == 2);
-        Assert.assertTrue(normalListener.requestsReceived == 1);
+        final RcvRequest testRequest = new RcvRequest();
+        testMsg.setSequenceNumber(3333);
+        testRequest.setTopicPublisherId(UUID.randomUUID());
+
+        topicSubscriber.onMessageReceived(testMsg);
+        topicSubscriber.onMessageReceived(testMsg);
+        topicSubscriber.onRequestReceived(testRequest);
+
+        Assert.assertEquals(2, normalListener.msgsReceived);
+        Assert.assertEquals(1, normalListener.requestsReceived);
 
         topicSubscriber.addPatternListener("a.*", patternListener1);
         topicSubscriber.addPatternListener("b.*", patternListener2);
 
-        topicSubscriber.onMessageReceived(new RcvMessage());
-        topicSubscriber.onRequestReceived(new RcvRequest());
+        topicSubscriber.onMessageReceived(testMsg);
+        topicSubscriber.onRequestReceived(testRequest);
 
-        Assert.assertTrue(normalListener.msgsReceived == 3);
-        Assert.assertTrue(normalListener.requestsReceived == 2);
-        Assert.assertTrue(patternListener1.msgsReceived == 1);
-        Assert.assertTrue(patternListener1.requestsReceived == 1);
-        Assert.assertTrue(patternListener2.msgsReceived == 1);
-        Assert.assertTrue(patternListener2.requestsReceived == 1);
+        assertEquals(3, normalListener.msgsReceived);
+        assertEquals(2, normalListener.requestsReceived);
+        assertEquals(1, patternListener1.msgsReceived);
+        assertEquals(1, patternListener1.requestsReceived);
+        assertEquals(1, patternListener2.msgsReceived);
+        assertEquals(1, patternListener2.requestsReceived);
+        
+        //Check sequence number
+        Assert.assertEquals(normalListener.msgSequenceNumber, testMsg.getSequenceNumber());
+        Assert.assertEquals(normalListener.requestSequenceNumber, testRequest.getSequenceNumber());
+        Assert.assertEquals(patternListener1.msgSequenceNumber, testMsg.getSequenceNumber());
+        Assert.assertEquals(patternListener1.requestSequenceNumber, testRequest.getSequenceNumber());
+        Assert.assertEquals(patternListener2.msgSequenceNumber, testMsg.getSequenceNumber());
+        Assert.assertEquals(patternListener2.requestSequenceNumber,testRequest.getSequenceNumber());
+
+    }
+
+    @Test
+    public void testSequenceNumberMap()
+    {
+        final long msgSequenceNumber = new Random().nextLong();
+        final UUID topicPublisherId = UUID.randomUUID();
+
+        final RcvMessage testMsg = new RcvMessage();
+        testMsg.setTopicPublisherId(topicPublisherId);
+        testMsg.setSequenceNumber(msgSequenceNumber);
+
+        topicSubscriber.onMessageReceived(testMsg);
+
+        Assert.assertEquals(msgSequenceNumber + 1, topicSubscriber.getExpectedSeqNumByTopicPubId().get(topicPublisherId).get());
+
+
+        // Remove topic publisher id from topic subscriber
+        topicSubscriber.onTopicPublisherRemoved(topicPublisherId);
+
+        Assert.assertNull(topicSubscriber.getExpectedSeqNumByTopicPubId().get(topicPublisherId));
     }
 
     private long getAeronSubsCount()
@@ -140,16 +183,21 @@ public class TopicSubscriberTest
         int msgsReceived = 0;
         int requestsReceived = 0;
 
+        long msgSequenceNumber = 0;
+        long requestSequenceNumber = 0;
+
         @Override
         public void onMessageReceived(IRcvMessage receivedMessage)
         {
             this.msgsReceived++;
+            this.msgSequenceNumber = ((RcvMessage)receivedMessage).getSequenceNumber();
         }
 
         @Override
         public void onRequestReceived(IRcvRequest receivedRequest)
         {
             this.requestsReceived++;
+            this.requestSequenceNumber = ((RcvRequest)receivedRequest).getSequenceNumber();
         }
     }
 }

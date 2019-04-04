@@ -13,21 +13,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by cnebrera on 16/11/2016.
  */
 public class SecureTopicSubscriberTest
 {
-    final Random rnd = new Random();
+    private final Random rnd = new Random();
     // Create an AES Crypto
-    AESCrypto aesCrypto;
-    final Listener listener = new Listener();
-    SecureTopicSubscriber topicSubscriber;
+    private AESCrypto aesCrypto;
+    private final Listener listener = new Listener();
+    private SecureTopicSubscriber topicSubscriber;
 
 
     @Before
@@ -37,7 +34,7 @@ public class SecureTopicSubscriberTest
 
         final TopicTemplateConfig config = new TopicTemplateConfig();
         // Create security template configuration for the subscriber topic
-        final Set<Integer> pubTopic1SecureSubs = new HashSet<>(Arrays.asList(22222));
+        final Set<Integer> pubTopic1SecureSubs = new HashSet<>(Collections.singletonList(22222));
         final Set<Integer> pubTopic1SecurePubs = new HashSet<>(Arrays.asList(11111, 22222, 33333));
         final TopicSecurityTemplateConfig securityTemplateConfig = new TopicSecurityTemplateConfig("secureConfig", 1000L, pubTopic1SecurePubs, pubTopic1SecureSubs);
         topicSubscriber = new SecureTopicSubscriber("topic1", config, securityTemplateConfig);
@@ -70,7 +67,7 @@ public class SecureTopicSubscriberTest
         final UnsafeBuffer buffer2 = listener.lastRcvMsg.getContents();
 
         // Both buffers should be the same
-        Assert.assertTrue(buffer1 == buffer2);
+        Assert.assertSame(buffer1, buffer2);
 
         // Now a message over internal buffer sizes
         msg = this.createMsg(2128);
@@ -79,7 +76,7 @@ public class SecureTopicSubscriberTest
         final UnsafeBuffer buffer3 = listener.lastRcvMsg.getContents();
 
         // Both buffers should be the different
-        Assert.assertTrue(buffer2 == buffer3);
+        Assert.assertSame(buffer2, buffer3);
 
         // Try again, this time should be the same again
         msg = this.createMsg(3000);
@@ -88,7 +85,7 @@ public class SecureTopicSubscriberTest
         final UnsafeBuffer buffer4 = listener.lastRcvMsg.getContents();
 
         // Both buffers should be the different
-        Assert.assertTrue(buffer3 == buffer4);
+        Assert.assertSame(buffer3, buffer4);
     }
 
     @Test
@@ -104,8 +101,8 @@ public class SecureTopicSubscriberTest
             this.simulateRcvMsg(aesCrypto, encodedMsg);
 
             // Now get the message and check if it has been correctly decoded
-            Assert.assertTrue(listener.lastRcvMsg.getContentOffset() == 0);
-            Assert.assertTrue(listener.lastRcvMsg.getContentLength() == i);
+            Assert.assertEquals(0, listener.lastRcvMsg.getContentOffset());
+            Assert.assertEquals(listener.lastRcvMsg.getContentLength(), i);
 
             // Make sure the contents are the same
             final byte[] rcvMsg = new byte[listener.lastRcvMsg.getContentLength()];
@@ -116,7 +113,7 @@ public class SecureTopicSubscriberTest
     }
 
     @Test
-    public void onSecureMsgWrongEncryption() throws Exception
+    public void onSecureMsgWrongEncryption()
     {
         // Create a message without encoding
         final ByteBuffer msg = this.createMsg(32);
@@ -125,7 +122,7 @@ public class SecureTopicSubscriberTest
         this.simulateRcvMsg(aesCrypto, msg);
 
         // Should have caused an exception and never arrive
-        Assert.assertTrue(listener.lastRcvMsg == null);
+        Assert.assertNull(listener.lastRcvMsg);
     }
 
     private void simulateRcvMsg(AESCrypto aesCrypto, ByteBuffer encodedMsg)
@@ -135,6 +132,7 @@ public class SecureTopicSubscriberTest
         rcvMessage.setUnsafeBufferContent(unsafeBuffer);
         rcvMessage.setContentOffset(0);
         rcvMessage.setContentLength(encodedMsg.limit());
+        rcvMessage.setTopicPublisherId(UUID.randomUUID());
         topicSubscriber.onSecureMsgReceived(rcvMessage, aesCrypto);
     }
 

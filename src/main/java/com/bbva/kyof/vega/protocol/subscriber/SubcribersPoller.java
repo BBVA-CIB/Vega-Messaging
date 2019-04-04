@@ -199,6 +199,7 @@ class SubcribersPoller extends RecurrentTask
         // Set the fields of the reusable received msg
         this.reusableReceivedMsg.setInstanceId(this.reusableDataMsgHeader.getInstanceId());
         this.reusableReceivedMsg.setTopicPublisherId(this.reusableDataMsgHeader.getTopicPublisherId());
+        this.reusableReceivedMsg.setSequenceNumber(this.reusableDataMsgHeader.getSequenceNumber());
         this.reusableReceivedMsg.setUnsafeBufferContent(this.bufferSerializer.getInternalBuffer());
         this.reusableReceivedMsg.setContentOffset(this.bufferSerializer.getOffset());
         this.reusableReceivedMsg.setContentLength(this.bufferSerializer.getMsgLength() - this.bufferSerializer.getOffset());
@@ -221,6 +222,7 @@ class SubcribersPoller extends RecurrentTask
         this.reusableReceivedMsg.setInstanceId(this.reusableDataMsgHeader.getInstanceId());
         this.reusableReceivedMsg.setTopicPublisherId(this.reusableDataMsgHeader.getTopicPublisherId());
         this.reusableReceivedMsg.setUnsafeBufferContent(this.bufferSerializer.getInternalBuffer());
+        this.reusableReceivedMsg.setSequenceNumber(this.reusableDataMsgHeader.getSequenceNumber());
         this.reusableReceivedMsg.setContentOffset(this.bufferSerializer.getOffset());
         this.reusableReceivedMsg.setContentLength(this.bufferSerializer.getMsgLength() - this.bufferSerializer.getOffset());
 
@@ -262,6 +264,7 @@ class SubcribersPoller extends RecurrentTask
         // Set the fields of the reusable received request
         this.reusableReceivedRequest.setInstanceId(this.reusableReqMsgHeader.getInstanceId());
         this.reusableReceivedRequest.setTopicPublisherId(this.reusableReqMsgHeader.getTopicPublisherId());
+        this.reusableReceivedRequest.setSequenceNumber(this.reusableReqMsgHeader.getSequenceNumber());
         this.reusableReceivedRequest.setRequestId(this.reusableReqMsgHeader.getRequestId());
         this.reusableReceivedRequest.setUnsafeBufferContent(this.bufferSerializer.getInternalBuffer());
         this.reusableReceivedRequest.setContentOffset(this.bufferSerializer.getOffset());

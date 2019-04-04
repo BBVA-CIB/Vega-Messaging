@@ -114,7 +114,7 @@ public abstract class AbstractAutodiscReceiver implements Closeable
      *
      * @return the created subscription
      */
-    public abstract Subscription createSubscription(final UUID instanceId, final Aeron aeron, final AutoDiscoveryConfig config);
+    public abstract Subscription createSubscription(UUID instanceId, Aeron aeron, AutoDiscoveryConfig config);
 
     @Override
     public void close()

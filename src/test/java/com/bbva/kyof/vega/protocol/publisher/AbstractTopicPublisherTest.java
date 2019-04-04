@@ -27,9 +27,9 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class AbstractTopicPublisherTest
 {
-    TopicTemplateConfig topicConfig;
-    VegaContext vegaContext;
-    AsyncRequestManager asyncRequestManager;
+    private TopicTemplateConfig topicConfig;
+    private VegaContext vegaContext;
+    private AsyncRequestManager asyncRequestManager;
 
     @Before
     public void beforeTest()
@@ -42,7 +42,7 @@ public class AbstractTopicPublisherTest
     }
 
     @After
-    public void afterTest() throws Exception
+    public void afterTest()
     {
         asyncRequestManager.close();
     }
@@ -54,18 +54,27 @@ public class AbstractTopicPublisherTest
 
         // Test get topic name and topic config
         Assert.assertEquals(topicPubImpl.getTopicName(), "topic");
-        Assert.assertTrue(topicPubImpl.getTopicConfig() == topicConfig);
+        Assert.assertSame(topicPubImpl.getTopicConfig(), topicConfig);
+        
+        // Test sequence number
+        Assert.assertEquals(0, topicPubImpl.getSequenceNumber());
 
         // Now test send message
         UnsafeBuffer sendBuffer = new UnsafeBuffer(ByteBuffer.allocate(128));
         Assert.assertEquals(topicPubImpl.sendMsg(sendBuffer, 0, 128), PublishResult.OK);
-        Assert.assertTrue(topicPubImpl.getSendMessageBufferRef() == sendBuffer);
+        Assert.assertSame(topicPubImpl.getSendMessageBufferRef(), sendBuffer);
+        
+        // Test sequence number after sending message
+        Assert.assertEquals(1, topicPubImpl.getSequenceNumber());
 
         // Test send request
         sendBuffer = new UnsafeBuffer(ByteBuffer.allocate(128));
         SentRequest sentRequest = topicPubImpl.sendRequest(sendBuffer, 0, 128, 100L, null);
         Assert.assertEquals(sentRequest.getSentResult(), PublishResult.OK);
         Assert.assertFalse(sentRequest.isClosed());
+        
+        // Test sequence number after sending request
+        Assert.assertEquals(2, topicPubImpl.getSequenceNumber());
 
         // Wait a bit, the request should expire and close
         Thread.sleep(200);
@@ -77,7 +86,7 @@ public class AbstractTopicPublisherTest
 
         sendBuffer = new UnsafeBuffer(ByteBuffer.allocate(128));
         Assert.assertEquals(topicPubImpl.sendMsg(sendBuffer, 0, 128), PublishResult.UNEXPECTED_ERROR);
-        Assert.assertFalse(topicPubImpl.getSendMessageBufferRef() == sendBuffer);
+        Assert.assertNotSame(topicPubImpl.getSendMessageBufferRef(), sendBuffer);
 
         // Test send request
         sendBuffer = new UnsafeBuffer(ByteBuffer.allocate(128));
@@ -108,7 +117,7 @@ public class AbstractTopicPublisherTest
         Assert.assertFalse(topicPublisherBase.isHeartbeatsActive());
 
         // Some request should have been sent
-        Assert.assertTrue(topicPublisherBase.getLastReqTypeSent() == MsgType.HEARTBEAT_REQ);
+        Assert.assertEquals(topicPublisherBase.getLastReqTypeSent(), MsgType.HEARTBEAT_REQ);
 
         // Activate twice now and close
         topicPublisherBase.activateHeartbeats(topicPublisherBase, HeartbeatParameters.builder().heartbeatRate(100).build());
@@ -160,14 +169,14 @@ public class AbstractTopicPublisherTest
         }
 
         @Override
-        protected PublishResult sendToAeron(DirectBuffer message, int offset, int length)
+        protected PublishResult sendToAeron(DirectBuffer message, long sequenceNumber, int offset, int length)
         {
             sendMessageBufferRef.set(message);
             return PublishResult.OK;
         }
 
         @Override
-        protected PublishResult sendRequestToAeron(byte msgType, UUID requestId, DirectBuffer message, int offset, int length)
+        protected PublishResult sendRequestToAeron(byte msgType, UUID requestId, DirectBuffer message, long sequenceNumber, int offset, int length)
         {
             lastReqTypeSent.set(msgType);
             sentRequestBufferRef.set(message);
@@ -180,22 +189,17 @@ public class AbstractTopicPublisherTest
             cleanedPublishers.set(true);
         }
 
-        public DirectBuffer getSendMessageBufferRef()
+        DirectBuffer getSendMessageBufferRef()
         {
             return sendMessageBufferRef.get();
         }
 
-        public DirectBuffer getSentRequestBufferRef()
-        {
-            return sentRequestBufferRef.get();
-        }
-
-        public boolean getCleanedPublishers()
+        boolean getCleanedPublishers()
         {
             return cleanedPublishers.get();
         }
 
-        public byte getLastReqTypeSent()
+        byte getLastReqTypeSent()
         {
             return lastReqTypeSent.get();
         }

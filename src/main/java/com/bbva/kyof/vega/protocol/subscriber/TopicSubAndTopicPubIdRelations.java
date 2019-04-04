@@ -62,6 +62,7 @@ class TopicSubAndTopicPubIdRelations
         {
             this.topicSubsByTopicPubId.remove(topicPubId);
             this.topicPubsByTopicSubId.remove(topicSubscriber.getUniqueId(), topicPubId);
+            topicSubscriber.onTopicPublisherRemoved(topicPubId);
         }
     }
 

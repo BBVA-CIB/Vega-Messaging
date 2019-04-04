@@ -22,25 +22,21 @@ import org.easymock.EasyMock;
 import org.junit.*;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by cnebrera on 11/08/16.
  */
 public class SubscribersManagerIpcMcastTest implements ITopicSubListener
 {
-    private static final String KEYS_DIR_PATH = CommandLineParserTest.class.getClassLoader().getResource("keys").getPath();
+    private static final String KEYS_DIR_PATH = Objects.requireNonNull(CommandLineParserTest.class.getClassLoader().getResource("keys")).getPath();
 
-    private static final String validConfigFile = ConfigReaderTest.class.getClassLoader().getResource("config/subscribersManagerTestConfig.xml").getPath();
+    private static final String validConfigFile = Objects.requireNonNull(ConfigReaderTest.class.getClassLoader().getResource("config/subscribersManagerTestConfig.xml")).getPath();
 
     private static MediaDriver MEDIA_DRIVER;
     private static Aeron AERON;
     private static SubnetAddress SUBNET_ADDRESS;
     private static VegaContext VEGA_CONTEXT;
-    private static AutoDiscManagerMock AUTO_DISC_MANAGER_MOCK;
     private static SubscribersPollersManager POLLERS_MANAGER;
     private static ReceiverListener POLLER_LISTENER = new ReceiverListener();
     private static TopicSubAndTopicPubIdRelations RELATIONS = new TopicSubAndTopicPubIdRelations();
@@ -48,7 +44,7 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
     private SubscribersManagerIpcMcast subscriberManager;
 
     // Create the topic configuration
-    final TopicTemplateConfig templateMcast = TopicTemplateConfig.builder().
+    private final TopicTemplateConfig templateMcast = TopicTemplateConfig.builder().
             name("template1").
             transportType(TransportMediaType.MULTICAST).
             numStreamsPerPort(2).
@@ -72,7 +68,7 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
         VEGA_CONTEXT = new VegaContext(AERON, ConfigReader.readConfiguration(validConfigFile));
 
         // Mock auto-discovery manager calls
-        AUTO_DISC_MANAGER_MOCK = new AutoDiscManagerMock();
+        AutoDiscManagerMock AUTO_DISC_MANAGER_MOCK = new AutoDiscManagerMock();
         VEGA_CONTEXT.setAutodiscoveryManager(AUTO_DISC_MANAGER_MOCK.getMock());
 
         final SecurityParams securityParams = SecurityParams.builder().
@@ -92,7 +88,7 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
+    public static void afterClass()
     {
         AERON.close();
         CloseHelper.quietClose(MEDIA_DRIVER);
@@ -281,7 +277,7 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
         final UUID instanceId = UUID.randomUUID();
 
         // Create security template configuration for the subscriber topic
-        final Set<Integer> pubTopic1SecureSubs = new HashSet<>(Arrays.asList(22222));
+        final Set<Integer> pubTopic1SecureSubs = new HashSet<>(Collections.singletonList(22222));
         final Set<Integer> pubTopic1SecurePubs = new HashSet<>(Arrays.asList(11111, 22222, 33333));
         final TopicSecurityTemplateConfig securityTemplateConfig = new TopicSecurityTemplateConfig("secureConfig", 1000L, pubTopic1SecurePubs, pubTopic1SecureSubs);
 
@@ -325,7 +321,7 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
         final UnsafeBuffer buffer = new UnsafeBuffer(ByteBuffer.allocate(128));
         buffer.putInt(0, 128);
 
-        aeronPublisher.sendMessage(MsgType.DATA, UUID.randomUUID(), buffer, 0, 4);
+        aeronPublisher.sendMessage(MsgType.DATA, UUID.randomUUID(), buffer, new Random().nextLong(), 0, 4);
         Thread.sleep(500);
 
         if (shouldArrive)
@@ -334,7 +330,7 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
         }
         else
         {
-            Assert.assertTrue(POLLER_LISTENER.receivedMsg == null);
+            Assert.assertNull(POLLER_LISTENER.receivedMsg);
         }
 
         POLLER_LISTENER.reset();

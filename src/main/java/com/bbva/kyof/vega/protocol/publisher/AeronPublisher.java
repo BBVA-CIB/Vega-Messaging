@@ -121,7 +121,7 @@ public class AeronPublisher implements IAeronPublisher, Closeable
     }
 
     @Override
-    public PublishResult sendMessage(final byte msgType, final UUID topicUniqueId, final DirectBuffer message, final int offset, final int length)
+    public PublishResult sendMessage(final byte msgType, final UUID topicUniqueId, final DirectBuffer message, final long sequenceNumber, final int offset, final int length)
     {
         synchronized (this.lock)
         {
@@ -131,16 +131,19 @@ public class AeronPublisher implements IAeronPublisher, Closeable
                 return PublishResult.OK;
             }
 
-            // Set the topic unique id of the reusable header, the rest of fields don't change between consecutive sends
+            // Set the topic unique id of the reusable header
             this.reusableMsgHeader.setTopicPublisherId(topicUniqueId);
-
+                        
+            // Set the sequence number of the reusable header
+            this.reusableMsgHeader.setSequenceNumber(sequenceNumber);
+            
             // Send the message
             return this.send(msgType, this.reusableMsgHeader, message, offset, length);
         }
     }
 
     @Override
-    public PublishResult sendRequest(final byte msgType, final UUID topicUniqueId, final UUID requestId, final DirectBuffer message, final int offset, final int length)
+    public PublishResult sendRequest(final byte msgType, final UUID topicUniqueId, final UUID requestId, final DirectBuffer message, final long sequenceNumber, final int offset, final int length)
     {
         synchronized (this.lock)
         {
@@ -153,6 +156,9 @@ public class AeronPublisher implements IAeronPublisher, Closeable
             // Set the request header fields
             this.reusableMsgReqHeader.setTopicPublisherId(topicUniqueId);
             this.reusableMsgReqHeader.setRequestId(requestId);
+            
+            // Set the sequence number of the reusable header
+            this.reusableMsgReqHeader.setSequenceNumber(sequenceNumber);
 
             // Send the message
             return this.send(msgType, this.reusableMsgReqHeader, message, offset, length);

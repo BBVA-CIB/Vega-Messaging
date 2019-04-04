@@ -60,7 +60,7 @@ class SecureTopicPublisherIpcMcast extends TopicPublisherIpcMcast
     }
 
     @Override
-    protected PublishResult sendToAeron(final DirectBuffer message, final int offset, final int length)
+    protected PublishResult sendToAeron(final DirectBuffer message, final long sequenceNumber, final int offset, final int length)
     {
         // Encrypt the message
         final ByteBuffer encrypedMsg;
@@ -78,7 +78,7 @@ class SecureTopicPublisherIpcMcast extends TopicPublisherIpcMcast
         this.encryptedUnsafeBuffer.wrap(encrypedMsg);
 
         // Send the message
-        return this.aeronPublisher.sendMessage(MsgType.ENCRYPTED_DATA, this.getUniqueId(), this.encryptedUnsafeBuffer, 0, encrypedMsg.limit());
+        return this.aeronPublisher.sendMessage(MsgType.ENCRYPTED_DATA, this.getUniqueId(), this.encryptedUnsafeBuffer, sequenceNumber, 0, encrypedMsg.limit());
     }
 
     @Override

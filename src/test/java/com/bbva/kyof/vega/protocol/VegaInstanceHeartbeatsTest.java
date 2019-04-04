@@ -17,6 +17,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -25,8 +26,7 @@ import java.util.UUID;
  */
 public class VegaInstanceHeartbeatsTest
 {
-    private static final String STAND_ALONE_CONFIG = ConfigReaderTest.class.getClassLoader().getResource("config/vegaInstanceStandAloneDriverTestConfig.xml").getPath();
-    private UnsafeBuffer sendBuffer = new UnsafeBuffer(ByteBuffer.allocate(128));
+    private static final String STAND_ALONE_CONFIG = Objects.requireNonNull(ConfigReaderTest.class.getClassLoader().getResource("config/vegaInstanceStandAloneDriverTestConfig.xml")).getPath();
     private static MediaDriver MEDIA_DRIVER;
 
     @BeforeClass
@@ -36,7 +36,7 @@ public class VegaInstanceHeartbeatsTest
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
+    public static void afterClass()
     {
         CloseHelper.quietClose(MEDIA_DRIVER);
     }
@@ -75,7 +75,7 @@ public class VegaInstanceHeartbeatsTest
             subInstance.subscribeToTopic("utopic1", new ReceiverListener());
 
             // Wait a bit, the client should be discovered
-            Thread.sleep(1000);
+            Thread.sleep(3000);
             Assert.assertTrue(connectionListener.activeClientInstancesByTopicIc.containsValue("utopic1", subInstance.getInstanceId()));
 
             // Add another instance by using a second subscription

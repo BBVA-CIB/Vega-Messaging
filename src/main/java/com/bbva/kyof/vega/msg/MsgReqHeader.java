@@ -27,10 +27,11 @@ public class MsgReqHeader extends MsgDataHeader
      * @param instanceId instance id that sent the message
      * @param topicPublisherId the unique id of the topic publisher that sent the message
      * @param requestId the request id of the request represented by the header
+     * @param sequenceNumber the sequence number of the message related to the topic publisher that sent it
      */
-    public MsgReqHeader(final UUID instanceId, final UUID topicPublisherId, final UUID requestId)
+    MsgReqHeader(final UUID instanceId, final UUID topicPublisherId, final long sequenceNumber, final UUID requestId)
     {
-        super(instanceId, topicPublisherId);
+        super(instanceId, topicPublisherId, sequenceNumber);
         this.requestId = requestId;
     }
 

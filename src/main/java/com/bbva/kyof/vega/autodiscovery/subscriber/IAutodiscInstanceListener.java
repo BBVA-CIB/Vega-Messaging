@@ -12,12 +12,12 @@ public interface IAutodiscInstanceListener
      *
      * @param info the added info
      */
-    void onNewAutoDiscInstanceInfo(final AutoDiscInstanceInfo info);
+    void onNewAutoDiscInstanceInfo(AutoDiscInstanceInfo info);
 
     /**
      * Called when a new autodiscovery instance info times out
      *
      * @param info the removed info
      */
-    void onTimedOutAutoDiscInstanceInfo(final AutoDiscInstanceInfo info);
+    void onTimedOutAutoDiscInstanceInfo(AutoDiscInstanceInfo info);
 }

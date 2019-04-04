@@ -28,24 +28,27 @@ public class RcvMessageTest
         rcvMessage.setContentOffset(0);
         rcvMessage.setContentLength(128);
         rcvMessage.setTopicPublisherId(publisherId);
+        rcvMessage.setSequenceNumber(250);
 
         // Get
         Assert.assertEquals(rcvMessage.getTopicName(), "TopicName");
         Assert.assertEquals(rcvMessage.getInstanceId(), instanceId);
-        Assert.assertTrue(rcvMessage.getContentOffset() == 0);
-        Assert.assertTrue(rcvMessage.getContentLength() == 128);
+        Assert.assertEquals(0, rcvMessage.getContentOffset());
+        Assert.assertEquals(128, rcvMessage.getContentLength());
         Assert.assertEquals(rcvMessage.getContents(), unsafeContents);
         Assert.assertEquals(rcvMessage.getTopicPublisherId(), publisherId);
+        Assert.assertEquals(250, rcvMessage.getSequenceNumber());
 
         // Promote the message and try again
         final IRcvMessage promotedMessage = rcvMessage.promote();
 
         Assert.assertEquals(promotedMessage.getTopicName(), "TopicName");
         Assert.assertEquals(promotedMessage.getInstanceId(), instanceId);
-        Assert.assertTrue(promotedMessage.getContentOffset() == 0);
-        Assert.assertTrue(promotedMessage.getContentLength() == 128);
+        Assert.assertEquals(0, promotedMessage.getContentOffset());
+        Assert.assertEquals(128, promotedMessage.getContentLength());
         Assert.assertNotNull(promotedMessage.getContents());
         Assert.assertNotEquals(promotedMessage.getContents(), unsafeContents);
         Assert.assertEquals(rcvMessage.getTopicPublisherId(), publisherId);
+        Assert.assertEquals(250, ((RcvMessage) promotedMessage).getSequenceNumber());
     }
 }

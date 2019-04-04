@@ -17,16 +17,18 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.junit.Assert.*;
+
 /**
  * Created by cnebrera on 11/08/16.
  */
 public class TopicPublisherIpcMcastTest
 {
-    TopicTemplateConfig topicConfig;
-    VegaContext vegaContext;
-    AsyncRequestManager asyncRequestManager;
-    int sentRequests;
-    int sentMessages;
+    private TopicTemplateConfig topicConfig;
+    private VegaContext vegaContext;
+    private AsyncRequestManager asyncRequestManager;
+    private int sentRequests;
+    private int sentMessages;
 
     @Before
     public void beforeTest()
@@ -42,7 +44,7 @@ public class TopicPublisherIpcMcastTest
     }
 
     @After
-    public void afterTest() throws Exception
+    public void afterTest()
     {
         asyncRequestManager.close();
     }
@@ -55,27 +57,36 @@ public class TopicPublisherIpcMcastTest
         // Create the Aeron publishers
         AeronPublisher publisher1 = createAeronPublisherMock(PublishResult.OK);
         topicPublisher.setAeronPublisher(publisher1);
+        
+        // Check sequence number before sending a message
+        Assert.assertEquals(0, topicPublisher.getSequenceNumber());
 
-        // Send a message, should habe been sent 3 times and result is OK since all internal publishers have give OK
+        // Send a message, should have been sent 3 times and result is OK since all internal publishers have give OK
         UnsafeBuffer message = new UnsafeBuffer(ByteBuffer.allocate(1024));
         Assert.assertEquals(topicPublisher.sendMsg(message, 0, 1024), PublishResult.OK);
-        Assert.assertTrue(this.sentMessages == 1);
+        Assert.assertEquals(1, this.sentMessages);
+        
+        // Check sequence number after sending a message
+        assertEquals(1, topicPublisher.getSequenceNumber());
 
-        // Send a request, should habe been sent 3 times and result is OK since all internal publishers have give OK
+        // Send a request, should have been sent 3 times and result is OK since all internal publishers have give OK
         message = new UnsafeBuffer(ByteBuffer.allocate(1024));
         SentRequest sentRequest = topicPublisher.sendRequest(message, 0, 1024, 100L, null);
         Assert.assertEquals(sentRequest.getSentResult(), PublishResult.OK);
-        Assert.assertTrue(this.sentRequests == 1);
-        Assert.assertTrue(this.sentMessages == 1);
+        Assert.assertEquals(1, this.sentRequests);
+        Assert.assertEquals(1, this.sentMessages);
+        
+        // Check sequence number after sending a request
+        Assert.assertEquals(2, topicPublisher.getSequenceNumber());
 
         // Wait a bit, the request should close by expiration
         Thread.sleep(200);
-        Assert.assertTrue(sentRequest.isClosed());
+        assertFalse(!sentRequest.isClosed());
 
         // Test run for each aeron publisher
         final AtomicInteger count = new AtomicInteger();
         topicPublisher.runForAeronPublisher((aeronPublisher -> count.getAndIncrement()));
-        Assert.assertTrue(count.get() == 1);
+        assertEquals(count.get(), 1);
 
         // Now close the publisher
         topicPublisher.close();
@@ -88,20 +99,20 @@ public class TopicPublisherIpcMcastTest
                 count.getAndIncrement();
             }
         });
-        Assert.assertTrue(count.get() == 0);
+        assertEquals(0, count.get());
 
         // Send should not work anymore
         Assert.assertEquals(topicPublisher.sendMsg(message, 0, 1024), PublishResult.UNEXPECTED_ERROR);
-        Assert.assertTrue(this.sentMessages == 1);
+        assertEquals(1, this.sentMessages);
 
         sentRequest = topicPublisher.sendRequest(message, 0, 1024, 100L, null);
         Assert.assertEquals(sentRequest.getSentResult(), PublishResult.UNEXPECTED_ERROR);
-        Assert.assertTrue(this.sentRequests == 1);
-        Assert.assertTrue(this.sentMessages == 1);
+        assertEquals(1, this.sentRequests);
+        assertEquals(1, this.sentMessages);
     }
 
     @Test
-    public void testBackPressureError() throws Exception
+    public void testBackPressureError()
     {
         final TopicPublisherUnicast topicPublisher = new TopicPublisherUnicast("topic", topicConfig, vegaContext);
 
@@ -112,15 +123,15 @@ public class TopicPublisherIpcMcastTest
         // Send a message, should have been sent 3 times and result is BACK_PRESSURED
         UnsafeBuffer message = new UnsafeBuffer(ByteBuffer.allocate(1024));
         Assert.assertEquals(topicPublisher.sendMsg(message, 0, 1024), PublishResult.BACK_PRESSURED);
-        Assert.assertTrue(this.sentMessages == 1);
+        assertEquals(1, this.sentMessages);
 
         SentRequest sentRequest = topicPublisher.sendRequest(message, 0, 1024, 100L, null);
         Assert.assertEquals(sentRequest.getSentResult(), PublishResult.BACK_PRESSURED);
-        Assert.assertTrue(this.sentRequests == 1);
+        assertEquals(1, this.sentRequests);
     }
 
     @Test
-    public void testUnexpectedError() throws Exception
+    public void testUnexpectedError()
     {
         final TopicPublisherUnicast topicPublisher = new TopicPublisherUnicast("topic", topicConfig, vegaContext);
 
@@ -131,18 +142,18 @@ public class TopicPublisherIpcMcastTest
         // Send a message, should have been sent 1 times, as soon as there is unexpected error it should stop
         UnsafeBuffer message = new UnsafeBuffer(ByteBuffer.allocate(1024));
         Assert.assertEquals(topicPublisher.sendMsg(message, 0, 1024), PublishResult.UNEXPECTED_ERROR);
-        Assert.assertTrue(this.sentMessages == 1);
+        assertEquals(1, this.sentMessages);
 
         SentRequest sentRequest = topicPublisher.sendRequest(message, 0, 1024, 100L, null);
         Assert.assertEquals(sentRequest.getSentResult(), PublishResult.UNEXPECTED_ERROR);
-        Assert.assertTrue(this.sentRequests == 1);
+        assertEquals(1, this.sentRequests);
     }
 
     private AeronPublisher createAeronPublisherMock(PublishResult pubResult)
     {
         AeronPublisher publisher = EasyMock.createNiceMock(AeronPublisher.class);
-        EasyMock.expect(publisher.sendMessage(EasyMock.anyByte(), EasyMock.anyObject(), EasyMock.anyObject(), EasyMock.anyInt(), EasyMock.anyInt())).andAnswer(() -> this.sendMessage(pubResult)).anyTimes();
-        EasyMock.expect(publisher.sendRequest(EasyMock.anyByte(), EasyMock.anyObject(), EasyMock.anyObject(), EasyMock.anyObject(),  EasyMock.anyInt(), EasyMock.anyInt())).andAnswer(() -> this.sendRequest(pubResult)).anyTimes();
+        EasyMock.expect(publisher.sendMessage(EasyMock.anyByte(), EasyMock.anyObject(), EasyMock.anyObject(), EasyMock.anyLong(), EasyMock.anyInt(), EasyMock.anyInt())).andAnswer(() -> this.sendMessage(pubResult)).anyTimes();
+        EasyMock.expect(publisher.sendRequest(EasyMock.anyByte(), EasyMock.anyObject(), EasyMock.anyObject(), EasyMock.anyObject(), EasyMock.anyLong(), EasyMock.anyInt(), EasyMock.anyInt())).andAnswer(() -> this.sendRequest(pubResult)).anyTimes();
         EasyMock.replay(publisher);
         return publisher;
     }

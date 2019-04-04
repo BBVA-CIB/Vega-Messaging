@@ -16,23 +16,25 @@ interface IAeronPublisher extends IRequestResponder
      *
      * @param msgType message type to send
      * @param topicId unique Id of the topic being publisherd
+     * @param sequenceNumber sequence number of the message to send
      * @param message the message to sendMsg
      * @param offset offset where the message starts in the buffer
      * @param length length of the message to send starting from the offset
      * @return Enum with the possible results after a publication
      */
-    PublishResult sendMessage(byte msgType, UUID topicId, DirectBuffer message, int offset, int length);
+    PublishResult sendMessage(byte msgType, UUID topicId, DirectBuffer message, long sequenceNumber, int offset, int length);
 
     /**
      * Send a message for the given topic with the provided contents
      *
      * @param msgType message type to send
      * @param topicId unique Id of the topic being publisherd
+     * @param sequenceNumber sequence number of the message to send
      * @param requestId unique id for the request
      * @param message the message to sendMsg
      * @param offset offset where the message starts in the buffer
      * @param length length of the message to send starting from the offset
      * @return Enum with the possible results after a publication
      */
-    PublishResult sendRequest(byte msgType, UUID topicId, UUID requestId, DirectBuffer message, int offset, int length);
+    PublishResult sendRequest(byte msgType, UUID topicId, UUID requestId, DirectBuffer message, long sequenceNumber, int offset, int length);
 }

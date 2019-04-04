@@ -48,7 +48,7 @@ public class AeronPublisherTest
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
+    public static void afterClass()
     {
         AERON.close();
         CloseHelper.quietClose(MEDIA_DRIVER);
@@ -90,9 +90,18 @@ public class AeronPublisherTest
 
         // Create a topic ID
         final UUID topicId = UUID.randomUUID();
-
+        
+        // Create a sequence number
+        final long sequenceNumber = new Random().nextLong();
+        
         // Send the message
-        while(publisher.sendMessage(MsgType.DATA, topicId, sendBuffer, 0, 1024) != PublishResult.BACK_PRESSURED);
+        while(true)
+        {
+            if (publisher.sendMessage(MsgType.DATA, topicId, sendBuffer, sequenceNumber, 0, 1024) == PublishResult.BACK_PRESSURED)
+            {
+                break;
+            }
+        }
 
         Assert.assertTrue(true);
 
@@ -182,9 +191,9 @@ public class AeronPublisherTest
         simpleReceiver.close();
 
         // Send again, should do nothing
-        Assert.assertTrue(publisher.sendMessage(MsgType.DATA, null, null, 0, 0) == PublishResult.OK);
-        Assert.assertTrue(publisher.sendRequest(MsgType.DATA_REQ, null, null, null, 0, 0) == PublishResult.OK);
-        Assert.assertTrue(publisher.sendResponse(null, null, 0, 0) == PublishResult.OK);
+        Assert.assertSame(publisher.sendMessage(MsgType.DATA, null, null, 0, 0, 0), PublishResult.OK);
+        Assert.assertSame(publisher.sendRequest(MsgType.DATA_REQ, null, null, null, 0, 0, 0), PublishResult.OK);
+        Assert.assertSame(publisher.sendResponse(null, null, 0, 0), PublishResult.OK);
     }
 
     private void testSendMessages(AeronPublisher publisher, SimpleReceiver subscription) throws Exception
@@ -232,9 +241,12 @@ public class AeronPublisherTest
 
         // Create a topic ID
         final UUID topicId = UUID.randomUUID();
-
+        
+        // Create a sequence number
+        final long sequenceNumber = new Random().nextLong();
+        
         // Send the message
-        Assert.assertTrue(publisher.sendMessage(MsgType.DATA, topicId, sendBuffer, 0, msgSize) == PublishResult.OK);
+        Assert.assertSame(publisher.sendMessage(MsgType.DATA, topicId, sendBuffer, sequenceNumber, 0, msgSize), PublishResult.OK);
 
         // Give it time to arrive
         Thread.sleep(10);
@@ -243,9 +255,10 @@ public class AeronPublisherTest
         subscription.pollReceivedMessage();
 
         // Check values
-        Assert.assertTrue(subscription.getReusableDataMsgHeader().getTopicPublisherId().equals(topicId));
-        Assert.assertTrue(subscription.getReusableDataMsgHeader().getInstanceId().equals(VEGA_CONTEXT.getInstanceUniqueId()));
-        Assert.assertTrue(subscription.getReusableBaseHeader().getVersion() == Version.LOCAL_VERSION);
+        Assert.assertEquals(subscription.getReusableDataMsgHeader().getTopicPublisherId(), topicId);
+        Assert.assertEquals(subscription.getReusableDataMsgHeader().getInstanceId(), VEGA_CONTEXT.getInstanceUniqueId());
+        Assert.assertEquals(subscription.getReusableBaseHeader().getVersion(), Version.LOCAL_VERSION);
+        Assert.assertEquals(subscription.getReusableDataMsgHeader().getSequenceNumber(), sequenceNumber);
 
         // Check the received message contents
         final IRcvMessage receivedMsg = subscription.getReusableReceivedMsg();
@@ -266,24 +279,26 @@ public class AeronPublisherTest
         RND.nextBytes(array);
         final UnsafeBuffer sendBuffer = new UnsafeBuffer(array);
 
-        // Create a topic ID
+        // Create a topic ID and a sequence number
         final UUID topicId = UUID.randomUUID();
         final UUID requestId = UUID.randomUUID();
+        long sequenceNumber = new Random().nextLong();
 
         // Send the message
-        Assert.assertTrue(publisher.sendRequest(MsgType.DATA_REQ, topicId, requestId, sendBuffer, 0, msgSize) == PublishResult.OK);
+        Assert.assertSame(publisher.sendRequest(MsgType.DATA_REQ, topicId, requestId, sendBuffer, sequenceNumber, 0, msgSize), PublishResult.OK);
 
         // Give it time to arrive
-        Thread.sleep(10);
+        Thread.sleep(50);
 
         // Get the message
         subscription.pollReceivedMessage();
 
         // Check values
-        Assert.assertTrue(subscription.getReusableReqMsgHeader().getTopicPublisherId().equals(topicId));
-        Assert.assertTrue(subscription.getReusableReqMsgHeader().getRequestId().equals(requestId));
-        Assert.assertTrue(subscription.getReusableReqMsgHeader().getInstanceId().equals(VEGA_CONTEXT.getInstanceUniqueId()));
-        Assert.assertTrue(subscription.getReusableBaseHeader().getVersion() == Version.LOCAL_VERSION);
+        Assert.assertEquals(subscription.getReusableReqMsgHeader().getTopicPublisherId(), topicId);
+        Assert.assertEquals(subscription.getReusableReqMsgHeader().getRequestId(), requestId);
+        Assert.assertEquals(subscription.getReusableReqMsgHeader().getInstanceId(), VEGA_CONTEXT.getInstanceUniqueId());
+        Assert.assertEquals(subscription.getReusableBaseHeader().getVersion(), Version.LOCAL_VERSION);
+        Assert.assertEquals(subscription.getReusableReqMsgHeader().getSequenceNumber(), sequenceNumber);
 
         // Check the received request contents
         final IRcvRequest receivedMsg = subscription.getReusableReceivedRequest();
@@ -301,7 +316,7 @@ public class AeronPublisherTest
         final UUID requestId = UUID.randomUUID();
 
         // Send the message
-        Assert.assertTrue(publisher.sendResponse(requestId, sendBuffer, 0, msgSize) == PublishResult.OK);
+        Assert.assertSame(publisher.sendResponse(requestId, sendBuffer, 0, msgSize), PublishResult.OK);
 
         // Give it time to arrive
         Thread.sleep(10);
@@ -310,9 +325,9 @@ public class AeronPublisherTest
         subscription.pollReceivedMessage();
 
         // Check values
-        Assert.assertTrue(subscription.getReusableRespMsgHeader().getRequestId().equals(requestId));
-        Assert.assertTrue(subscription.getReusableRespMsgHeader().getInstanceId().equals(VEGA_CONTEXT.getInstanceUniqueId()));
-        Assert.assertTrue(subscription.getReusableBaseHeader().getVersion() == Version.LOCAL_VERSION);
+        Assert.assertEquals(subscription.getReusableRespMsgHeader().getRequestId(), requestId);
+        Assert.assertEquals(subscription.getReusableRespMsgHeader().getInstanceId(), VEGA_CONTEXT.getInstanceUniqueId());
+        Assert.assertEquals(subscription.getReusableBaseHeader().getVersion(), Version.LOCAL_VERSION);
 
         // Check the received request contents
         final IRcvResponse receivedMsg = subscription.getReusableReceivedResponse();

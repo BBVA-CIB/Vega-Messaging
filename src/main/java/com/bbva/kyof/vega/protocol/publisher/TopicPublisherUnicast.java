@@ -50,9 +50,9 @@ class TopicPublisherUnicast extends AbstractTopicPublisher
     }
 
     @Override
-    protected PublishResult sendToAeron(final DirectBuffer message, final int offset, final int length)
+    protected PublishResult sendToAeron(final DirectBuffer message, final long sequenceNumber, final int offset, final int length)
     {
-        return this.sendToAeron(MsgType.DATA, message, offset, length);
+        return this.sendToAeron(MsgType.DATA, message, sequenceNumber, offset, length);
     }
 
     /**
@@ -64,7 +64,7 @@ class TopicPublisherUnicast extends AbstractTopicPublisher
      * @param length message length starting from the offset
      * @return the result of the send process
      */
-    PublishResult sendToAeron(final byte msgType, final DirectBuffer message, final int offset, final int length)
+    PublishResult sendToAeron(final byte msgType, final DirectBuffer message, final long sequenceNumber, final int offset, final int length)
     {
         // Get the publishers internal array
         final IAeronPublisher[] publishers = this.aeronPublishers.getInternalArray();
@@ -73,7 +73,7 @@ class TopicPublisherUnicast extends AbstractTopicPublisher
 
         for (int i = 0; i < this.aeronPublishers.getNumElements(); i++)
         {
-            final PublishResult sendResult = publishers[i].sendMessage(msgType, this.getUniqueId(), message, offset, length);
+            final PublishResult sendResult = publishers[i].sendMessage(msgType, this.getUniqueId(), message, sequenceNumber, offset, length);
 
             // If there is an unexpected error, return without trying with any other publisher
             if (sendResult == PublishResult.UNEXPECTED_ERROR)
@@ -97,7 +97,7 @@ class TopicPublisherUnicast extends AbstractTopicPublisher
     }
 
     @Override
-    protected PublishResult sendRequestToAeron(final byte msgType, final UUID requestId, final DirectBuffer message, final int offset, final int length)
+    protected PublishResult sendRequestToAeron(final byte msgType, final UUID requestId, final DirectBuffer message, final long sequenceNumber, final int offset, final int length)
     {
         // Get the publishers internal array
         final IAeronPublisher[] publishers = this.aeronPublishers.getInternalArray();
@@ -106,7 +106,8 @@ class TopicPublisherUnicast extends AbstractTopicPublisher
 
         for (int i = 0; i < this.aeronPublishers.getNumElements(); i++)
         {
-            final PublishResult sendResult = publishers[i].sendRequest(msgType, this.getUniqueId(), requestId, message, offset, length);
+                        
+            final PublishResult sendResult = publishers[i].sendRequest(msgType, this.getUniqueId(), requestId, message, sequenceNumber, offset, length);
 
             // If there is an unexpected error, return without trying with any other publisher
             if (sendResult == PublishResult.UNEXPECTED_ERROR)

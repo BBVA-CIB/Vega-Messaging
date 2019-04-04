@@ -11,11 +11,11 @@ import java.lang.reflect.Constructor;
 public class VersionTest
 {
     @Test
-    public void testIntegerRep() throws Exception
+    public void testIntegerRep()
     {
         // Create 3 versions
         final int version = Version.toIntegerRepresentation((byte)34, (byte)45, (byte)67);
-        final int localVersionCompatible = Version.toIntegerRepresentation((byte)1, (byte)5, (byte)1);
+        final int localVersionCompatible = Version.toIntegerRepresentation((byte)2, (byte)1, (byte)0);
         final int compatibleVersion = Version.toIntegerRepresentation((byte)34, (byte)50, (byte)32);
         final int incompatibleVersion = Version.toIntegerRepresentation((byte)36, (byte)45, (byte)67);
 

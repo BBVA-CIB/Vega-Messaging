@@ -46,9 +46,9 @@ public class SimpleReceiver implements Closeable
     /** Reusable buffer serializer */
     private final UnsafeBufferSerializer bufferSerializer = new UnsafeBufferSerializer();
 
-    final Subscription subscription;
+    private final Subscription subscription;
 
-    public SimpleReceiver(final Aeron aeron, final TransportMediaType type, final String ip, final int port, final int stream, final SubnetAddress subnet)
+    SimpleReceiver(final Aeron aeron, final TransportMediaType type, final String ip, final int port, final int stream, final SubnetAddress subnet)
     {
         switch (type)
         {
@@ -69,17 +69,17 @@ public class SimpleReceiver implements Closeable
     }
 
     @Override
-    public void close() throws IOException
+    public void close()
     {
         subscription.close();
     }
 
-    public int pollReceivedMessage()
+    int pollReceivedMessage()
     {
         return subscription.poll(new FragmentAssembler(this::processRcvMessage), Integer.MAX_VALUE);
     }
 
-    public void processRcvMessage(final DirectBuffer buffer, final int offset, final int length, final Header aeronHeader)
+    private void processRcvMessage(final DirectBuffer buffer, final int offset, final int length, final Header aeronHeader)
     {
         // Wrap the buffer into the serializer
         this.bufferSerializer.wrap(buffer, offset, length);
@@ -114,6 +114,7 @@ public class SimpleReceiver implements Closeable
         // Set the fields of the reusable received msg
         this.reusableReceivedMsg.setInstanceId(this.reusableDataMsgHeader.getInstanceId());
         this.reusableReceivedMsg.setTopicPublisherId(this.reusableDataMsgHeader.getTopicPublisherId());
+        this.reusableReceivedMsg.setSequenceNumber(this.reusableDataMsgHeader.getSequenceNumber());
         this.reusableReceivedMsg.setUnsafeBufferContent(this.bufferSerializer.getInternalBuffer());
         this.reusableReceivedMsg.setContentOffset(this.bufferSerializer.getOffset());
         this.reusableReceivedMsg.setContentLength(this.bufferSerializer.getMsgLength() - this.bufferSerializer.getOffset());
@@ -143,6 +144,7 @@ public class SimpleReceiver implements Closeable
         this.reusableReceivedRequest.setInstanceId(this.reusableReqMsgHeader.getInstanceId());
         this.reusableReceivedRequest.setTopicPublisherId(this.reusableReqMsgHeader.getTopicPublisherId());
         this.reusableReceivedRequest.setRequestId(this.reusableReqMsgHeader.getRequestId());
+        this.reusableReceivedRequest.setSequenceNumber(this.reusableReqMsgHeader.getSequenceNumber());
         this.reusableReceivedRequest.setUnsafeBufferContent(this.bufferSerializer.getInternalBuffer());
         this.reusableReceivedRequest.setContentOffset(this.bufferSerializer.getOffset());
         this.reusableReceivedRequest.setContentLength(this.bufferSerializer.getMsgLength() - this.bufferSerializer.getOffset());

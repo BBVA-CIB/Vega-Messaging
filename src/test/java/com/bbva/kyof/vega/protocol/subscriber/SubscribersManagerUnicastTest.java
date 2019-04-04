@@ -23,21 +23,20 @@ import org.easymock.EasyMock;
 import org.junit.*;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.UUID;
+import java.util.*;
+
+import static org.junit.Assert.*;
 
 /**
  * Created by cnebrera on 11/08/16.
  */
 public class SubscribersManagerUnicastTest implements ITopicSubListener
 {
-    private static final String validConfigFile = ConfigReaderTest.class.getClassLoader().getResource("config/subscribersManagerTestConfig.xml").getPath();
+    private static final String validConfigFile = Objects.requireNonNull(ConfigReaderTest.class.getClassLoader().getResource("config/subscribersManagerTestConfig.xml")).getPath();
 
     private static MediaDriver MEDIA_DRIVER;
     private static Aeron AERON;
     private static SubnetAddress SUBNET_ADDRESS;
-    private static int IP_ADDRESS;
     private static VegaContext VEGA_CONTEXT;
     private static AutoDiscManagerMock AUTO_DISC_MANAGER_MOCK;
     private static SubscribersPollersManager POLLERS_MANAGER;
@@ -58,7 +57,9 @@ public class SubscribersManagerUnicastTest implements ITopicSubListener
         AERON = Aeron.connect(ctx1);
 
         SUBNET_ADDRESS = InetUtil.getDefaultSubnet();
-        IP_ADDRESS = InetUtil.convertIpAddressToInt(SUBNET_ADDRESS.getIpAddres().getHostAddress());
+
+        Assert.assertNotNull(SUBNET_ADDRESS);
+
         VEGA_CONTEXT = new VegaContext(AERON, ConfigReader.readConfiguration(validConfigFile));
 
         // Mock auto-discovery manager calls
@@ -82,7 +83,7 @@ public class SubscribersManagerUnicastTest implements ITopicSubListener
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
+    public static void afterClass()
     {
         AERON.close();
         CloseHelper.quietClose(MEDIA_DRIVER);
@@ -120,38 +121,38 @@ public class SubscribersManagerUnicastTest implements ITopicSubListener
         final AutoDiscTopicInfo topicInfo4 = new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.SUB_UNI, subscriberManager.getTopicSubscriberForTopicName("utopic4").getUniqueId(), "utopic4");
 
         // 4 new auto-discovery topic info should have been registered in auto-discovery
-        Assert.assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicInfos().contains(topicInfo1));
-        Assert.assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicInfos().contains(topicInfo2));
-        Assert.assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicInfos().contains(topicInfo3));
-        Assert.assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicInfos().contains(topicInfo4));
+        assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicInfos().contains(topicInfo1));
+        assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicInfos().contains(topicInfo2));
+        assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicInfos().contains(topicInfo3));
+        assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicInfos().contains(topicInfo4));
 
         // There should be 4 topic sockets, one per topic publisher but only 2 actual publishers are created
-        Assert.assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size() == 4);
+        Assert.assertEquals(4, AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size());
 
         // Review them
         AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().forEach((topicSocket) ->
         {
-            Assert.assertTrue(topicSocket.getPort() == 28401 || topicSocket.getPort() == 28402);
-            Assert.assertTrue(topicSocket.getTransportType() == AutoDiscTransportType.SUB_UNI);
-            Assert.assertTrue(topicSocket.getStreamId() == 2 || topicSocket.getStreamId() == 3);
-            Assert.assertTrue(topicSocket.getTopicName().startsWith("utopic"));
+            assertTrue(topicSocket.getPort() == 28401 || topicSocket.getPort() == 28402);
+            assertSame(topicSocket.getTransportType(), AutoDiscTransportType.SUB_UNI);
+            assertTrue(topicSocket.getStreamId() == 2 || topicSocket.getStreamId() == 3);
+            assertTrue(topicSocket.getTopicName().startsWith("utopic"));
         });
 
         // Now un-subscribe one by one...
         subscriberManager.unsubscribeFromTopic("utopic1");
-        Assert.assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size() == 3);
+        assertEquals(3, AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size());
         Assert.assertFalse(AUTO_DISC_MANAGER_MOCK.getRegTopicInfos().contains(topicInfo1));
 
         subscriberManager.unsubscribeFromTopic("utopic2");
-        Assert.assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size() == 2);
+        assertEquals(2, AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size());
         Assert.assertFalse(AUTO_DISC_MANAGER_MOCK.getRegTopicInfos().contains(topicInfo2));
 
         subscriberManager.unsubscribeFromTopic("utopic3");
-        Assert.assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size() == 1);
+        assertEquals(1, AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size());
         Assert.assertFalse(AUTO_DISC_MANAGER_MOCK.getRegTopicInfos().contains(topicInfo3));
 
         subscriberManager.unsubscribeFromTopic("utopic4");
-        Assert.assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size() == 0);
+        assertEquals(0, AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size());
         Assert.assertFalse(AUTO_DISC_MANAGER_MOCK.getRegTopicInfos().contains(topicInfo4));
     }
 
@@ -192,7 +193,7 @@ public class SubscribersManagerUnicastTest implements ITopicSubListener
     }
 
     @Test
-    public void testAdverts() throws Exception
+    public void testAdverts()
     {
         final UUID instanceId = UUID.randomUUID();
         final AutoDiscTopicSocketInfo topicSocketInfo1 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "mtopic1", UUID.randomUUID(), 34, 34534, 23);
@@ -211,7 +212,7 @@ public class SubscribersManagerUnicastTest implements ITopicSubListener
         final UnsafeBuffer buffer = new UnsafeBuffer(ByteBuffer.allocate(128));
         buffer.putInt(0, 128);
 
-        aeronPublisher.sendMessage(MsgType.DATA, UUID.randomUUID(), buffer, 0, 4);
+        aeronPublisher.sendMessage(MsgType.DATA, UUID.randomUUID(), buffer, new Random().nextLong(), 0, 4);
 
         try
         {
@@ -228,7 +229,7 @@ public class SubscribersManagerUnicastTest implements ITopicSubListener
         }
         else
         {
-            Assert.assertTrue(POLLER_LISTENER.receivedMsg == null);
+            assertNull(POLLER_LISTENER.receivedMsg);
         }
 
         POLLER_LISTENER.reset();

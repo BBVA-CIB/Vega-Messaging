@@ -60,7 +60,7 @@ class SecureTopicPublisherUnicast extends TopicPublisherUnicast
     }
 
     @Override
-    protected PublishResult sendToAeron(final DirectBuffer message, final int offset, final int length)
+    protected PublishResult sendToAeron(final DirectBuffer message, final long sequenceNumber, final int offset, final int length)
     {
         // Encrypt the message
         final ByteBuffer encrypedMsg;
@@ -78,7 +78,7 @@ class SecureTopicPublisherUnicast extends TopicPublisherUnicast
         this.encryptedUnsafeBuffer.wrap(encrypedMsg);
 
         // Send the message
-        return super.sendToAeron(MsgType.ENCRYPTED_DATA, this.encryptedUnsafeBuffer, 0, encrypedMsg.limit());
+        return super.sendToAeron(MsgType.ENCRYPTED_DATA, this.encryptedUnsafeBuffer, sequenceNumber, 0, encrypedMsg.limit());
     }
 
     @Override

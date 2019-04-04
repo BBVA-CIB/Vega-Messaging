@@ -5,14 +5,12 @@ package com.bbva.kyof.vega.config;
  */
 public final class ConfigConstants
 {
-    /**Static literal to build the jaxb schema url*/
-    private static final String HTTP = "http";
-    /**Static literal to build the jaxb schema*/
-    private static final String PREFIX_FILE = "://";
     /** Schema used to validate the xsd for the jaxb */
-    public static final String W3_SCHEMA = HTTP + PREFIX_FILE + "www.w3.org/2001/XMLSchema";
+    public static final String W3_SCHEMA = "http://www.w3.org/2001/XMLSchema";
+
     /** Prefix of public key files */
     public static final String PUB_KEY_FILE_PREFIX = "VEGA_PUB_KEY";
+
     /** Prefix of private key files */
     public static final String PRIV_KEY_FILE_PREFIX = "VEGA_PRIV_KEY";
 

@@ -7,6 +7,9 @@ public final class AeronChannelHelper
 {
     /** Represents an Aeron IPC channel*/
     private static final String CHANNEL_IPC = "aeron:ipc";
+    
+    /** Reliability of Aeron channel */
+    private static boolean reliable = true;
 
     /** Private constructor to avoid instantiation of utility class */
     private AeronChannelHelper()
@@ -47,7 +50,15 @@ public final class AeronChannelHelper
                                                       final int port,
                                                       final SubnetAddress subnetAddress)
     {
-        return String.format("aeron:udp?endpoint=%s:%d|interface=%s", ipAddress, port, subnetAddress.toString());
+        if (reliable)
+        {
+            return String.format("aeron:udp?endpoint=%s:%d|interface=%s", ipAddress, port, subnetAddress.toString());
+        }
+        else
+        {
+            return String.format("aeron:udp?endpoint=%s:%d|interface=%s|reliable=false", ipAddress, port, subnetAddress.toString());
+        }
+
     }
 
     /**
@@ -73,7 +84,14 @@ public final class AeronChannelHelper
      */
     public static String createUnicastChannelString(final String ipAddress, final Integer port, final SubnetAddress subnetAddress)
     {
-        return String.format("aeron:udp?endpoint=%s:%d|interface=%s", ipAddress, port, subnetAddress.toString());
+        if (reliable)
+        {
+            return String.format("aeron:udp?endpoint=%s:%d|interface=%s", ipAddress, port, subnetAddress.toString());
+        }
+        else
+        {
+            return String.format("aeron:udp?endpoint=%s:%d|interface=%s|reliable=false", ipAddress, port, subnetAddress.toString());
+        }
     }
 
     /**

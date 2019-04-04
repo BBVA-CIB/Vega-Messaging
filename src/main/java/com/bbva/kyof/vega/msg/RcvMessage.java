@@ -18,6 +18,9 @@ public class RcvMessage extends BaseRcvMessage implements IRcvMessage
     /** TopicPublisherId of the topic publisher that sent the message */
     @Getter @Setter private UUID topicPublisherId;
 
+    /** Sequence Number corresponding to the topic publisher that sent the message */
+    @Getter @Setter private long sequenceNumber;
+    
     @Override
     public IRcvMessage promote()
     {
@@ -38,5 +41,6 @@ public class RcvMessage extends BaseRcvMessage implements IRcvMessage
     {
         super.promote(promotedMsg);
         promotedMsg.topicPublisherId = this.topicPublisherId;
+        promotedMsg.sequenceNumber = this.sequenceNumber;
     }
 }

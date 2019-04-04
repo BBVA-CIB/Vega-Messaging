@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Launcher to run the sniffer in stand alone mode
  */
 @Slf4j
-public class SnifferLauncher
+public final class SnifferLauncher
 {
     /** Singletone instance of the sniffer */
     private static final AtomicReference<AutodiscManagerSniffer> SNIFFER_SINGLETONE = new AtomicReference<>();
@@ -41,6 +41,7 @@ public class SnifferLauncher
      *
      * @param args arguments for the command line sniffer launch
      * @throws SnifferException exception thrown if there is any problem launching the sniffer
+     * @throws InterruptedException exception thrown if interrupted unexpectly
      */
     public static void main(final String[] args) throws SnifferException, InterruptedException
     {

@@ -6,7 +6,6 @@ import com.bbva.kyof.vega.protocol.common.VegaInstanceParams;
 import com.bbva.kyof.vega.protocol.publisher.ITopicPublisher;
 import com.bbva.kyof.vega.protocol.subscriber.ITopicSubListener;
 import io.aeron.driver.MediaDriver;
-import org.agrona.CloseHelper;
 import org.agrona.concurrent.UnsafeBuffer;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -14,6 +13,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 /**
  * Test for the {@link VegaInstance} class
@@ -21,9 +21,9 @@ import java.nio.ByteBuffer;
  */
 public class VegaInstanceTest
 {
-    private static final String STAND_ALONE_CONFIG = ConfigReaderTest.class.getClassLoader().getResource("config/vegaInstanceStandAloneDriverTestConfig.xml").getPath();
-    private static final String EMBEDDED_CONFIG = ConfigReaderTest.class.getClassLoader().getResource("config/vegaInstanceEmbeddedDriverTestConfig.xml").getPath();
-    private static final String LOWLATENCY_EMBEDDED_CONFIG = ConfigReaderTest.class.getClassLoader().getResource("config/vegaInstanceLowLatencyEmbeddedDriverTestConfig.xml").getPath();
+    private static final String STAND_ALONE_CONFIG = Objects.requireNonNull(ConfigReaderTest.class.getClassLoader().getResource("config/vegaInstanceStandAloneDriverTestConfig.xml")).getPath();
+    private static final String EMBEDDED_CONFIG = Objects.requireNonNull(ConfigReaderTest.class.getClassLoader().getResource("config/vegaInstanceEmbeddedDriverTestConfig.xml")).getPath();
+    private static final String LOWLATENCY_EMBEDDED_CONFIG = Objects.requireNonNull(ConfigReaderTest.class.getClassLoader().getResource("config/vegaInstanceLowLatencyEmbeddedDriverTestConfig.xml")).getPath();
 
     private UnsafeBuffer sendBuffer = new UnsafeBuffer(ByteBuffer.allocate(128));
 
@@ -36,9 +36,10 @@ public class VegaInstanceTest
     }
 
     @AfterClass
-    public static void afterClass() throws Exception
+    public static void afterClass()
     {
-        CloseHelper.quietClose(MEDIA_DRIVER);
+        //CloseHelper.quietClose(MEDIA_DRIVER);
+        MEDIA_DRIVER.close();
     }
 
     @Test
@@ -294,7 +295,7 @@ public class VegaInstanceTest
 
         try(final IVegaInstance instance = VegaInstance.createNewInstance(params1))
         {
-            // Subscribe to 2 topis of each type
+            // Subscribe to 2 topics of each type
             final ReceiverListener utopic1Listener = new ReceiverListener();
             instance.subscribeToTopic("utopic1", utopic1Listener);
 
@@ -333,7 +334,7 @@ public class VegaInstanceTest
         // Check for reception
         if (shouldReceive)
         {
-            Assert.assertTrue(listener.receivedMsg.getContents().getInt(0) == 33);
+            Assert.assertEquals(33, listener.receivedMsg.getContents().getInt(0));
             Assert.assertEquals(listener.receivedMsg.getTopicName(), publisher.getTopicName());
         }
         else
@@ -357,9 +358,9 @@ public class VegaInstanceTest
         // Check for reception of response and request
         if (shouldArrive)
         {
-            Assert.assertTrue(listener.receivedReq.getContents().getInt(0) == 33);
+            Assert.assertEquals(33, listener.receivedReq.getContents().getInt(0));
             Assert.assertEquals(listener.receivedReq.getTopicName(), publisher.getTopicName());
-            Assert.assertTrue(listener.receivedResponse.getContents().getInt(0) == 33);
+            Assert.assertEquals(33, listener.receivedResponse.getContents().getInt(0));
             Assert.assertEquals(listener.receivedResponse.getTopicName(), publisher.getTopicName());
         }
         else

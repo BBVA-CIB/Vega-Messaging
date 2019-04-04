@@ -28,7 +28,7 @@ class SubscribedTopics
      * @param transportType the topic transport
      * @return the subscribed topics
      */
-    HashMapOfHashSet<String, IAutodiscTopicSubListener> getSubTopicsForTransport(final AutoDiscTransportType transportType)
+    private HashMapOfHashSet<String, IAutodiscTopicSubListener> getSubTopicsForTransport(final AutoDiscTransportType transportType)
     {
         switch (transportType)
         {
@@ -67,7 +67,7 @@ class SubscribedTopics
      * @param transportType the transport type
      * @param topicName the name of the topic
      * @param listener the listener to get information about new topic info or topic socket info elements
-     @return true if the element has been removed, false it it was already there
+     * @return true if the element has been removed, false it it was already there
      */
     boolean removeListener(final AutoDiscTransportType transportType, final String topicName, final IAutodiscTopicSubListener listener)
     {

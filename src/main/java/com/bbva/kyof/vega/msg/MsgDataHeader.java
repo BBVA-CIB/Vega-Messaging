@@ -20,7 +20,7 @@ import java.util.UUID;
 public class MsgDataHeader implements IUnsafeSerializable
 {
     /** Binary size of the header once it has been serialized */
-    static final int BINARY_SIZE = UnsafeBufferSerializer.UUID_SIZE * 2;
+    static final int BINARY_SIZE = UnsafeBufferSerializer.UUID_SIZE * 2 + UnsafeBufferSerializer.LONG_SIZE;
 
     /** Identifier of the application instance ID that created the message */
     @Getter @Setter private UUID instanceId;
@@ -28,11 +28,15 @@ public class MsgDataHeader implements IUnsafeSerializable
     /** Id of the topic publisher that sent the message */
     @Getter @Setter private UUID topicPublisherId;
 
+    /** Sequence Number of the topic publisher that sent the message */
+    @Getter @Setter private long sequenceNumber;
+
     @Override
     public void toBinary(final UnsafeBufferSerializer buffer)
     {
         buffer.writeUUID(this.instanceId);
         buffer.writeUUID(this.topicPublisherId);
+        buffer.writeLong(this.sequenceNumber);
     }
 
     @Override
@@ -41,6 +45,7 @@ public class MsgDataHeader implements IUnsafeSerializable
         // TopicUniqueId
         this.instanceId = buffer.readUUID();
         this.topicPublisherId = buffer.readUUID();
+        this.sequenceNumber = buffer.readLong();
     }
 
     @Override

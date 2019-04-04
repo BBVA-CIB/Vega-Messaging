@@ -36,7 +36,7 @@ class UnicastDaemonReceiver implements Closeable
     private final IDaemonReceiverListener listener;
 
     /** Reusable auto-discovery instance info used to avoid object creation during deserialization */
-    private AutoDiscDaemonClientInfo reusableAutoDiscDaemonClientInfo = new AutoDiscDaemonClientInfo();
+    private AutoDiscDaemonClientInfo reusableDaemonClientInfo = new AutoDiscDaemonClientInfo();
 
     /** Queue with all active adverts of daemon clients information */
     private final ActiveAdvertsQueue<AutoDiscDaemonClientInfo> activeDaemonClients;
@@ -138,8 +138,8 @@ class UnicastDaemonReceiver implements Closeable
             switch (this.reusableBaseHeader.getMsgType())
             {
                 case MsgType.AUTO_DISC_DAEMON_CLIENT_INFO:
-                    this.reusableAutoDiscDaemonClientInfo.fromBinary(this.bufferSerializer);
-                    this.onClientInfoReceived(this.reusableAutoDiscDaemonClientInfo);
+                    this.reusableDaemonClientInfo.fromBinary(this.bufferSerializer);
+                    this.onClientInfoReceived(this.reusableDaemonClientInfo);
                     break;
                 case MsgType.AUTO_DISC_INSTANCE:
                 case MsgType.AUTO_DISC_TOPIC_SOCKET:
@@ -175,7 +175,7 @@ class UnicastDaemonReceiver implements Closeable
             log.info("Discovered new client [{}]", msg);
 
             // Restart the reusable autodiscovery info object since the original has been stored
-            this.reusableAutoDiscDaemonClientInfo = new AutoDiscDaemonClientInfo();
+            this.reusableDaemonClientInfo = new AutoDiscDaemonClientInfo();
 
             // Notify about the new addition
             this.listener.onNewAutoDiscDaemonClientInfo(msg);

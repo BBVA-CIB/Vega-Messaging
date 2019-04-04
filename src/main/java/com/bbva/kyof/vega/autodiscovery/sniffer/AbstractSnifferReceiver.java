@@ -115,7 +115,7 @@ public abstract class AbstractSnifferReceiver implements Closeable
      * @param snifferListener sniffer listener
      * @return the created subscription
      */
-    public abstract Subscription createSubscription(final UUID instanceId, final Aeron aeron, final SnifferParameters parameters, ISnifferListener snifferListener);
+    public abstract Subscription createSubscription(UUID instanceId, Aeron aeron, SnifferParameters parameters, ISnifferListener snifferListener);
 
     @Override
     public void close()

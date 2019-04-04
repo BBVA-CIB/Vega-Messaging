@@ -35,7 +35,7 @@ import java.nio.ByteBuffer;
 public abstract class AbstractAutodiscSender implements Closeable
 {
     /** Send buffer size, with 1024 should be enough for autodiscovery messages */
-    private final static int SEND_BUFFER_SIZE = 1024;
+    private static final int SEND_BUFFER_SIZE = 1024;
 
     /** Reusable buffer serializer used to serialize the messages into the reusable send buffer */
     private final UnsafeBufferSerializer sendBufferSerializer = new UnsafeBufferSerializer();
@@ -89,7 +89,7 @@ public abstract class AbstractAutodiscSender implements Closeable
      *
      * @return the created Aeron publication
      */
-    public abstract Publication createPublication(final Aeron aeron, final AutoDiscoveryConfig config);
+    public abstract Publication createPublication(Aeron aeron, AutoDiscoveryConfig config);
 
     @Override
     public void close()

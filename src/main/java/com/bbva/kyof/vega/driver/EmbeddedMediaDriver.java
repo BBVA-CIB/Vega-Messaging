@@ -76,8 +76,7 @@ public class EmbeddedMediaDriver implements Closeable
                 ctx.senderIdleStrategy(new BusySpinIdleStrategy());
                 break;
             default:
-                throw new IllegalArgumentException("Driver type not found!");
-
+                throw new IllegalArgumentException("Driver type was not found!");
         }
 
         this.driver = MediaDriver.launch(ctx);

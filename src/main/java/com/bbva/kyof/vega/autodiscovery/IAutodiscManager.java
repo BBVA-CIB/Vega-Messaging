@@ -27,7 +27,7 @@ public interface IAutodiscManager
      *
      * @param instanceInfo the instance information to publish
      */
-    void registerInstanceInfo(final AutoDiscInstanceInfo instanceInfo);
+    void registerInstanceInfo(AutoDiscInstanceInfo instanceInfo);
 
     /**
      * Unregister the given instance information from auto-discovery and close periodically advert to other clients
@@ -39,42 +39,42 @@ public interface IAutodiscManager
      *
      * @param autoDiscTopicInfo the topic information information to publish
      */
-    void registerTopicInfo(final AutoDiscTopicInfo autoDiscTopicInfo);
+    void registerTopicInfo(AutoDiscTopicInfo autoDiscTopicInfo);
 
     /**
      * Unregister the given topic publisher or subscriber topic information from auto-discovery and close periodical adverts
      *
      * @param autoDiscTopicInfo the topic information information to remove
      */
-    void unregisterTopicInfo(final AutoDiscTopicInfo autoDiscTopicInfo);
+    void unregisterTopicInfo(AutoDiscTopicInfo autoDiscTopicInfo);
 
     /**
      * Register the given topic - socket pair information in auto-discovery to be periodically advert to other clients
      *
      * @param autoDiscTopicSocketInfo the topic socket pair information to publish
      */
-    void registerTopicSocketInfo(final AutoDiscTopicSocketInfo autoDiscTopicSocketInfo);
+    void registerTopicSocketInfo(AutoDiscTopicSocketInfo autoDiscTopicSocketInfo);
 
     /**
      * Unregister the given topic - socket pair information in auto-discovery to be periodically advert to other clients
      *
      * @param autoDiscTopicSocketInfo the topic socket pair information to publish
      */
-    void unregisterTopicSocketInfo(final AutoDiscTopicSocketInfo autoDiscTopicSocketInfo);
+    void unregisterTopicSocketInfo(AutoDiscTopicSocketInfo autoDiscTopicSocketInfo);
 
     /**
      * Subscribe to receive topic adverts with instances information
      *
      * @param listener listener that will receive the notifications of adverts related to the subscribed topic
      */
-    void subscribeToInstances(final IAutodiscInstanceListener listener);
+    void subscribeToInstances(IAutodiscInstanceListener listener);
 
     /**
      * Unsubscribe to stop receiving topic adverts with instances information
      *
      * @param listener listener that will receive the notifications of adverts related to the subscribed topic
      */
-    void unsubscribeFromInstances(final IAutodiscInstanceListener listener);
+    void unsubscribeFromInstances(IAutodiscInstanceListener listener);
 
     /**
      * Subscribe to receive topic adverts for the given topic and transport type
@@ -83,7 +83,7 @@ public interface IAutodiscManager
      * @param transportType transport type and direction
      * @param listener listener that will receive the notifications of adverts related to the subscribed topic
      */
-    void subscribeToTopic(final String topicName, final AutoDiscTransportType transportType, final IAutodiscTopicSubListener listener);
+    void subscribeToTopic(String topicName, AutoDiscTransportType transportType, IAutodiscTopicSubListener listener);
 
     /**
      * Unsubscribe from topic adverts for the given topic and transport type
@@ -92,7 +92,7 @@ public interface IAutodiscManager
      * @param transportType transport type and direction
      * @param listener listener that was receiving the adverts of the subcribed topic
      */
-    void unsubscribeFromTopic(final String topicName, final AutoDiscTransportType transportType, final IAutodiscTopicSubListener listener);
+    void unsubscribeFromTopic(String topicName, AutoDiscTransportType transportType, IAutodiscTopicSubListener listener);
 
     /**
      * Add a listener to receive events related to added or removed publisher topic names on the domain.
@@ -102,12 +102,12 @@ public interface IAutodiscManager
      * @param topicPattern the java string pattern to check the topic name against
      * @param listener the listener for events triggered due to the pattern
      */
-    void subscribeToPubTopicPattern(final String topicPattern, final IAutodiscPubTopicPatternListener listener);
+    void subscribeToPubTopicPattern(String topicPattern, IAutodiscPubTopicPatternListener listener);
 
     /**
      * Remove the listener for events related to publisher topics with the given pattern
      *
      * @param topicPattern the java string pattern to check the topic name against
      */
-    void unsubscribeFromPubTopicPattern(final String topicPattern);
+    void unsubscribeFromPubTopicPattern(String topicPattern);
 }

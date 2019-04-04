@@ -19,12 +19,12 @@ public interface IAutodiscPubTopicPatternListener
      * @param pubTopicInfo the publisher topic information
      * @param topicPattern the pattern of the original pattern subscription that triggered the event
      */
-    void onNewPubTopicForPattern(final AutoDiscTopicInfo pubTopicInfo, final String topicPattern);
+    void onNewPubTopicForPattern(AutoDiscTopicInfo pubTopicInfo, String topicPattern);
 
     /**
      * Called when there are no more publishers for the topic in the domain
      * @param pubTopicInfo the topic information
      * @param topicPattern the pattern of the original pattern subscription that triggered the event
      */
-    void onPubTopicForPatternRemoved(final AutoDiscTopicInfo pubTopicInfo, final String topicPattern);
+    void onPubTopicForPatternRemoved(AutoDiscTopicInfo pubTopicInfo, String topicPattern);
 }

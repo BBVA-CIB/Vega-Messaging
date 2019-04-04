@@ -48,16 +48,16 @@ class TopicPublisherIpcMcast extends AbstractTopicPublisher
     }
 
     @Override
-    protected PublishResult sendToAeron(final DirectBuffer message, final int offset, final int length)
+    protected PublishResult sendToAeron(final DirectBuffer message, final long sequenceNumber, final int offset, final int length)
     {
-        return this.aeronPublisher.sendMessage(MsgType.DATA, this.getUniqueId(), message, offset, length);
+        return this.aeronPublisher.sendMessage(MsgType.DATA, this.getUniqueId(), message, sequenceNumber, offset, length);
     }
 
     @Override
-    protected PublishResult sendRequestToAeron(final byte msgType, final UUID requestId, final DirectBuffer message, final int offset, final int length)
+    protected PublishResult sendRequestToAeron(final byte msgType, final UUID requestId, final DirectBuffer message, final long sequenceNumber, final int offset, final int length)
     {
         // Send the request to all the internal Aeron publishers
-        return this.aeronPublisher.sendRequest(msgType, this.getUniqueId(), requestId, message, offset, length);
+        return this.aeronPublisher.sendRequest(msgType, this.getUniqueId(), requestId, message, sequenceNumber, offset, length);
     }
 
     @Override

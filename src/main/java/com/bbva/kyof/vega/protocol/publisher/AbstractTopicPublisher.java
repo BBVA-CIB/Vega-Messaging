@@ -44,7 +44,10 @@ abstract class AbstractTopicPublisher implements ITopicPublisher, IHeartbeatSend
 
     /** Unique id of the topic publisher */
     @Getter private final UUID uniqueId = UUID.randomUUID();
-
+    
+    /** Sequence number of the message or request, it will increment for each sent message */
+    @Getter private long sequenceNumber = 0;
+    
     /** Random number generator for request id's */
     private final Random rnd = new Random(System.nanoTime());
 
@@ -90,8 +93,11 @@ abstract class AbstractTopicPublisher implements ITopicPublisher, IHeartbeatSend
                 log.error("Error, trying to send a message on a closed publisher on topicName [{}]", this.topicName);
                 return PublishResult.UNEXPECTED_ERROR;
             }
-
-            return this.sendToAeron(message, offset, length);
+            
+            // Add a unit to the sequence number
+            this.sequenceNumber = this.sequenceNumber + 1;
+            
+            return this.sendToAeron(message, this.sequenceNumber, offset, length);
         }
     }
 
@@ -149,9 +155,12 @@ abstract class AbstractTopicPublisher implements ITopicPublisher, IHeartbeatSend
 
         // Add to the request manager
         this.vegaContext.getAsyncRequestManager().addNewRequest(request);
-
+        
+        // Add a unit to the sequence number
+        this.sequenceNumber = this.sequenceNumber + 1;
+            
         // Send the request to all the internal Aeron publishers
-        request.setSentResult(this.sendRequestToAeron(msgType, request.getRequestId(), message, offset, length));
+        request.setSentResult(this.sendRequestToAeron(msgType, request.getRequestId(), message, this.sequenceNumber, offset, length));
 
         return request;
     }
@@ -236,11 +245,12 @@ abstract class AbstractTopicPublisher implements ITopicPublisher, IHeartbeatSend
      * Send message to all the AeronPublishers related to the topic
      *
      * @param message the message to send
+     * @param sequenceNumber the sequence number of the message
      * @param offset message offset in the byte buffer
      * @param length message length starting from the offset
      * @return the result of the send process
      */
-    abstract PublishResult sendToAeron(DirectBuffer message, int offset, int length);
+    abstract PublishResult sendToAeron(DirectBuffer message, long sequenceNumber, int offset, int length);
 
     /**
      * Send request to all the AeronPublishers related to the topic
@@ -248,9 +258,12 @@ abstract class AbstractTopicPublisher implements ITopicPublisher, IHeartbeatSend
      * @param msgType type of the message to send
      * @param requestId the unique id of the request object
      * @param message the message to send
+     * @param sequenceNumber the sequence number of the message
+     * @param offset message offset in the byte buffer
+     * @param length message length starting from the offset
      * @return the result of the send process
      */
-    abstract PublishResult sendRequestToAeron(byte msgType, UUID requestId, DirectBuffer message, int offset, int length);
+    abstract PublishResult sendRequestToAeron(byte msgType, UUID requestId, DirectBuffer message, long sequenceNumber, int offset, int length);
 
     /**
      * Clean related AeronPublishers information. Don't close the aeron publishers, just cleanAfterClose references.

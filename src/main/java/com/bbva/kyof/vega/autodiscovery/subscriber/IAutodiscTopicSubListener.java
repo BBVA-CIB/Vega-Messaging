@@ -13,26 +13,26 @@ public interface IAutodiscTopicSubListener
      *
      * @param info the added info
      */
-    void onNewAutoDiscTopicInfo(final AutoDiscTopicInfo info);
+    void onNewAutoDiscTopicInfo(AutoDiscTopicInfo info);
 
     /**
      * Called when a autodiscovery topic info is removed due to expiration
      *
      * @param info the removed info
      */
-    void onTimedOutAutoDiscTopicInfo(final AutoDiscTopicInfo info);
+    void onTimedOutAutoDiscTopicInfo(AutoDiscTopicInfo info);
 
     /**
      * Called when a new autodiscovery topic socket pair info is added
      *
      * @param info the added info
      */
-    void onNewAutoDiscTopicSocketInfo(final AutoDiscTopicSocketInfo info);
+    void onNewAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info);
 
     /**
      * Called when a new autodiscovery topic socket pair info is removed due to expiration
      *
      * @param info the removed info
      */
-    void onTimedOutAutoDiscTopicSocketInfo(final AutoDiscTopicSocketInfo info);
+    void onTimedOutAutoDiscTopicSocketInfo(AutoDiscTopicSocketInfo info);
 }
