@@ -93,10 +93,10 @@ abstract class AbstractTopicPublisher implements ITopicPublisher, IHeartbeatSend
                 log.error("Error, trying to send a message on a closed publisher on topicName [{}]", this.topicName);
                 return PublishResult.UNEXPECTED_ERROR;
             }
-            
+
             // Add a unit to the sequence number
             this.sequenceNumber = this.sequenceNumber + 1;
-            
+
             return this.sendToAeron(message, this.sequenceNumber, offset, length);
         }
     }
@@ -155,10 +155,10 @@ abstract class AbstractTopicPublisher implements ITopicPublisher, IHeartbeatSend
 
         // Add to the request manager
         this.vegaContext.getAsyncRequestManager().addNewRequest(request);
-        
+
         // Add a unit to the sequence number
         this.sequenceNumber = this.sequenceNumber + 1;
-            
+
         // Send the request to all the internal Aeron publishers
         request.setSentResult(this.sendRequestToAeron(msgType, request.getRequestId(), message, this.sequenceNumber, offset, length));
 

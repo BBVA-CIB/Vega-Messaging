@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.xml.bind.annotation.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Contains the configuration for hte auto-discovery process. The process can be unicast using a centralized daemon router or
@@ -57,13 +59,23 @@ public class AutoDiscoveryConfig implements IConfiguration
     @XmlElement(name = "timeout")
     @Getter private Long timeout;
 
-    /** (Optional, only unicast) The resolver daemon address */
+    /** (Optional, only unicast) The resolver daemon address (backward compatibility)
+     * This data will be inserted into unicastInfoArray and it will not used any more
+     */
     @XmlElement(name = "resolver_daemon_address")
-    @Getter private String resolverDaemonAddress;
+    @Deprecated
+    private String resolverDaemonAddress;
 
-    /** (Optional, only unicast) The resolver daemon port */
+    /** (Optional, only unicast) The resolver daemon port  (backward compatibility)
+     * This data will be inserted into unicastInfoArray and it will not used any more
+     */
     @XmlElement(name = "resolver_daemon_port")
-    @Getter private Integer resolverDaemonPort;
+    @Deprecated
+    private Integer resolverDaemonPort;
+
+    /** (Optional, only unicast) Address and port for all the resolver daemons */
+    @XmlElement(name = "unicast_info")
+    @Getter private List<UnicastInfo> unicastInfoArray;
 
     /** (Optional, only unicast) Min port for unicast resolver subscription */
     @XmlElement(name = "unicast_resolver_port_min")
@@ -192,19 +204,31 @@ public class AutoDiscoveryConfig implements IConfiguration
      */
     private void validateUnicastDaemonConfig() throws VegaException
     {
-        // Check the multicast address
-        if (this.resolverDaemonAddress == null)
-        {
+        //Move the old style unicast daemon address and port to the new structure.
+        saveOldStyleDaemonAddressAndPort();
+
+        //Check all the IPs and ports configurations
+        for(UnicastInfo unicastInfo: unicastInfoArray){
+
+            // Check the unicast address
+            if (unicastInfo.getResolverDaemonAddress() == null)
+            {
+                throw new VegaException("The resolver daemon address is missing");
+            }
+            ConfigUtils.validateUnicastAddress(unicastInfo.getResolverDaemonAddress());
+
+            // Check the unicast port
+            if (unicastInfo.getResolverDaemonPort() == null)
+            {
+                unicastInfo.setResolverDaemonPort(DEFAULT_RESOLVER_DAEMON_PORT);
+            }
+            ConfigUtils.validatePortNumber(unicastInfo.getResolverDaemonPort());
+        }
+
+        //Check if is it some unicastInfo configured
+        if(unicastInfoArray.isEmpty()){
             throw new VegaException("The resolver daemon address is missing");
         }
-        ConfigUtils.validateUnicastAddress(this.resolverDaemonAddress);
-
-        // Check the unicast port
-        if (this.resolverDaemonPort == null)
-        {
-            this.resolverDaemonPort = DEFAULT_RESOLVER_DAEMON_PORT;
-        }
-        ConfigUtils.validatePortNumber(this.resolverDaemonPort);
 
         // Check reception port range
         if (this.unicastResolverRcvPortMin == null)
@@ -225,6 +249,38 @@ public class AutoDiscoveryConfig implements IConfiguration
         if (this.unicastResolverRcvNumStreams == null)
         {
             this.unicastResolverRcvNumStreams = DEFAULT_UNI_RSV_RCV_NUM_STREAMS;
+        }
+    }
+
+    /**
+     * With the new functionality of adding various unicast daemons, the configuration has change, adding an array of
+     * IPs and ports. But to maintain backward compatibility, the fields this.resolverDaemonAddress
+     * and this.resolverDaemonPort are still supported.
+     * This function is used to convert the old style configuration params to the new structure
+     */
+    private void saveOldStyleDaemonAddressAndPort()
+    {
+    	//If there are only an old configuration, unicastInfoArray is null
+    	if(unicastInfoArray == null)
+		{
+			unicastInfoArray = new ArrayList<>();
+		}
+
+        //If old style address is not null, configure into the new structure
+        if (this.resolverDaemonAddress != null)
+        {
+            //If existe an old style address configured but there is not port, use default port
+            if (this.resolverDaemonPort == null)
+            {
+                this.resolverDaemonPort = DEFAULT_RESOLVER_DAEMON_PORT;
+            }
+
+            //Insert the IP and port (old configuration style) into unicastInfoArray (new functionality)
+            this.unicastInfoArray.add( new UnicastInfo(this.resolverDaemonAddress, this.resolverDaemonPort) );
+
+            //Initialize both fields to ensure that them are not used
+            this.resolverDaemonAddress = null;
+            this.resolverDaemonPort=null;
         }
     }
 }

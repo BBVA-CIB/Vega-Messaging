@@ -57,7 +57,7 @@ public class UnicastDaemonSenderTest
                 build();
 
         daemonParameters.completeAndValidateParameters();
-        DAEMON_SENDER = new UnicastDaemonSender(AERON, daemonParameters);
+        DAEMON_SENDER = new UnicastDaemonSender(AERON, daemonParameters, UUID.randomUUID());
     }
 
     @AfterClass

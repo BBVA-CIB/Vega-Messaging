@@ -82,8 +82,8 @@ public class AutoDiscoveryConfigTest
         Assert.assertTrue(unicastConfig.getTimeout() == AutoDiscoveryConfig.DEFAULT_EXPIRATION_TIMEOUT);
 
         // Unicast parameters
-        Assert.assertEquals(unicastConfig.getResolverDaemonAddress(), "192.168.1.1");
-        Assert.assertTrue(unicastConfig.getResolverDaemonPort() == AutoDiscoveryConfig.DEFAULT_RESOLVER_DAEMON_PORT);
+        Assert.assertEquals(unicastConfig.getUnicastInfoArray().get(0).getResolverDaemonAddress(), "192.168.1.1");
+        Assert.assertTrue(unicastConfig.getUnicastInfoArray().get(0).getResolverDaemonPort() == AutoDiscoveryConfig.DEFAULT_RESOLVER_DAEMON_PORT);
         Assert.assertTrue(unicastConfig.getUnicastResolverRcvNumStreams() == AutoDiscoveryConfig.DEFAULT_UNI_RSV_RCV_NUM_STREAMS);
         Assert.assertTrue(unicastConfig.getUnicastResolverRcvPortMax() == AutoDiscoveryConfig.DEFAULT_UNI_RSV_RCV_MAX_PORT);
         Assert.assertTrue(unicastConfig.getUnicastResolverRcvPortMin() == AutoDiscoveryConfig.DEFAULT_UNI_RSV_RCV_MIN_PORT);

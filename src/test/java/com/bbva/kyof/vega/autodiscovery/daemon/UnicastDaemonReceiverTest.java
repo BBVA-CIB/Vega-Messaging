@@ -83,7 +83,11 @@ public class UnicastDaemonReceiverTest
 
         // There should be now a new instance info event
         Assert.assertEquals(LISTENER.newClientInfo, daemonClientInfo);
+        // And the onReceiveAutoDiscDaemonClientInfo event is called too
+        Assert.assertEquals(LISTENER.receiveAutoDiscDaemonClientInfo, daemonClientInfo);
         LISTENER.reset();
+        // Check if initialized correctly onReceiveAutoDiscDaemonClientInfo
+        Assert.assertEquals(LISTENER.receiveAutoDiscDaemonClientInfo, null);
 
         // Now call again, since there has been no time out, there shouldn't be a new event
         this.sendMessage(MsgType.AUTO_DISC_DAEMON_CLIENT_INFO, daemonClientInfo);
@@ -91,6 +95,8 @@ public class UnicastDaemonReceiverTest
         this.callReceiverLifeCycle();
 
         Assert.assertNull(LISTENER.newClientInfo);
+        // The nonReceiveAutoDiscDaemonClientInfo event is called always
+        Assert.assertEquals(LISTENER.receiveAutoDiscDaemonClientInfo, daemonClientInfo);
         Assert.assertNull(LISTENER.clientInfoRemoved);
 
         // Wait 300 millis, the time out is in 500, there should be no time out
@@ -103,12 +109,16 @@ public class UnicastDaemonReceiverTest
         this.callReceiverLifeCycle();
         Assert.assertEquals(LISTENER.clientInfoRemoved, daemonClientInfo);
         LISTENER.reset();
+        // Check if initialized correctly onReceiveAutoDiscDaemonClientInfo
+        Assert.assertEquals(LISTENER.receiveAutoDiscDaemonClientInfo, null);
 
         // If we send again, there should be a new element again
         this.sendMessage(MsgType.AUTO_DISC_DAEMON_CLIENT_INFO, daemonClientInfo);
         Thread.sleep(100);
         this.callReceiverLifeCycle();
         Assert.assertEquals(LISTENER.newClientInfo, daemonClientInfo);
+        // The nonReceiveAutoDiscDaemonClientInfo event is called always
+        Assert.assertEquals(LISTENER.receiveAutoDiscDaemonClientInfo, daemonClientInfo);
     }
 
     @Test
@@ -208,6 +218,7 @@ public class UnicastDaemonReceiverTest
         AutoDiscDaemonClientInfo newClientInfo;
         AutoDiscDaemonClientInfo clientInfoRemoved;
         boolean msgToFordward;
+        AutoDiscDaemonClientInfo receiveAutoDiscDaemonClientInfo;
 
         @Override
         public void onRemovedAutoDiscDaemonClientInfo(AutoDiscDaemonClientInfo clientInfo)
@@ -227,11 +238,18 @@ public class UnicastDaemonReceiverTest
             newClientInfo = info;
         }
 
+        @Override
+        public void onReceiveAutoDiscDaemonClientInfo(AutoDiscDaemonClientInfo info)
+        {
+            receiveAutoDiscDaemonClientInfo = info;
+        }
+
         public void reset()
         {
             newClientInfo = null;
             clientInfoRemoved = null;
             msgToFordward = false;
+            receiveAutoDiscDaemonClientInfo = null;
         }
     }
 }

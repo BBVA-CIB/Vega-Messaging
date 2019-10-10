@@ -1,6 +1,7 @@
 package com.bbva.kyof.vega.protocol.subscriber;
 
 import com.bbva.kyof.vega.config.general.TopicTemplateConfig;
+import com.bbva.kyof.vega.msg.MsgReqHeader;
 import com.bbva.kyof.vega.msg.RcvMessage;
 import com.bbva.kyof.vega.msg.RcvRequest;
 import com.bbva.kyof.vega.msg.lost.MsgLostReport;
@@ -98,11 +99,9 @@ class TopicSubscriber implements Closeable
      */
     void onRequestReceived(final RcvRequest receivedRequest)
     {
-        final ITopicSubListener currentNormalListener = this.normalListener;
-
         final MsgLostReport lostReport = this.checkMessageLoss(receivedRequest);
 
-        if (currentNormalListener != null)
+        if (this.normalListener != null)
         {
             if (lostReport != null)
             {
@@ -120,6 +119,27 @@ class TopicSubscriber implements Closeable
             }
 
             this.patternListenersByPattern.forEach((key, value) -> value.onRequestReceived(receivedRequest));
+        }
+    }
+
+    /**
+     * Method called when a heartbeat request message is received.
+     *
+     * @param heartbeatReqMsgHeader the received heartbeat header request
+     * @param topicName The name of the target topic
+     */
+    void onHeartbeatReceived(final MsgReqHeader heartbeatReqMsgHeader, final String topicName)
+    {
+        final MsgLostReport lostReport = this.checkHeartbeatLoss(heartbeatReqMsgHeader, topicName);
+
+        if (this.normalListener != null && lostReport != null)
+        {
+                this.normalListener.onMessageLost(lostReport);
+        }
+
+        if (!this.patternListenersByPattern.isEmpty() && lostReport != null)
+        {
+                this.patternListenersByPattern.forEach((key, value) -> value.onMessageLost(lostReport));
         }
     }
 
@@ -267,6 +287,51 @@ class TopicSubscriber implements Closeable
             expectedSequenceNumber.set(msg.getSequenceNumber() + 1);
 
             log.warn("Message lost detected, sequence number found {}, {}", msg.getSequenceNumber(), lossResult);
+        }
+        else // In any other case everything is all right, just increment the expected sequence number
+        {
+            expectedSequenceNumber.incrementAndGet();
+        }
+
+        return lossResult;
+    }
+
+    /**
+     * Method called when a heartbeat request is received, checks for losses between this message and the last received message
+     * of the same topicPublisherId through the use of sequence numbers that are incorporated in the header of the message
+     *
+     * @param heartbeatReqMsgHeader the heartbeat header received message
+     * @return MsgLostReport object with the loss information if there is a loss, if not return null
+     */
+    private MsgLostReport checkHeartbeatLoss(final MsgReqHeader heartbeatReqMsgHeader, final String topicName)
+    {
+        // Result of the loss check
+        MsgLostReport lossResult = null;
+
+        // Check if there is an expected sequence number for the topic publisher
+        AtomicLong expectedSequenceNumber = this.expectedSeqNumByTopicPubId.get(heartbeatReqMsgHeader.getTopicPublisherId());
+
+        // There is no number, add a new expected sequence
+        if (expectedSequenceNumber == null)
+        {
+            // Update the expected sequence number to the next one
+            expectedSequenceNumber = new AtomicLong(heartbeatReqMsgHeader.getSequenceNumber() + 1);
+            this.expectedSeqNumByTopicPubId.put(heartbeatReqMsgHeader.getTopicPublisherId(), expectedSequenceNumber);
+        }
+        else if (expectedSequenceNumber.get() != heartbeatReqMsgHeader.getSequenceNumber()) // There is an expected sequence number, check for gap
+        {
+            // There is a gap and therefore a loss, create the loss report
+            lossResult = new MsgLostReport(
+                    heartbeatReqMsgHeader.getInstanceId(),
+                    topicName,
+                    heartbeatReqMsgHeader.getSequenceNumber() - expectedSequenceNumber.get(),
+                    heartbeatReqMsgHeader.getTopicPublisherId()
+            );
+
+            // Update expected sequence number to the next one received
+            expectedSequenceNumber.set(heartbeatReqMsgHeader.getSequenceNumber() + 1);
+
+            log.warn("Message lost detected by heartbeat, sequence number found {}, {}", heartbeatReqMsgHeader.getSequenceNumber(), lossResult);
         }
         else // In any other case everything is all right, just increment the expected sequence number
         {

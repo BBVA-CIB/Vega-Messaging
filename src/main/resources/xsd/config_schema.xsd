@@ -10,12 +10,20 @@
       <xs:element name="timeout" type="xs:long" minOccurs="0"/>
       <xs:element name="resolver_daemon_address" type="xs:string" minOccurs="0"/>
       <xs:element name="resolver_daemon_port" type="xs:int" minOccurs="0"/>
+      <xs:element name="unicast_info" type="tns:UnicastInfo" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="unicast_resolver_port_min" type="xs:int" minOccurs="0"/>
       <xs:element name="unicast_resolver_port_max" type="xs:int" minOccurs="0"/>
       <xs:element name="unicast_resolver_num_streams" type="xs:int" minOccurs="0"/>
       <xs:element name="multicast_address" type="xs:string" minOccurs="0"/>
       <xs:element name="multicast_port" type="xs:int" minOccurs="0"/>
       <xs:element name="subnet" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="UnicastInfo">
+    <xs:sequence>
+      <xs:element name="resolver_daemon_address" type="xs:string" minOccurs="0"/>
+      <xs:element name="resolver_daemon_port" type="xs:int" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 

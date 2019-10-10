@@ -65,16 +65,19 @@ public class NativeArraySetTest
         Assert.assertTrue(arraySet.getNumElements() == 5);
 
         // Remove the last element
-        arraySet.removeElement(6);
-        Assert.assertFalse(arraySet.contains(6));
+        // Before deleting the element 1, the element 6 was the last.
+        // After deleting the element 1, the element 6 is the first element (it was moved)
+        // and now, the last element is the 5
+        arraySet.removeElement(5);
+        Assert.assertFalse(arraySet.contains(5));
         Assert.assertTrue(arraySet.contains(2));
         Assert.assertTrue(arraySet.getInternalArray()[1] == 2);
         Assert.assertTrue(arraySet.contains(3));
         Assert.assertTrue(arraySet.getInternalArray()[2] == 3);
         Assert.assertTrue(arraySet.contains(4));
         Assert.assertTrue(arraySet.getInternalArray()[3] == 4);
-        Assert.assertTrue(arraySet.contains(5));
-        Assert.assertTrue(arraySet.getInternalArray()[0] == 5);
+        Assert.assertTrue(arraySet.contains(6));
+        Assert.assertTrue(arraySet.getInternalArray()[0] == 6);
         Assert.assertTrue(arraySet.getNumElements() == 4);
 
         // Remove an element in between
@@ -84,8 +87,8 @@ public class NativeArraySetTest
         Assert.assertTrue(arraySet.getInternalArray()[1] == 2);
         Assert.assertTrue(arraySet.contains(4));
         Assert.assertTrue(arraySet.getInternalArray()[2] == 4);
-        Assert.assertTrue(arraySet.contains(5));
-        Assert.assertTrue(arraySet.getInternalArray()[0] == 5);
+        Assert.assertTrue(arraySet.contains(6));
+        Assert.assertTrue(arraySet.getInternalArray()[0] == 6);
         Assert.assertTrue(arraySet.getNumElements() == 3);
 
         // 3 elements have been removed, only 3 not null elements should remain
@@ -94,7 +97,7 @@ public class NativeArraySetTest
         // Finally remove the rest of the elements
         arraySet.removeElement(2);
         arraySet.removeElement(4);
-        arraySet.removeElement(5);
+        arraySet.removeElement(6);
 
         Assert.assertTrue(arraySet.isEmpty());
         Assert.assertTrue(arraySet.getNumElements() == 0);

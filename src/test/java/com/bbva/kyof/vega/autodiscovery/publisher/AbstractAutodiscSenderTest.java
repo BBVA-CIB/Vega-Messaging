@@ -52,6 +52,9 @@ public class AbstractAutodiscSenderTest
     @Test
     public void testClose()
     {
+        //Now, the publication is in the implementations of this abstract class. It is externally closed
+        Publication publication = sender.getPublication();
+        publication.close();
         this.sender.close();
         Assert.assertTrue(this.sender.testIsClosed);
     }
@@ -275,7 +278,7 @@ public class AbstractAutodiscSenderTest
         }
 
         @Override
-        public Publication createPublication(final Aeron aeron, final AutoDiscoveryConfig config)
+        public Publication getPublication()
         {
             final Publication publication = EasyMock.createNiceMock(Publication.class);
             publication.close();
@@ -306,7 +309,7 @@ public class AbstractAutodiscSenderTest
         }
 
         @Override
-        public Publication createPublication(final Aeron aeron, final AutoDiscoveryConfig config)
+        public Publication getPublication()
         {
             return null;
         }

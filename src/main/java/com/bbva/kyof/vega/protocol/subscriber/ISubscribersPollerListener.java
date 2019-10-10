@@ -1,10 +1,9 @@
 package com.bbva.kyof.vega.protocol.subscriber;
 
+import com.bbva.kyof.vega.msg.MsgReqHeader;
 import com.bbva.kyof.vega.msg.RcvMessage;
 import com.bbva.kyof.vega.msg.RcvRequest;
 import com.bbva.kyof.vega.msg.RcvResponse;
-
-import java.util.UUID;
 
 /**
  * Listener to implement in order to listen to messages from a subscribers poller
@@ -37,8 +36,7 @@ interface ISubscribersPollerListener
 
     /**
      * Callback when a new heartbeat request message is received
-     * @param senderInstanceId request sender instance id
-     * @param requestId request unique id
+     * @param heartbeatReqMsgHeader heartbeat request message header
      */
-    void onHeartbeatRequestMsgReceived(final UUID senderInstanceId, final UUID requestId);
+    void onHeartbeatRequestMsgReceived(MsgReqHeader heartbeatReqMsgHeader);
 }

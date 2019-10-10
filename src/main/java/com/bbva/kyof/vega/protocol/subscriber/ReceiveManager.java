@@ -7,6 +7,7 @@ import com.bbva.kyof.vega.autodiscovery.subscriber.IAutodiscPubTopicPatternListe
 import com.bbva.kyof.vega.config.general.TopicSecurityTemplateConfig;
 import com.bbva.kyof.vega.config.general.TopicTemplateConfig;
 import com.bbva.kyof.vega.exception.VegaException;
+import com.bbva.kyof.vega.msg.MsgReqHeader;
 import com.bbva.kyof.vega.msg.RcvMessage;
 import com.bbva.kyof.vega.msg.RcvRequest;
 import com.bbva.kyof.vega.msg.RcvResponse;
@@ -21,7 +22,6 @@ import org.agrona.concurrent.UnsafeBuffer;
 import java.io.Closeable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Main class to handle the receiving functionality on the framework. It contains separate managers for unicast messaging and multicast/ipc messaging.
@@ -597,14 +597,23 @@ public final class ReceiveManager implements ISubscribersPollerListener, Closeab
     }
 
     @Override
-    public void onHeartbeatRequestMsgReceived(final UUID senderInstanceId, final UUID requestId)
+    public void onHeartbeatRequestMsgReceived(final MsgReqHeader heartbeatReqMsgHeader)
     {
         // Look for the responder socket for the given sender application instance id
-        final AeronPublisher responsePublisher = this.responsePublishersManager.getResponsePublisherForInstance(senderInstanceId);
+        final AeronPublisher responsePublisher = this.responsePublishersManager.getResponsePublisherForInstance(heartbeatReqMsgHeader.getInstanceId());
 
+        //Send the response
         if (responsePublisher != null)
         {
-            responsePublisher.sendResponse(requestId, heartbeatRespContent, 0, 0);
+            responsePublisher.sendResponse(heartbeatReqMsgHeader.getRequestId(), heartbeatRespContent, 0, 0);
+        }
+
+        // Find the topic subscriber and notify to the listener
+        final TopicSubscriber topicSubscriber = this.topicSubAndTopicPubIdRelations.getTopicSubscriberForTopicPublisherId(heartbeatReqMsgHeader.getTopicPublisherId());
+        if (topicSubscriber != null)
+        {
+            // Set the topic name
+            topicSubscriber.onHeartbeatReceived(heartbeatReqMsgHeader, topicSubscriber.getTopicName());
         }
     }
 

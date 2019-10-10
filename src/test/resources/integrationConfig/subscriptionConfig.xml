@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<vega_config xmlns="http://www.bbva.com/vega/config">
+
+    <driver_type>EMBEDDED</driver_type>
+
+    <rcv_poller_config name="default_poller">
+        <idle_strategy_type>BACK_OFF</idle_strategy_type>
+    </rcv_poller_config>
+
+    <control_rcv_config>
+        <min_port>35020</min_port>
+        <max_port>35021</max_port>
+        <num_streams>10</num_streams>
+    </control_rcv_config>
+
+    <responses_config>
+        <min_port>35024</min_port>
+        <max_port>35025</max_port>
+        <rcv_poller>default_poller</rcv_poller>
+    </responses_config>
+
+    <autodisc_config>
+        <autodisc_type>MULTICAST</autodisc_type>
+    </autodisc_config>
+    <!--
+    <autodisc_config>
+        <autodisc_type>UNICAST_DAEMON</autodisc_type>
+        <resolver_daemon_address>10.23.202.252</resolver_daemon_address>
+        <resolver_daemon_port>40300</resolver_daemon_port>
+        <unicast_resolver_port_min>35022</unicast_resolver_port_min>
+        <unicast_resolver_port_max>35023</unicast_resolver_port_max>
+    </autodisc_config>
+    -->
+
+    <topic_template name="default_unicast">
+        <transport_type>UNICAST</transport_type>
+        <rcv_poller>default_poller</rcv_poller>
+        <min_port>35028</min_port>
+        <max_port>35029</max_port>
+    </topic_template>
+
+    <topic_pattern pattern=".*" template="default_unicast" />
+
+    <!--
+        <topic_security_template name="default_sec">
+            <pub_sec_id>11111</pub_sec_id>
+            <pub_sec_id>22222</pub_sec_id>
+            <sub_sec_id>22222</sub_sec_id>
+        </topic_security_template>
+
+        <topic_security_pattern pattern="sec.*" template="default_sec"/>
+        -->
+</vega_config>

@@ -1,10 +1,7 @@
 package com.bbva.kyof.vega.autodiscovery.subscriber;
 
 import com.bbva.kyof.vega.Version;
-import com.bbva.kyof.vega.autodiscovery.model.AutoDiscInstanceInfo;
-import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicInfo;
-import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicSocketInfo;
-import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTransportType;
+import com.bbva.kyof.vega.autodiscovery.model.*;
 import com.bbva.kyof.vega.config.general.AutoDiscoType;
 import com.bbva.kyof.vega.config.general.AutoDiscoveryConfig;
 import com.bbva.kyof.vega.msg.BaseHeader;
@@ -510,6 +507,16 @@ public class AbstractAutodiscReceiverTest implements IAutodiscGlobalEventListene
         {
             final String ipcChannel = AeronChannelHelper.createIpcChannelString();
             return aeron.addSubscription(ipcChannel, STREAM_ID);
+        }
+
+        protected boolean processAutoDiscDaemonServerInfoMsg(AutoDiscDaemonServerInfo autoDiscDaemonServerInfo)
+        {
+            return false;
+        }
+
+        protected int checkAutoDiscDaemonServerInfoTimeouts()
+        {
+            return 0;
         }
     }
 }

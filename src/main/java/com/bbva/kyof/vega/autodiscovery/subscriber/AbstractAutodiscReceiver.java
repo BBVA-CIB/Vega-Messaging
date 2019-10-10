@@ -3,10 +3,7 @@ package com.bbva.kyof.vega.autodiscovery.subscriber;
 import com.bbva.kyof.vega.Version;
 import com.bbva.kyof.vega.autodiscovery.advert.ActiveAdvertsQueue;
 import com.bbva.kyof.vega.autodiscovery.advert.ActiveTopicAdvertsQueue;
-import com.bbva.kyof.vega.autodiscovery.model.AutoDiscInstanceInfo;
-import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicInfo;
-import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicSocketInfo;
-import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTransportType;
+import com.bbva.kyof.vega.autodiscovery.model.*;
 import com.bbva.kyof.vega.config.general.AutoDiscoveryConfig;
 import com.bbva.kyof.vega.msg.BaseHeader;
 import com.bbva.kyof.vega.msg.MsgType;
@@ -51,6 +48,9 @@ public abstract class AbstractAutodiscReceiver implements Closeable
 
     /** Reusable base header to deserialize the header of incoming messages */
     private final BaseHeader reusableBaseHeader = new BaseHeader();
+
+    /** Reusable auto-discovery daemon server info used to avoid object creation during deserialization */
+    private AutoDiscDaemonServerInfo autoDiscDaemonServerInfo = new AutoDiscDaemonServerInfo();
 
     /** Reusable auto-discovery instance info used to avoid object creation during deserialization */
     private AutoDiscInstanceInfo instanceInfo = new AutoDiscInstanceInfo();
@@ -115,6 +115,25 @@ public abstract class AbstractAutodiscReceiver implements Closeable
      * @return the created subscription
      */
     public abstract Subscription createSubscription(UUID instanceId, Aeron aeron, AutoDiscoveryConfig config);
+
+    /**
+     * Process a received message with information about a unicast daemon server information
+     *
+     * This method is only for unicast discovery mechanism.
+     *
+     * The multicast implementation will do nothing
+     * If a multicast client receives a unicast daemon server info message, do nothing
+     *
+     * @param autoDiscDaemonServerInfo the received message
+     * @return true if the msg was consumed, and it is necessary to create another buffer autoDiscDaemonServerInfo
+     */
+    protected abstract boolean processAutoDiscDaemonServerInfoMsg(AutoDiscDaemonServerInfo autoDiscDaemonServerInfo);
+
+    /**
+     * Check for time out on daemon server info active adverts
+     * @return the number of timeouts
+     */
+    protected abstract  int checkAutoDiscDaemonServerInfoTimeouts();
 
     @Override
     public void close()
@@ -278,6 +297,7 @@ public abstract class AbstractAutodiscReceiver implements Closeable
         int numTimeOuts = checkTopicInfoTimeouts();
         numTimeOuts += checkTopicSocketInfoTimeouts();
         numTimeOuts += checkInstanceInfoTimeouts();
+        numTimeOuts += checkAutoDiscDaemonServerInfoTimeouts();
         return numTimeOuts;
     }
 
@@ -372,6 +392,9 @@ public abstract class AbstractAutodiscReceiver implements Closeable
                     break;
                 case MsgType.AUTO_DISC_INSTANCE:
                     this.onReceivedInstanceInfoMsg();
+                    break;
+                case MsgType.AUTO_DISC_DAEMON_SERVER_INFO:
+                    this.onReceivedAutoDiscDaemonServerInfoMsg();
                     break;
                 default:
                     log.warn("Wrong message type [{}] received on autodiscovery", this.reusableBaseHeader.getMsgType());
@@ -475,5 +498,26 @@ public abstract class AbstractAutodiscReceiver implements Closeable
 
         // Restart the reusable auto-discovery info object since the original has been stored
         this.instanceInfo = new AutoDiscInstanceInfo();
+    }
+
+
+    /**
+     * Process a received message with information about a unicast daemon server instance
+     */
+    private void onReceivedAutoDiscDaemonServerInfoMsg()
+    {
+        this.autoDiscDaemonServerInfo.fromBinary(this.bufferSerializer);
+
+        if (log.isTraceEnabled())
+        {
+            log.trace("Processing received unicast daemon server info message [{}]", this.autoDiscDaemonServerInfo);
+        }
+
+        //Process the autoDiscDaemonServerInfo message
+        //If the message was saved (the buffer used in anothe structure), this method returns true, and it is necessary to instance another buffer of autoDiscDaemonServerInfo
+        if( this.processAutoDiscDaemonServerInfoMsg(this.autoDiscDaemonServerInfo) )
+        {
+            this.autoDiscDaemonServerInfo = new AutoDiscDaemonServerInfo();
+        }
     }
 }

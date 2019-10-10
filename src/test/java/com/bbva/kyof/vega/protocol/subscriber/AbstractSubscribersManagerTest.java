@@ -85,7 +85,7 @@ public class AbstractSubscribersManagerTest implements ITopicSubListener
 
             @Override public void onDataRequestMsgReceived(RcvRequest request) {}
             @Override public void onDataResponseMsgReceived(RcvResponse response) {}
-            @Override public void onHeartbeatRequestMsgReceived(UUID senderInstanceId, UUID requestId) {}
+            @Override public void onHeartbeatRequestMsgReceived(MsgReqHeader heartbeatReqMsgHeader) {}
         });
 
         Thread.sleep(1000);

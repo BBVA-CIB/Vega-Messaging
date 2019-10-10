@@ -31,4 +31,11 @@ interface IDaemonReceiverListener
      * @param info information about the connected client
      */
     void onNewAutoDiscDaemonClientInfo(AutoDiscDaemonClientInfo info);
+
+    /**
+     * Called when a daemon receives a client info msg
+     *
+     * @param info information about the connected client
+     */
+    void onReceiveAutoDiscDaemonClientInfo(AutoDiscDaemonClientInfo info);
 }

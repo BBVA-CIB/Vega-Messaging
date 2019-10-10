@@ -285,6 +285,6 @@ class SubcribersPoller extends RecurrentTask
         this.reusableReqMsgHeader.fromBinary(this.bufferSerializer);
 
         // Give the heartbeat request to the listener
-        this.listener.onHeartbeatRequestMsgReceived(this.reusableReqMsgHeader.getInstanceId(), this.reusableReqMsgHeader.getRequestId());
+        this.listener.onHeartbeatRequestMsgReceived(this.reusableReqMsgHeader);
     }
 }

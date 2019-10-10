@@ -7,7 +7,15 @@ import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTransportType;
 import com.bbva.kyof.vega.autodiscovery.publisher.AbstractAutodiscSender;
 import com.bbva.kyof.vega.autodiscovery.publisher.AutodiscMcastSender;
 import com.bbva.kyof.vega.autodiscovery.publisher.AutodiscUnicastSender;
-import com.bbva.kyof.vega.autodiscovery.subscriber.*;
+import com.bbva.kyof.vega.autodiscovery.publisher.IPublicationsManager;
+import com.bbva.kyof.vega.autodiscovery.publisher.PublicationsManager;
+import com.bbva.kyof.vega.autodiscovery.subscriber.AbstractAutodiscReceiver;
+import com.bbva.kyof.vega.autodiscovery.subscriber.AutodiscMcastReceiver;
+import com.bbva.kyof.vega.autodiscovery.subscriber.AutodiscUnicastReceiver;
+import com.bbva.kyof.vega.autodiscovery.subscriber.IAutodiscGlobalEventListener;
+import com.bbva.kyof.vega.autodiscovery.subscriber.IAutodiscInstanceListener;
+import com.bbva.kyof.vega.autodiscovery.subscriber.IAutodiscPubTopicPatternListener;
+import com.bbva.kyof.vega.autodiscovery.subscriber.IAutodiscTopicSubListener;
 import com.bbva.kyof.vega.config.general.AutoDiscoType;
 import com.bbva.kyof.vega.config.general.AutoDiscoveryConfig;
 import com.bbva.kyof.vega.util.threads.RecurrentTask;
@@ -62,8 +70,11 @@ public class AutodiscManager extends RecurrentTask implements IAutodiscManager, 
         }
         else
         {
-            this.autodiscSub = new AutodiscUnicastReceiver(instanceId, aeron, config, this);
-            this.autodiscPub = new AutodiscUnicastSender(aeron, config, ((AutodiscUnicastReceiver)this.autodiscSub).getDaemonClientInfo());
+            //For High Availability, it is created an IPublicationsManager that will manage the publishers their status
+            //This IPublicationsManager is shared between autodiscSub and autodiscPub
+            IPublicationsManager publicationsManager = new PublicationsManager(aeron, config);
+            this.autodiscSub = new AutodiscUnicastReceiver(instanceId, aeron, config, this, publicationsManager);
+            this.autodiscPub = new AutodiscUnicastSender(aeron, config, ((AutodiscUnicastReceiver)this.autodiscSub).getDaemonClientInfo(), publicationsManager);
         }
     }
 

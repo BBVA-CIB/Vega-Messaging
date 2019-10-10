@@ -375,7 +375,7 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
         }
 
         @Override
-        public void onHeartbeatRequestMsgReceived(UUID senderInstanceId, UUID requestId)
+        public void onHeartbeatRequestMsgReceived(MsgReqHeader heartbeatReqMsgHeader)
         {
 
         }

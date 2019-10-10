@@ -7,6 +7,8 @@ import io.aeron.Aeron;
 import lombok.extern.slf4j.Slf4j;
 import org.agrona.concurrent.SleepingMillisIdleStrategy;
 
+import java.util.UUID;
+
 /**
  * Unicast Daemon that acts as a central point for auto-discovery communication routing.<p>
  *
@@ -28,6 +30,8 @@ public class UnicastDaemon extends RecurrentTask
     private final Aeron aeron;
     /** Embedded media driver, null if the daemon is using an stand alone media driver */
     private final EmbeddedMediaDriver embeddedMediaDriver;
+    /** UUID for the UnicastDaemon to identification with the clients */
+    private final UUID uuid = UUID.randomUUID();
 
     /**
      * Create a unicast daemon for the given parameters
@@ -64,7 +68,7 @@ public class UnicastDaemon extends RecurrentTask
         this.aeron = Aeron.connect(aeronContext);
 
         // Start senders and receivers
-        this.daemonPublisher = new UnicastDaemonSender(this.aeron, parameters);
+        this.daemonPublisher = new UnicastDaemonSender(this.aeron, parameters, this.uuid);
         this.daemonReceiver = new UnicastDaemonReceiver(this.aeron, parameters, this.daemonPublisher);
     }
 

@@ -2,6 +2,7 @@ package com.bbva.kyof.vega.protocol.subscriber;
 
 import com.bbva.kyof.vega.config.general.ConfigReader;
 import com.bbva.kyof.vega.config.general.ConfigReaderTest;
+import com.bbva.kyof.vega.msg.MsgReqHeader;
 import com.bbva.kyof.vega.msg.RcvMessage;
 import com.bbva.kyof.vega.msg.RcvRequest;
 import com.bbva.kyof.vega.msg.RcvResponse;
@@ -105,7 +106,7 @@ public class SubscribersPollersManagerTest
         }
 
         @Override
-        public void onHeartbeatRequestMsgReceived(UUID senderInstanceId, UUID requestId)
+        public void onHeartbeatRequestMsgReceived(MsgReqHeader heartbeatReqMsgHeader)
         {
 
         }

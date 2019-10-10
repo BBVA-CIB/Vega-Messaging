@@ -8,6 +8,7 @@ import com.bbva.kyof.vega.config.general.ConfigReader;
 import com.bbva.kyof.vega.config.general.ConfigReaderTest;
 import com.bbva.kyof.vega.exception.VegaException;
 import com.bbva.kyof.vega.msg.*;
+import com.bbva.kyof.vega.msg.lost.IMsgLostReport;
 import com.bbva.kyof.vega.protocol.AutoDiscManagerMock;
 import com.bbva.kyof.vega.protocol.common.AsyncRequestManager;
 import com.bbva.kyof.vega.protocol.common.KeySecurityType;
@@ -29,6 +30,8 @@ import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.util.UUID;
+
+import static org.junit.Assert.*;
 
 /**
  * Created by cnebrera on 11/08/16.
@@ -133,17 +136,17 @@ public class ReceiveManagerTest
         RECEIVER_MANAGER.subscribeToTopic("mcastTopic", new ReceiverListener());
         RECEIVER_MANAGER.subscribeToTopic("ipcTopic", new ReceiverListener());
 
-        Assert.assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("ucastTopic"));
-        Assert.assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("mcastTopic"));
-        Assert.assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("ipcTopic"));
+        assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("ucastTopic"));
+        assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("mcastTopic"));
+        assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("ipcTopic"));
 
         RECEIVER_MANAGER.unsubscribeFromTopic("ucastTopic");
         RECEIVER_MANAGER.unsubscribeFromTopic("mcastTopic");
         RECEIVER_MANAGER.unsubscribeFromTopic("ipcTopic");
 
-        Assert.assertNull(RECEIVER_MANAGER.getTopicSubscriber("ucastTopic"));
-        Assert.assertNull(RECEIVER_MANAGER.getTopicSubscriber("mcastTopic"));
-        Assert.assertNull(RECEIVER_MANAGER.getTopicSubscriber("ipcTopic"));
+        assertNull(RECEIVER_MANAGER.getTopicSubscriber("ucastTopic"));
+        assertNull(RECEIVER_MANAGER.getTopicSubscriber("mcastTopic"));
+        assertNull(RECEIVER_MANAGER.getTopicSubscriber("ipcTopic"));
     }
 
     @Test(expected = VegaException.class)
@@ -165,10 +168,10 @@ public class ReceiveManagerTest
     public void testSecureSubscribe() throws Exception
     {
         RECEIVER_MANAGER.subscribeToTopic("sTopic", new ReceiverListener());
-        Assert.assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("sTopic"));
+        assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("sTopic"));
 
         RECEIVER_MANAGER.unsubscribeFromTopic("sTopic");
-        Assert.assertNull(RECEIVER_MANAGER.getTopicSubscriber("sTopic"));
+        assertNull(RECEIVER_MANAGER.getTopicSubscriber("sTopic"));
     }
 
     @Test
@@ -189,47 +192,47 @@ public class ReceiveManagerTest
         RECEIVER_MANAGER.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(),"itopicPattern"), "*.itopicPattern");
 
         // It should be subscribed to both TOPICS
-        Assert.assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("utopicPattern"));
-        Assert.assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("itopicPattern"));
+        assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("utopicPattern"));
+        assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("itopicPattern"));
 
         // Force an un-subscription due to advert removed
         RECEIVER_MANAGER.onPubTopicForPatternRemoved(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"utopicPattern"), "*.utopicPattern");
-        Assert.assertNull(RECEIVER_MANAGER.getTopicSubscriber("utopicPattern"));
+        assertNull(RECEIVER_MANAGER.getTopicSubscriber("utopicPattern"));
 
         // Advert on non configured topic
         RECEIVER_MANAGER.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(),"LOL"), "*.utopicPattern");
-        Assert.assertNull(RECEIVER_MANAGER.getTopicSubscriber("LOL"));
+        assertNull(RECEIVER_MANAGER.getTopicSubscriber("LOL"));
 
         // Try unsubscribe from pattern, should unsubscribe both topic and pattern
         RECEIVER_MANAGER.unsubscribefromPattern("*.itopicPattern");
         Assert.assertFalse(RECEIVER_MANAGER.isSubscribedToPattern("*.itopicPattern"));
-        Assert.assertNull(RECEIVER_MANAGER.getTopicSubscriber("itopicPattern"));
+        assertNull(RECEIVER_MANAGER.getTopicSubscriber("itopicPattern"));
 
         // Launch advert again, this time since there is no subscription nothing will happen
         RECEIVER_MANAGER.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(),"itopicPattern"), "*.itopicPattern");
         Assert.assertFalse(RECEIVER_MANAGER.isSubscribedToPattern("*.itopicPattern"));
-        Assert.assertNull(RECEIVER_MANAGER.getTopicSubscriber("itopicPattern"));
+        assertNull(RECEIVER_MANAGER.getTopicSubscriber("itopicPattern"));
 
         // Subscribe again
         RECEIVER_MANAGER.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"utopicPattern"), "*.utopicPattern");
-        Assert.assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("utopicPattern"));
+        assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("utopicPattern"));
 
         // Now launch a wrong advert on non existing pattern
         RECEIVER_MANAGER.onPubTopicForPatternRemoved(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"utopicPattern"), "LOL*.utopicPattern");
-        Assert.assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("utopicPattern"));
+        assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("utopicPattern"));
 
         // Now launch a wrong advert on non configured topic
         RECEIVER_MANAGER.onPubTopicForPatternRemoved(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"LOLutopicPattern"), "*.utopicPattern");
-        Assert.assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("utopicPattern"));
+        assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("utopicPattern"));
 
         // Last test is to process a removed topic in mcast or ipc
         RECEIVER_MANAGER.subscribeToPattern("*.itopicPattern", new ReceiverListener());
         RECEIVER_MANAGER.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(),"itopicPattern"), "*.itopicPattern");
 
-        Assert.assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("itopicPattern"));
+        assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("itopicPattern"));
 
         RECEIVER_MANAGER.onPubTopicForPatternRemoved(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(),"itopicPattern"), "*.itopicPattern");
-        Assert.assertNull(RECEIVER_MANAGER.getTopicSubscriber("itopicPattern"));
+        assertNull(RECEIVER_MANAGER.getTopicSubscriber("itopicPattern"));
 
         // Finally just unsubscribe from both
         RECEIVER_MANAGER.unsubscribefromPattern("*.utopicPattern");
@@ -252,32 +255,32 @@ public class ReceiveManagerTest
         // Force a topic subscription due to new advert that is secure but we are not allowed to subscribe to it
         RECEIVER_MANAGER.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"2stopicPattern", 77), "*.2stopicPattern");
         // It should not subscribe
-        Assert.assertNull(RECEIVER_MANAGER.getTopicSubscriber("2stopicPattern"));
+        assertNull(RECEIVER_MANAGER.getTopicSubscriber("2stopicPattern"));
 
         // Force a topic subscription due to new advert that is not secure
         RECEIVER_MANAGER.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"stopicPattern"), "*.stopicPattern");
         // It should not subscribe
-        Assert.assertNull(RECEIVER_MANAGER.getTopicSubscriber("stopicPattern"));
+        assertNull(RECEIVER_MANAGER.getTopicSubscriber("stopicPattern"));
 
         // Force a topic subscription due to new advert that is secure but is not allowed to publish
         RECEIVER_MANAGER.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"stopicPattern", 77), "*.stopicPattern");
         // It should not subscribe
-        Assert.assertNull(RECEIVER_MANAGER.getTopicSubscriber("stopicPattern"));
+        assertNull(RECEIVER_MANAGER.getTopicSubscriber("stopicPattern"));
 
         // Force a topic subscription due to new advert that is secure is allowed to publish but we have no RSA key for the publisher id
         RECEIVER_MANAGER.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"stopicPattern", 33333), "*.stopicPattern");
         // It should not subscribe
-        Assert.assertNull(RECEIVER_MANAGER.getTopicSubscriber("stopicPattern"));
+        assertNull(RECEIVER_MANAGER.getTopicSubscriber("stopicPattern"));
 
         // Force a topic subscription with a secure advert on a non secure topic
         RECEIVER_MANAGER.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"utopicPattern", 6666), "*.utopicPattern");
         // It should not subscribe
-        Assert.assertNull(RECEIVER_MANAGER.getTopicSubscriber("utopicPattern"));
+        assertNull(RECEIVER_MANAGER.getTopicSubscriber("utopicPattern"));
 
         // Finally one that should work!
         RECEIVER_MANAGER.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"stopicPattern", 22222), "*.stopicPattern");
         // It should not subscribe
-        Assert.assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("stopicPattern"));
+        assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("stopicPattern"));
 
         // Finally just unsubscribe from all
         RECEIVER_MANAGER.unsubscribefromPattern("*.stopicPattern");
@@ -288,7 +291,7 @@ public class ReceiveManagerTest
     public void testPatternTopicSubscribeMix() throws Exception
     {
         // Calibration check
-        Assert.assertNull(RECEIVER_MANAGER.getTopicSubscriber("*.uMixTopicPattern"));
+        assertNull(RECEIVER_MANAGER.getTopicSubscriber("*.uMixTopicPattern"));
 
         // Subscribe to pattern and force a topic subscription
         RECEIVER_MANAGER.subscribeToPattern("*.uMixTopicPattern", new ReceiverListener());
@@ -297,39 +300,39 @@ public class ReceiveManagerTest
         RECEIVER_MANAGER.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"uMixPattern"), "*.uMixTopicPattern.*");
 
         // It should be subscribed to both TOPICS
-        Assert.assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("uMixPattern"));
+        assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("uMixPattern"));
 
         // Now subscribe normally
         RECEIVER_MANAGER.subscribeToTopic("uMixPattern", new ReceiverListener());
-        Assert.assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("uMixPattern"));
+        assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("uMixPattern"));
 
         // Now force the pattern unsubscriptions, it should still be subscribed!
         RECEIVER_MANAGER.onPubTopicForPatternRemoved(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"uMixPattern"), "*.uMixTopicPattern");
-        Assert.assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("uMixPattern"));
+        assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("uMixPattern"));
         RECEIVER_MANAGER.onPubTopicForPatternRemoved(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"uMixPattern"), "*.uMixTopicPattern.*");
-        Assert.assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("uMixPattern"));
+        assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("uMixPattern"));
 
         // Now unsubscribe the normal topic, it should be gonce
         RECEIVER_MANAGER.unsubscribeFromTopic("uMixPattern");
-        Assert.assertNull(RECEIVER_MANAGER.getTopicSubscriber("uMixPattern"));
+        assertNull(RECEIVER_MANAGER.getTopicSubscriber("uMixPattern"));
 
         //-------------------------- The other way around --------------------------
         // Now subscribe normally
         RECEIVER_MANAGER.subscribeToTopic("uMixPattern", new ReceiverListener());
-        Assert.assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("uMixPattern"));
+        assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("uMixPattern"));
 
         RECEIVER_MANAGER.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"uMixPattern"), "*.uMixTopicPattern");
         RECEIVER_MANAGER.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"uMixPattern"), "*.uMixTopicPattern.*");
 
         // Now unsubscribe the normal topic, it should be there still
         RECEIVER_MANAGER.unsubscribeFromTopic("uMixPattern");
-        Assert.assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("uMixPattern"));
+        assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("uMixPattern"));
 
         // Now force the pattern unsubscriptions
         RECEIVER_MANAGER.onPubTopicForPatternRemoved(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"uMixPattern"), "*.uMixTopicPattern");
-        Assert.assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("uMixPattern"));
+        assertNotNull(RECEIVER_MANAGER.getTopicSubscriber("uMixPattern"));
         RECEIVER_MANAGER.onPubTopicForPatternRemoved(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"uMixPattern"), "*.uMixTopicPattern.*");
-        Assert.assertNull(RECEIVER_MANAGER.getTopicSubscriber("uMixPattern"));
+        assertNull(RECEIVER_MANAGER.getTopicSubscriber("uMixPattern"));
     }
 
     @Test(expected = VegaException.class)
@@ -405,7 +408,7 @@ public class ReceiveManagerTest
     @Test
     public void getResponseSubParams()
     {
-        Assert.assertNotNull(RECEIVER_MANAGER.getResponseSubscriberParams());
+        assertNotNull(RECEIVER_MANAGER.getResponseSubscriberParams());
     }
 
     @Test
@@ -435,13 +438,13 @@ public class ReceiveManagerTest
 
         // Call the encrypted version, since the topic is not encrypted it should not work
         RECEIVER_MANAGER.onEncryptedDataMsgReceived(rcvMessage);
-        Assert.assertNull(listener.receivedMsg);
+        assertNull(listener.receivedMsg);
 
         // If we try with another topic id it should not work
         rcvMessage.setTopicPublisherId(UUID.randomUUID());
 
         RECEIVER_MANAGER.onDataMsgReceived(rcvMessage);
-        Assert.assertNull(listener.receivedMsg);
+        assertNull(listener.receivedMsg);
     }
 
     @Test
@@ -465,7 +468,7 @@ public class ReceiveManagerTest
 
         // It should not arrive
         RECEIVER_MANAGER.onDataMsgReceived(rcvMessage);
-        Assert.assertNull(listener.receivedMsg);
+        assertNull(listener.receivedMsg);
 
         RECEIVER_MANAGER.unsubscribeFromTopic("stopicMsg");
     }
@@ -492,7 +495,7 @@ public class ReceiveManagerTest
         RECEIVER_MANAGER.onEncryptedDataMsgReceived(rcvMessage);
 
         // It should not work because we don't have the AES decoder for the publisher
-        Assert.assertNull(listener.receivedMsg);
+        assertNull(listener.receivedMsg);
 
         RECEIVER_MANAGER.unsubscribeFromTopic("stopicMsg");
     }
@@ -500,8 +503,142 @@ public class ReceiveManagerTest
     @Test
     public void onHeartbeatRequestReceived() throws VegaException
     {
+        // Subscribe to a topic
+        final ReceiverListener listener = new ReceiverListener();
+        RECEIVER_MANAGER.subscribeToTopic("itopicMsg3", listener);
+
+        // Get the subscribed topic
+        final TopicSubscriber topicSubscriber = RECEIVER_MANAGER.getTopicSubscriber("itopicMsg3");
+
+        // Now simulate that we have information on a topic publisher
+        final UUID topicPubId = UUID.randomUUID();
+        RECEIVER_MANAGER.getTopicSubAndTopicPubIdRelations().addTopicPubRelation(topicPubId, topicSubscriber);
+
         // It wont sent any response, since there is no response socket for this
-        RECEIVER_MANAGER.onHeartbeatRequestMsgReceived(UUID.randomUUID(), UUID.randomUUID());
+        MsgReqHeader heartbeatReqMsgHeader = new MsgReqHeader();
+        heartbeatReqMsgHeader.setInstanceId(UUID.randomUUID());
+        heartbeatReqMsgHeader.setRequestId(UUID.randomUUID());
+        heartbeatReqMsgHeader.setTopicPublisherId(topicPubId);
+
+        //The first heartbeat initialize the TopicSubscriber.expectedSeqNumByTopicPubId with a sequence number 0
+        RECEIVER_MANAGER.onHeartbeatRequestMsgReceived(heartbeatReqMsgHeader);
+
+        // assert that there are not gaps
+        assertNull(listener.lostReport);
+
+        //The second heartbeat increases the TopicSubscriber.expectedSeqNumByTopicPubId to a sequence number 1
+        heartbeatReqMsgHeader.setSequenceNumber(1);
+        RECEIVER_MANAGER.onHeartbeatRequestMsgReceived(heartbeatReqMsgHeader);
+
+        // assert that there are not gaps
+        assertNull(listener.lostReport);
+    }
+
+    @Test
+    public void onHeartbeatRequestReceivedWithLoss() throws VegaException
+    {
+        // Subscribe to a topic
+        final ReceiverListener listener = new ReceiverListener();
+        RECEIVER_MANAGER.subscribeToTopic("itopicMsg4", listener);
+
+        // Get the subscribed topic
+        final TopicSubscriber topicSubscriber = RECEIVER_MANAGER.getTopicSubscriber("itopicMsg4");
+
+        // Now simulate that we have information on a topic publisher
+        final UUID topicPubId = UUID.randomUUID();
+        RECEIVER_MANAGER.getTopicSubAndTopicPubIdRelations().addTopicPubRelation(topicPubId, topicSubscriber);
+
+        // It wont sent any response, since there is no response socket for this
+        MsgReqHeader heartbeatReqMsgHeader = new MsgReqHeader();
+        heartbeatReqMsgHeader.setInstanceId(UUID.randomUUID());
+        heartbeatReqMsgHeader.setRequestId(UUID.randomUUID());
+        heartbeatReqMsgHeader.setTopicPublisherId(topicPubId);
+
+        //Initialize the TopicSubscriber.expectedSeqNumByTopicPubId with a new message sequence number
+        RECEIVER_MANAGER.onHeartbeatRequestMsgReceived(heartbeatReqMsgHeader);
+
+        // assert that there are not gaps
+        assertNull(listener.lostReport);
+
+        //The second heartbeat simulates a GAP with a sequence number of 2 (one message lost)
+        heartbeatReqMsgHeader.setSequenceNumber(2);
+        RECEIVER_MANAGER.onHeartbeatRequestMsgReceived(heartbeatReqMsgHeader);
+
+        // Must exist an error with one message lost
+        assertNotNull(listener.lostReport);
+        assertEquals(1, listener.lostReport.getNumberLostMessages());
+
+        //The second heartbeat simulates a GAP of 10 messages lost
+        heartbeatReqMsgHeader.setSequenceNumber(13);
+        RECEIVER_MANAGER.onHeartbeatRequestMsgReceived(heartbeatReqMsgHeader);
+
+        // Must exist an error with one message lost
+        assertNotNull(listener.lostReport);
+        assertEquals(10, listener.lostReport.getNumberLostMessages());
+    }
+
+    @Test
+    public void onHeartbeatRequestReceivedWithPatterListenerLoss() throws VegaException
+    {
+        // topic name & patterns
+        String topicName = "itopicPatterMsg";
+        String topicPattern1 = "itopicPattern*";
+        String topicPattern2 = "itopicPatternMsg*";
+
+        // Subscribe to topic and pattern the listeners
+        final ReceiverListener listener0 = new ReceiverListener();
+        RECEIVER_MANAGER.subscribeToTopic(topicName, listener0);
+        final ReceiverListener listener1 = new ReceiverListener();
+        RECEIVER_MANAGER.subscribeToPattern(topicPattern1, listener1);
+        final ReceiverListener listener2 = new ReceiverListener();
+        RECEIVER_MANAGER.subscribeToPattern(topicPattern2, listener2);
+
+        // Get the subscribed topic and add the patterns
+        final TopicSubscriber topicSubscriber0 = RECEIVER_MANAGER.getTopicSubscriber(topicName);
+        topicSubscriber0.addPatternListener(topicPattern1, listener1);
+        topicSubscriber0.addPatternListener(topicPattern2, listener2);
+
+        // Now simulate that we have information on a topic publisher
+        final UUID topicPubId = UUID.randomUUID();
+        RECEIVER_MANAGER.getTopicSubAndTopicPubIdRelations().addTopicPubRelation(topicPubId, topicSubscriber0);
+
+        // It wont sent any response, since there is no response socket for this
+        MsgReqHeader heartbeatReqMsgHeader = new MsgReqHeader();
+        heartbeatReqMsgHeader.setInstanceId(UUID.randomUUID());
+        heartbeatReqMsgHeader.setRequestId(UUID.randomUUID());
+        heartbeatReqMsgHeader.setTopicPublisherId(topicPubId);
+
+        //Initialize the TopicSubscriber.expectedSeqNumByTopicPubId with a new message sequence number
+        RECEIVER_MANAGER.onHeartbeatRequestMsgReceived(heartbeatReqMsgHeader);
+
+        // assert that there are not gaps in the listeners
+        assertNull(listener0.lostReport);
+        assertNull(listener1.lostReport);
+        assertNull(listener2.lostReport);
+
+        //The second heartbeat simulates a GAP with a sequence number of 2 (one message lost)
+        heartbeatReqMsgHeader.setSequenceNumber(2);
+        RECEIVER_MANAGER.onHeartbeatRequestMsgReceived(heartbeatReqMsgHeader);
+
+        // Must exist an error with one message lost in all the listeners
+        assertNotNull(listener0.lostReport);
+        assertNotNull(listener1.lostReport);
+        assertNotNull(listener2.lostReport);
+        assertEquals(1, listener0.lostReport.getNumberLostMessages());
+        assertEquals(1, listener1.lostReport.getNumberLostMessages());
+        assertEquals(1, listener2.lostReport.getNumberLostMessages());
+
+        //The second heartbeat simulates a GAP of 10 messages lost
+        heartbeatReqMsgHeader.setSequenceNumber(13);
+        RECEIVER_MANAGER.onHeartbeatRequestMsgReceived(heartbeatReqMsgHeader);
+
+        // Must exist an error with then message lost
+        assertNotNull(listener0.lostReport);
+        assertNotNull(listener1.lostReport);
+        assertNotNull(listener2.lostReport);
+        assertEquals(10, listener0.lostReport.getNumberLostMessages());
+        assertEquals(10, listener1.lostReport.getNumberLostMessages());
+        assertEquals(10, listener2.lostReport.getNumberLostMessages());
     }
 
     @Test
@@ -526,21 +663,21 @@ public class ReceiveManagerTest
 
         // Send the request it should not arrive, there is no response publisher registered
         RECEIVER_MANAGER.onDataRequestMsgReceived(rcvRequest);
-        Assert.assertNull(listener.receivedReq);
+        assertNull(listener.receivedReq);
 
         // Now add the response publisher info!
         RECEIVER_MANAGER.onNewAutoDiscInstanceInfo(new AutoDiscInstanceInfo("intanceName", remoteRequesterInstanceId, IP_ADDRESS, 25555, 8, IP_ADDRESS, 25555, 9));
 
         // Send the request again, it should still not arrive because it cannot find the topic name
         RECEIVER_MANAGER.onDataRequestMsgReceived(rcvRequest);
-        Assert.assertNull(listener.receivedReq);
+        assertNull(listener.receivedReq);
 
         // Now simulate that we have information on a topic publisher
         RECEIVER_MANAGER.getTopicSubAndTopicPubIdRelations().addTopicPubRelation(topicPubId, topicSubscriber);
 
         // Send the request again, now it should finally work!
         RECEIVER_MANAGER.onDataRequestMsgReceived(rcvRequest);
-        Assert.assertNotNull(listener.receivedReq);
+        assertNotNull(listener.receivedReq);
         Assert.assertEquals(listener.receivedReq.getTopicName(), topicSubscriber.getTopicName());
 
         // Send a response
@@ -559,6 +696,7 @@ public class ReceiveManagerTest
     {
         volatile IRcvMessage receivedMsg = null;
         volatile IRcvRequest receivedReq = null;
+        volatile IMsgLostReport lostReport = null;
 
         private void reset()
         {
@@ -575,6 +713,12 @@ public class ReceiveManagerTest
         public void onRequestReceived(IRcvRequest receivedRequest)
         {
             this.receivedReq = receivedRequest;
+        }
+
+        @Override
+        public void onMessageLost(IMsgLostReport lostReport)
+        {
+            this.lostReport = lostReport;
         }
     }
 }

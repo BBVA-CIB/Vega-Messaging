@@ -55,8 +55,8 @@ public abstract class AbstractAutodiscSender implements Closeable
     /** Reusable base header for the messages*/
     private final BaseHeader reusableBaseHeader;
 
-    /** Publication aeron socket used to send the messages */
-    private final Publication publication;
+    /** Variable used to control to print a warning each second when does not exists a valid publication, **/
+    private long lastPublicationNullWarn = System.currentTimeMillis();
 
     /**
      * Constructor to create a new auto-discovery abstract publisher
@@ -75,28 +75,24 @@ public abstract class AbstractAutodiscSender implements Closeable
         // Initialize the reusable header to serialize the messages
         this.reusableBaseHeader = new BaseHeader(MsgType.AUTO_DISC_TOPIC, Version.LOCAL_VERSION);
 
-        // Create the publication
-        this.publication = this.createPublication(aeron, config);
-
         // Prepare the reusable buffer serializer
         this.sendBufferSerializer.wrap(ByteBuffer.allocate(SEND_BUFFER_SIZE));
     }
 
     /**
-     * Creates the Aeron publication object to send auto-discovery messages.
-     * @param aeron the Aeron instance
-     * @param config the auto-discovery configuration
+     * Getter for the publication.
      *
-     * @return the created Aeron publication
+     * It is abstract because the unicast and multicast environments are different
+     *
+     * @return the publication
      */
-    public abstract Publication createPublication(Aeron aeron, AutoDiscoveryConfig config);
+    public abstract Publication getPublication();
 
     @Override
     public void close()
     {
-        log.info("Closing auto discovery sender");
+        log.info("Closing auto discovery sender: registeredTopicSocketInfos & registeredTopicInfos");
 
-        this.publication.close();
         this.registeredTopicSocketInfos.clear();
         this.registeredTopicInfos.clear();
     }
@@ -218,51 +214,6 @@ public abstract class AbstractAutodiscSender implements Closeable
     }
 
     /**
-     * Send the provided message if is not null
-     *
-     * @param msgType the message type to send
-     * @param serializable the message in the form of a serializable object
-     * @return 0 if not sent, 1 if sent
-     */
-    int sendMessageIfNotNull(final byte msgType, final IUnsafeSerializable serializable)
-    {
-        // Check for null
-        if (serializable == null)
-        {
-            return 0;
-        }
-
-        if (log.isTraceEnabled())
-        {
-            log.trace("Sending auto-discovery advert message [{}]", serializable);
-        }
-
-        try
-        {
-            // Reset the send buffer serializer offset
-            this.sendBufferSerializer.setOffset(0);
-
-            // Set msg type and write the base header
-            this.reusableBaseHeader.setMsgType(msgType);
-            this.reusableBaseHeader.toBinary(this.sendBufferSerializer);
-
-            // Serialize the message
-            serializable.toBinary(this.sendBufferSerializer);
-
-            // Send the message
-            publication.offer(this.sendBufferSerializer.getInternalBuffer(), 0, this.sendBufferSerializer.getOffset());
-
-            return 1;
-        }
-        catch (final RuntimeException e)
-        {
-            log.error("Unexpected error sending auto-discovery advert message", e);
-        }
-
-        return 0;
-    }
-
-    /**
      * Republish all the information registered about the given topic for an specific transport type. <p>
      *
      * This information includes both topic info and topic socket info for the given topic name. <p>
@@ -313,5 +264,117 @@ public abstract class AbstractAutodiscSender implements Closeable
             instanceInfo.resetNextExpectedSent(System.currentTimeMillis());
             this.sendMessageIfNotNull(MsgType.AUTO_DISC_INSTANCE, instanceInfo.getInfo());
         }
+    }
+
+    /**
+     * Send the provided message if is not null
+     *
+     * @param msgType the message type to send
+     * @param serializable the message in the form of a serializable object
+     * @return 0 if not sent, 1 if sent
+     */
+    int sendMessageIfNotNull(final byte msgType, final IUnsafeSerializable serializable)
+    {
+        // Check for null
+        if (serializable == null)
+        {
+            return 0;
+        }
+
+        if (log.isTraceEnabled())
+        {
+            log.trace("Sending auto-discovery advert message [{}]", serializable);
+        }
+
+        try
+        {
+            // Reset the send buffer serializer offset
+            this.sendBufferSerializer.setOffset(0);
+
+            // Set msg type and write the base header
+            this.reusableBaseHeader.setMsgType(msgType);
+            this.reusableBaseHeader.toBinary(this.sendBufferSerializer);
+
+            // Serialize the message
+            serializable.toBinary(this.sendBufferSerializer);
+
+            // Send the message if there is an enabled publication
+            // In unicast mode, if it does not exist replies from any of the unicast daemon servers,
+            // all the publications become disabled until new messages are received
+            //In multicast mode, it does exist an enabled publication always
+            Publication publication = this.getPublication();
+
+            if (publication == null)
+            {
+                //Only print one warning each second
+                if(System.currentTimeMillis() - lastPublicationNullWarn > 1000)
+                {
+                    lastPublicationNullWarn = System.currentTimeMillis();
+                    log.warn(
+                            "It is not possible to send auto-discovery advert message, because it does not exist an enabled publication for msgType = {}", MsgType.toString(msgType) );
+                }
+            }
+            else
+            {
+                publication.offer(this.sendBufferSerializer.getInternalBuffer(), 0, this.sendBufferSerializer.getOffset());
+                return 1;
+            }
+        }
+        catch (final RuntimeException e)
+        {
+            log.error("Unexpected error sending auto-discovery advert message", e);
+        }
+
+        return 0;
+    }
+
+    /**
+     * Send the provided message if is not null to all the publishers
+     *
+     * Although this method is for the unicast case, it is placed here for reuse the reusable variables
+     *
+     * @param msgType the message type to send
+     * @param serializable the message in the form of a serializable object
+     * @param publicationsInfoArray array with all the publications to send the message
+     * @return 0 if not sent, 1 if sent
+     */
+    int sendMessageIfNotNullToAllPublications(final byte msgType, final IUnsafeSerializable serializable, final PublicationInfo[] publicationsInfoArray)
+    {
+        // Check for null
+        if (serializable == null)
+        {
+            return 0;
+        }
+
+        if (log.isTraceEnabled())
+        {
+            log.trace("Sending auto-discovery advert message [{}]", serializable);
+        }
+
+        try
+        {
+            // Reset the send buffer serializer offset
+            this.sendBufferSerializer.setOffset(0);
+
+            // Set msg type and write the base header
+            this.reusableBaseHeader.setMsgType(msgType);
+            this.reusableBaseHeader.toBinary(this.sendBufferSerializer);
+
+            // Serialize the message
+            serializable.toBinary(this.sendBufferSerializer);
+
+            // Send the same message to all the publishers
+            for(int i = 0; i < publicationsInfoArray.length; i++)
+            {
+                publicationsInfoArray[i].getPublication().offer(this.sendBufferSerializer.getInternalBuffer(), 0, this.sendBufferSerializer.getOffset());
+            }
+            return 1;
+        }
+        catch (final RuntimeException e)
+        {
+            log.error("Unexpected error sending auto-discovery advert message", e);
+        }
+
+        return 0;
     }
 }

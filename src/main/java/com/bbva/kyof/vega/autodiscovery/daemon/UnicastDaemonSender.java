@@ -1,17 +1,23 @@
 package com.bbva.kyof.vega.autodiscovery.daemon;
 
+import com.bbva.kyof.vega.Version;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscDaemonClientInfo;
+import com.bbva.kyof.vega.autodiscovery.model.AutoDiscDaemonServerInfo;
+import com.bbva.kyof.vega.msg.BaseHeader;
+import com.bbva.kyof.vega.msg.MsgType;
+import com.bbva.kyof.vega.serialization.UnsafeBufferSerializer;
 import com.bbva.kyof.vega.util.net.AeronChannelHelper;
 import com.bbva.kyof.vega.util.collection.HashMapOfHashSet;
 import com.bbva.kyof.vega.util.collection.NativeArraySet;
+import com.bbva.kyof.vega.util.net.InetUtil;
 import io.aeron.Aeron;
 import io.aeron.Publication;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.agrona.DirectBuffer;
 
 import java.io.Closeable;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -22,9 +28,11 @@ import java.util.UUID;
  * It will create the unicast sockets for any active client and fodward the received autodiscovery information in each one of the clients.
  */
 @Slf4j
-@AllArgsConstructor
 class UnicastDaemonSender implements IDaemonReceiverListener, Closeable
 {
+    /** Buffer size needed to sendBufferServerInfo */
+    private static final int SEND_BUFFER_SERVER_INFO_SIZE = 32;
+
     /** Store all the AeronPublishers by the parameters used to create it */
     private final Map<PublicationParams, Publication> publicationsByParams = new HashMap<>();
 
@@ -39,6 +47,55 @@ class UnicastDaemonSender implements IDaemonReceiverListener, Closeable
 
     /** Parameters used to create the unicast daemon instance */
     private final DaemonParameters parameters;
+
+    /** UUID for the UnicastDaemon to identification with the clients (setted by UnicastDaemon) */
+    private final UUID uuid;
+
+    /** Buffer to send with the daemon server information*/
+    private final UnsafeBufferSerializer sendBufferServerInfo = new UnsafeBufferSerializer();
+
+    /**
+     * Constructor that initialized only once the sendBufferServerInfo
+     * @param pAeron Aeron
+     * @param pParameters parameters
+     * @param pUuid uuid
+     */
+    UnicastDaemonSender(final Aeron pAeron, final DaemonParameters pParameters, final UUID pUuid){
+        super();
+        this.aeron = pAeron;
+        this.parameters = pParameters;
+        this.uuid = pUuid;
+
+        //Initialize the sendBufferServerInfo
+        initializeSendBufferSerializerServerInfo();
+    }
+
+    /**
+     * Initializes the sendBufferServerInfo with the AUTO_DISC_DAEMON_SERVER_INFO message
+     * With this message, all the clients can know if this server is up or not,
+     * and the clients can apply balanced load
+     */
+    private void initializeSendBufferSerializerServerInfo(){
+
+        // Prepare the reusable buffer serializer
+        sendBufferServerInfo.wrap(ByteBuffer.allocate(SEND_BUFFER_SERVER_INFO_SIZE));
+        sendBufferServerInfo.setOffset(0);
+
+        //Create the header with AUTO_DISC_DAEMON_SERVER_INFO type
+        final BaseHeader reusableBaseHeader = new BaseHeader(MsgType.AUTO_DISC_DAEMON_SERVER_INFO, Version.LOCAL_VERSION);
+        reusableBaseHeader.toBinary(sendBufferServerInfo);
+
+        //Create the body with the unicast daemon server data
+        final AutoDiscDaemonServerInfo autoDiscDaemonServerInfo
+                = new AutoDiscDaemonServerInfo(
+                uuid,
+                InetUtil.convertIpAddressToInt(parameters.getIpAddress()),
+                parameters.getPort()
+        );
+
+        // Serialize the message
+        autoDiscDaemonServerInfo.toBinary(this.sendBufferServerInfo);
+    }
 
     @Override
     public void onNewAutoDiscDaemonClientInfo(final AutoDiscDaemonClientInfo msg)
@@ -112,6 +169,32 @@ class UnicastDaemonSender implements IDaemonReceiverListener, Closeable
 
         // Forward the message to all clients
         publications.consumeAll(publication -> publication.offer(buffer, offset, length));
+    }
+
+    @Override
+    public void onReceiveAutoDiscDaemonClientInfo(final AutoDiscDaemonClientInfo msg)
+    {
+        if (log.isTraceEnabled())
+        {
+            log.trace("Answering message to client with UUID {}", msg.getUniqueId());
+        }
+
+        // Create the parameters for the publication and
+        // Get the publication for the parameters or create a new one if it doesn't exists
+        Publication publication = this.publicationsByParams.get( this.createPublicationParams(msg) );
+
+        if(publication != null)
+        {
+            try
+            {
+                //Send the sendBufferServerInfo with the AUTO_DISC_DAEMON_SERVER_INFO message
+                publication.offer(sendBufferServerInfo.getInternalBuffer(), 0, sendBufferServerInfo.getOffset());
+            }
+            catch (final RuntimeException e)
+            {
+                log.error("Unexpected error sending auto-discovery daemon server info message", e);
+            }
+        }
     }
 
     @Override

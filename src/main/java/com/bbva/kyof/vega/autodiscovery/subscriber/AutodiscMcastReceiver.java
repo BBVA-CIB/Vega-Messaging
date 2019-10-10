@@ -1,5 +1,6 @@
 package com.bbva.kyof.vega.autodiscovery.subscriber;
 
+import com.bbva.kyof.vega.autodiscovery.model.AutoDiscDaemonServerInfo;
 import com.bbva.kyof.vega.config.general.AutoDiscoveryConfig;
 import com.bbva.kyof.vega.util.net.AeronChannelHelper;
 import io.aeron.Aeron;
@@ -43,5 +44,20 @@ public class AutodiscMcastReceiver extends AbstractAutodiscReceiver
 
         // Create the aeron subscription
         return aeron.addSubscription(channel, config.getDefaultStreamId());
+    }
+
+    @Override
+    protected boolean processAutoDiscDaemonServerInfoMsg(final AutoDiscDaemonServerInfo autoDiscDaemonServerInfo)
+    {
+        // Do nothing for multicast
+        // Return false because the buffer is not consumed
+        return false;
+    }
+
+    @Override
+    protected int checkAutoDiscDaemonServerInfoTimeouts()
+    {
+        // Do nothing for multicast
+        return 0;
     }
 }

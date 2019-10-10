@@ -180,5 +180,8 @@ class UnicastDaemonReceiver implements Closeable
             // Notify about the new addition
             this.listener.onNewAutoDiscDaemonClientInfo(msg);
         }
+
+        //Answer the client with AUTO_DISC_DAEMON_SERVER_INFO
+        this.listener.onReceiveAutoDiscDaemonClientInfo(msg);
     }
 }

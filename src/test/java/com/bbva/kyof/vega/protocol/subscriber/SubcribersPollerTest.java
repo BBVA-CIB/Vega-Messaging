@@ -353,9 +353,9 @@ public class SubcribersPollerTest
         }
 
         @Override
-        public void onHeartbeatRequestMsgReceived(UUID senderInstanceId, UUID requestId)
+        public void onHeartbeatRequestMsgReceived(MsgReqHeader heartbeatReqMsgHeader)
         {
-            rcvHeartbeatRequestIds.add(requestId);
+            rcvHeartbeatRequestIds.add(heartbeatReqMsgHeader.getRequestId());
         }
     }
 
@@ -386,7 +386,7 @@ public class SubcribersPollerTest
         }
 
         @Override
-        public void onHeartbeatRequestMsgReceived(UUID senderInstanceId, UUID requestId)
+        public void onHeartbeatRequestMsgReceived(MsgReqHeader heartbeatReqMsgHeader)
         {
 
         }

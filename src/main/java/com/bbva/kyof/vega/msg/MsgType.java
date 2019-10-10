@@ -41,6 +41,9 @@ public final class MsgType
     /** Encrypted data message */
     public static final byte ENCRYPTED_DATA = 11;
 
+    /** Auto discovery unicast server resolver information */
+    public static final byte AUTO_DISC_DAEMON_SERVER_INFO = 12;
+
     /** Private constructor to avoid instantiation */
     private MsgType()
     {
@@ -68,6 +71,7 @@ public final class MsgType
             case CONTROL_SECURITY_RESP: return "CONTROL_SECURITY_RESP";
             case ENCRYPTED_DATA: return "ENCRYPTED_DATA";
             case CONTROL_SECURITY_ERROR_RESP: return  "CONTROL_SECURITY_ERROR_RESP";
+            case AUTO_DISC_DAEMON_SERVER_INFO: return "AUTO_DISC_DAEMON_SERVER_INFO";
             default: return "UNKNOWN";
         }
     }

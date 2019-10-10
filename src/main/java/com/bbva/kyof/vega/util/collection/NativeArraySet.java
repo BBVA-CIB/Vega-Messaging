@@ -6,6 +6,7 @@ import org.agrona.collections.ArrayUtil;
 import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.function.Consumer;
 
 /**
@@ -54,7 +55,7 @@ public class NativeArraySet<V>
      */
     public NativeArraySet(final Class<V> valueClass, final int initialSize, final int growFactor)
     {
-        this.elementPositions = new HashMap<>(initialSize, growFactor);
+        this.elementPositions = new HashMap<>(initialSize);
         this.internalArray = (V[]) Array.newInstance(valueClass, initialSize);
         this.growFactor = growFactor;
     }
@@ -138,10 +139,15 @@ public class NativeArraySet<V>
         {
             // Get the element to move, it will be the last element of the collection
             final V lastElement = this.internalArray[numElements];
-            // Move the last element to the position of the element to remove
-            this.internalArray[removedElementPos] = lastElement;
-            // Update the moved element position
-            this.elementPositions.put(lastElement, removedElementPos);
+
+            //If the element that will be removed is not the last one, it is necessary an adjustment
+            if(!lastElement.equals(this.internalArray[removedElementPos]))
+            {
+                // Move the last element to the position of the element to remove
+                this.internalArray[removedElementPos] = lastElement;
+                // Update the moved element position
+                this.elementPositions.put(lastElement, removedElementPos);
+            }
         }
 
         // Remove the reference to the last element of the collection
@@ -168,5 +174,19 @@ public class NativeArraySet<V>
 
         this.elementPositions.clear();
         this.numElements = 0;
+    }
+
+    /**
+     * Returns a random element from internalArray
+     * @return the aleatory V element
+     */
+    public V getRandomElement()
+    {
+        if(numElements > 0)
+        {
+            return this.internalArray[new Random().nextInt(numElements)];
+        }
+        //If the array is empty, return null
+        return null;
     }
 }
