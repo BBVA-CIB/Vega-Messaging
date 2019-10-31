@@ -8,7 +8,7 @@ public final class Version
     /** Mayor library version of current code */
     private static final byte LOCAL_MAYOR = 2;
     /** Minor library version of current code */
-    private static final byte LOCAL_MINOR = 2;
+    private static final byte LOCAL_MINOR = 3;
     /** Patch library version of current code */
     private static final byte LOCAL_PATCH = 0;
 

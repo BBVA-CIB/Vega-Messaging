@@ -5,6 +5,7 @@ import com.bbva.kyof.vega.msg.IRcvMessage;
 import com.bbva.kyof.vega.msg.IRcvRequest;
 import com.bbva.kyof.vega.msg.RcvMessage;
 import com.bbva.kyof.vega.msg.RcvRequest;
+import com.bbva.kyof.vega.msg.lost.IMsgLostReport;
 import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Test;
@@ -117,12 +118,15 @@ public class TopicSubscriberTest
         testMsg.setTopicPublisherId(UUID.randomUUID());
 
         final RcvRequest testRequest = new RcvRequest();
-        testMsg.setSequenceNumber(3333);
+        testRequest.setSequenceNumber(3333);
         testRequest.setTopicPublisherId(UUID.randomUUID());
 
         topicSubscriber.onMessageReceived(testMsg);
+        testMsg.setSequenceNumber(testMsg.getSequenceNumber() + 1);
         topicSubscriber.onMessageReceived(testMsg);
+        testMsg.setSequenceNumber(testMsg.getSequenceNumber() + 1);
         topicSubscriber.onRequestReceived(testRequest);
+        testRequest.setSequenceNumber(testRequest.getSequenceNumber() + 1);
 
         Assert.assertEquals(2, normalListener.msgsReceived);
         Assert.assertEquals(1, normalListener.requestsReceived);
@@ -186,6 +190,8 @@ public class TopicSubscriberTest
         long msgSequenceNumber = 0;
         long requestSequenceNumber = 0;
 
+        long msgsLost = 0;
+
         @Override
         public void onMessageReceived(IRcvMessage receivedMessage)
         {
@@ -199,5 +205,130 @@ public class TopicSubscriberTest
             this.requestsReceived++;
             this.requestSequenceNumber = ((RcvRequest)receivedRequest).getSequenceNumber();
         }
+
+        @Override
+        public void onMessageLost(final IMsgLostReport lostReport)
+        {
+            this.msgsLost = this.msgsLost + lostReport.getNumberLostMessages();
+        }
+    }
+
+    @Test
+    public void testReceiveMessagesWithDuplicates()
+    {
+        final Listener normalListener = new Listener();
+        final Listener patternListener1 = new Listener();
+        final Listener patternListener2 = new Listener();
+
+        topicSubscriber.setNormalListener(normalListener);
+
+        final RcvMessage testMsg = new RcvMessage();
+        testMsg.setSequenceNumber(1234);
+        testMsg.setTopicPublisherId(UUID.randomUUID());
+
+        final RcvRequest testRequest = new RcvRequest();
+        testRequest.setSequenceNumber(3333);
+        testRequest.setTopicPublisherId(UUID.randomUUID());
+
+        topicSubscriber.onMessageReceived(testMsg);
+        topicSubscriber.onMessageReceived(testMsg);
+        topicSubscriber.onRequestReceived(testRequest);
+        topicSubscriber.onRequestReceived(testRequest);
+
+        Assert.assertEquals(1, normalListener.msgsReceived);
+        Assert.assertEquals(1, normalListener.requestsReceived);
+
+        testMsg.setSequenceNumber(testMsg.getSequenceNumber() + 1);
+        testRequest.setSequenceNumber(testRequest.getSequenceNumber() + 1);
+
+        topicSubscriber.addPatternListener("a.*", patternListener1);
+        topicSubscriber.addPatternListener("b.*", patternListener2);
+
+        topicSubscriber.onMessageReceived(testMsg);
+        topicSubscriber.onMessageReceived(testMsg);
+        topicSubscriber.onRequestReceived(testRequest);
+        topicSubscriber.onRequestReceived(testRequest);
+
+        assertEquals(2, normalListener.msgsReceived);
+        assertEquals(2, normalListener.requestsReceived);
+        assertEquals(1, patternListener1.msgsReceived);
+        assertEquals(1, patternListener1.requestsReceived);
+        assertEquals(1, patternListener2.msgsReceived);
+        assertEquals(1, patternListener2.requestsReceived);
+
+        //Check sequence number
+        Assert.assertEquals(normalListener.msgSequenceNumber, testMsg.getSequenceNumber());
+        Assert.assertEquals(normalListener.requestSequenceNumber, testRequest.getSequenceNumber());
+        Assert.assertEquals(patternListener1.msgSequenceNumber, testMsg.getSequenceNumber());
+        Assert.assertEquals(patternListener1.requestSequenceNumber, testRequest.getSequenceNumber());
+        Assert.assertEquals(patternListener2.msgSequenceNumber, testMsg.getSequenceNumber());
+        Assert.assertEquals(patternListener2.requestSequenceNumber,testRequest.getSequenceNumber());
+    }
+
+    @Test
+    public void testReceiveMessagesWithGap()
+    {
+        final Listener normalListener = new Listener();
+        final Listener patternListener1 = new Listener();
+        final Listener patternListener2 = new Listener();
+
+        topicSubscriber.setNormalListener(normalListener);
+
+        final RcvMessage testMsg = new RcvMessage();
+        testMsg.setSequenceNumber(1234);
+        testMsg.setTopicPublisherId(UUID.randomUUID());
+
+        final RcvRequest testRequest = new RcvRequest();
+        testRequest.setSequenceNumber(3333);
+        testRequest.setTopicPublisherId(UUID.randomUUID());
+
+        topicSubscriber.onMessageReceived(testMsg);
+        //simulate gap of 10 msgs
+        testMsg.setSequenceNumber(testMsg.getSequenceNumber() + 11);
+        topicSubscriber.onMessageReceived(testMsg);
+        //simulate gap of 10 msgs
+        testMsg.setSequenceNumber(testMsg.getSequenceNumber() + 11);
+        topicSubscriber.onRequestReceived(testRequest);
+        //simulate gap of 10 rqs
+        testRequest.setSequenceNumber(testRequest.getSequenceNumber() + 11);
+        //simulate gap of 10 rqs
+        topicSubscriber.onRequestReceived(testRequest);
+        testRequest.setSequenceNumber(testRequest.getSequenceNumber() + 11);
+
+        Assert.assertEquals(2, normalListener.msgsReceived);
+        Assert.assertEquals(2, normalListener.requestsReceived);
+
+        topicSubscriber.addPatternListener("a.*", patternListener1);
+        topicSubscriber.addPatternListener("b.*", patternListener2);
+
+        //4 Gaps (2 of msgs & 2 of rqs)
+        topicSubscriber.onMessageReceived(testMsg);
+        testMsg.setSequenceNumber(testMsg.getSequenceNumber() + 11);
+        topicSubscriber.onMessageReceived(testMsg);
+        topicSubscriber.onRequestReceived(testRequest);
+        testRequest.setSequenceNumber(testRequest.getSequenceNumber() + 11);
+        topicSubscriber.onRequestReceived(testRequest);
+
+        assertEquals(4, normalListener.msgsReceived);
+        assertEquals(4, normalListener.requestsReceived);
+        assertEquals(2, patternListener1.msgsReceived);
+        assertEquals(2, patternListener1.requestsReceived);
+        assertEquals(2, patternListener2.msgsReceived);
+        assertEquals(2, patternListener2.requestsReceived);
+
+        //Check sequence number
+        Assert.assertEquals(normalListener.msgSequenceNumber, testMsg.getSequenceNumber());
+        Assert.assertEquals(normalListener.requestSequenceNumber, testRequest.getSequenceNumber());
+        Assert.assertEquals(patternListener1.msgSequenceNumber, testMsg.getSequenceNumber());
+        Assert.assertEquals(patternListener1.requestSequenceNumber, testRequest.getSequenceNumber());
+        Assert.assertEquals(patternListener2.msgSequenceNumber, testMsg.getSequenceNumber());
+        Assert.assertEquals(patternListener2.requestSequenceNumber,testRequest.getSequenceNumber());
+
+        //Check loss repots (6 gaps of 10 messages / requests)
+        Assert.assertEquals(normalListener.msgsLost, 60);
+
+        //Check loss repots (4 gaps of 10 messages / requests)
+        Assert.assertEquals(patternListener1.msgsLost, 40);
+        Assert.assertEquals(patternListener2.msgsLost, 40);
     }
 }

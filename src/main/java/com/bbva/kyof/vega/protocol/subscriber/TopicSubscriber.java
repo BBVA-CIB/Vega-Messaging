@@ -71,7 +71,7 @@ class TopicSubscriber implements Closeable
         final ITopicSubListener currentNormalListener = this.normalListener;
         final MsgLostReport lostReport = this.checkMessageLoss(receivedMessage);
 
-        if (currentNormalListener != null)
+        if (notDuplicatedData(lostReport) && currentNormalListener != null)
         {
             if (lostReport != null)
             {
@@ -81,7 +81,7 @@ class TopicSubscriber implements Closeable
             this.normalListener.onMessageReceived(receivedMessage);
         }
 
-        if (!this.patternListenersByPattern.isEmpty())
+        if (notDuplicatedData(lostReport) && !this.patternListenersByPattern.isEmpty())
         {
             if (lostReport != null)
             {
@@ -101,7 +101,7 @@ class TopicSubscriber implements Closeable
     {
         final MsgLostReport lostReport = this.checkMessageLoss(receivedRequest);
 
-        if (this.normalListener != null)
+        if (notDuplicatedData(lostReport) && this.normalListener != null)
         {
             if (lostReport != null)
             {
@@ -111,7 +111,7 @@ class TopicSubscriber implements Closeable
             this.normalListener.onRequestReceived(receivedRequest);
         }
 
-        if (!this.patternListenersByPattern.isEmpty())
+        if (notDuplicatedData(lostReport) && !this.patternListenersByPattern.isEmpty())
         {
             if (lostReport != null)
             {
@@ -286,7 +286,8 @@ class TopicSubscriber implements Closeable
             // Update expected sequence number to the next one received
             expectedSequenceNumber.set(msg.getSequenceNumber() + 1);
 
-            log.warn("Message lost detected, sequence number found {}, {}", msg.getSequenceNumber(), lossResult);
+            log.warn("Message lost detected, sequence number found {}, {}, size {}",
+                    msg.getSequenceNumber(), lossResult, msg.getContentLength());
         }
         else // In any other case everything is all right, just increment the expected sequence number
         {
@@ -339,6 +340,16 @@ class TopicSubscriber implements Closeable
         }
 
         return lossResult;
+    }
+
+    /**
+     * Check if the received message is not a duplicated one
+     * @param lostReport report of loss data
+     * @return boolean if it is a duplicated message
+     */
+    private boolean notDuplicatedData(MsgLostReport lostReport)
+    {
+        return lostReport == null || lostReport.getNumberLostMessages() >= 0;
     }
 
     /**

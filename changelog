@@ -1,0 +1,50 @@
+Changelog
+---------
+
+2.3.0
+-----
+- Upgrade Aeron to 1.22.1
+- Discard duplicated data
+
+2.2.1
+-----
+- Fix nullpointerException in PublicationsManager
+
+2.2.0
+-----
+- Add High Availability and Load Balance for Unicast Daemons
+- Fix NativeArraySet removeElement bug when deleting the last element (LLF-433)
+
+2.1.0
+-----
+- Add support to detect message loss at topic level
+- Increase Aeron version to 1.16
+- This version is not compatible with 1.X versions
+
+1.5.1
+-----
+- Fix Bug in the embedded media driver type selection. If back-off type was chosen, low-latency type was used instead.
+
+1.5.0
+-----
+- Fix Bug in the embedded media drivers that prevented the option to change the driver directory name using a properties file.
+- Change the Idle strategies of the non-lowlatency media drivers to reduce CPU consumption
+- This will increase latency on sending and receiving to a maximum of 1 millisecond in the worst case if the system is idle and non-lowlatency drivers are used. See Media Driver documentation for more information.
+- Change the Idle strategies of the Autodiscovery and Auto-discovery daemon to recude CPU usage.
+
+1.4.0
+-----
+- Added support to capture internal Aeron exceptions and use a custom handler
+
+1.2.0
+-----
+- Added support for Aeron version 1.3.0
+- Added auto-discovery sniffer module
+
+1.1.0
+-----
+- Added support to encrypt the private keys using a dissociated password
+
+1.0.0
+-----
+- First release of the library!
