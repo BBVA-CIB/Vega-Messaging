@@ -256,6 +256,14 @@ public final class HashMapStack<K, V>
     }
 
     /**
+     * @return the number of elements
+     */
+    public int size()
+    {
+        return hashMap.size();
+    }
+
+    /**
      * Consume all values in the set
      * @param consumer the consumer for the values
      */

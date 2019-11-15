@@ -16,7 +16,10 @@ public enum PublishResult
     BACK_PRESSURED,
 
     /** Unexpected internal unexpected library error in one of the underlying sockets */
-    UNEXPECTED_ERROR;
+    UNEXPECTED_ERROR,
+
+    /** All the aeron publishers are down, and Vega will not send the message. */
+    AERON_PUBLISHERS_NOT_FOUND;
 
     /**
      * Converts the aeron publication result into our internal publish result enum

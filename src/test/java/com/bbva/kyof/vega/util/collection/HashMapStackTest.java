@@ -171,4 +171,16 @@ public class HashMapStackTest
         Assert.assertTrue(this.hashMapStack.isEmpty());
     }
 
+    @Test
+    public void testGetHashMapSize()
+    {
+        HashMapStack hashMapStack = new HashMapStack<>(5);
+        Assert.assertEquals(0, hashMapStack.size());
+        hashMapStack.put("1",1);
+        Assert.assertEquals(1, hashMapStack.size());
+        hashMapStack.put("2",2);
+        Assert.assertEquals(2, hashMapStack.size());
+        hashMapStack.put("10",10);
+        Assert.assertEquals(3, hashMapStack.size());
+    }
 }

@@ -154,4 +154,50 @@ class RegisteredInfoQueue<T extends IAutoDiscTopicInfo>
             }
         });
     }
+
+    /**
+     * @return the number of elements
+     */
+    int size()
+    {
+        return registeredInfosById.size();
+    }
+
+    /**
+     * Reset the next send time and consume the first numberOfAdvertsToConsume elements.
+     *
+     * @param now current time in milliseconds, it will be used to set the next send interval for each element
+     * @param numberOfAdvertsToConsume number of elements to consume
+     * @param consumer the consumer for the registered events which sendInterval has been reset
+     *
+     */
+    int resetNextSendTimeAndMultipleConsume(final long now, final int numberOfAdvertsToConsume, final Consumer<T> consumer)
+    {
+        //Iterate numberOfAdvertsToConsume times
+        for(int i = 0; i < numberOfAdvertsToConsume; i++)
+        {
+            // Get the eldest key value pair on the map
+            final UUID eldestKey = this.registeredInfosById.getEldestKey();
+            final RegisteredTopicInfo<T> eldestValue = this.registeredInfosById.getEldestValue();
+
+            // If no eldest key or value the map is empty
+            if (eldestKey == null || eldestValue == null)
+            {
+                // Return the number of elements processed
+                return i;
+            }
+
+            //reset the sendInterval
+            eldestValue.resetNextExpectedSent(now);
+
+            // Convert the eldest entry into the newest since the send time has been reset
+            this.registeredInfosById.removeAndPut(eldestKey, eldestValue);
+
+            // Consume
+            consumer.accept(eldestValue.getInfo());
+        }
+
+        // Return the number of elements processed
+        return numberOfAdvertsToConsume;
+    }
 }

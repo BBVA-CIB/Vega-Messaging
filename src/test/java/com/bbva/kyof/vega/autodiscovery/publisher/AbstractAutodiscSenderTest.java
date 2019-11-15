@@ -119,9 +119,13 @@ public class AbstractAutodiscSenderTest
         Thread.sleep(400);
 
         // Send next topic adverts again, now it should be one again but 3 times
+        // The first burst interval sends 1 topic advert + 1 topic by timeout
+        Assert.assertTrue(this.sender.sendNextTopicAdverts() == 2);
+        //One old remains (timeout 100 ms, 3 topics => burstInterval = 33)
+        // Wait a burstInterval
+        Thread.sleep(33);
         Assert.assertTrue(this.sender.sendNextTopicAdverts() == 1);
-        Assert.assertTrue(this.sender.sendNextTopicAdverts() == 1);
-        Assert.assertTrue(this.sender.sendNextTopicAdverts() == 1);
+        Assert.assertTrue(this.sender.sendNextTopicAdverts() == 0);
         Assert.assertTrue(this.sender.sendNextTopicAdverts() == 0);
 
         // Now remove 2 TOPICS info
@@ -171,9 +175,13 @@ public class AbstractAutodiscSenderTest
         Thread.sleep(400);
 
         // Send next topic adverts again, now it should be one again but 3 times
+        //The first burst send one topicSocket + one old
+        Assert.assertTrue(this.sender.sendNextTopicAdverts() == 2);
+        //One old remains (timeout 100 ms, 3 topics => burstInterval = 33)
+        // Wait a burstInterval
+        Thread.sleep(33);
         Assert.assertTrue(this.sender.sendNextTopicAdverts() == 1);
-        Assert.assertTrue(this.sender.sendNextTopicAdverts() == 1);
-        Assert.assertTrue(this.sender.sendNextTopicAdverts() == 1);
+        Assert.assertTrue(this.sender.sendNextTopicAdverts() == 0);
         Assert.assertTrue(this.sender.sendNextTopicAdverts() == 0);
 
         // Now remove 2 TOPICS info
@@ -260,10 +268,12 @@ public class AbstractAutodiscSenderTest
         Assert.assertTrue(this.sender2.numTopicSocketMsgSent == 6);
 
         Thread.sleep(400);
-        Assert.assertTrue(this.sender2.sendNextTopicAdverts() == 3);
+        //The first burst interval send 1 topic advert and 1 topicSocket advert
+        // + 1 topic timeout + 1 topicSocket timeout + 1 instance
+        Assert.assertTrue(this.sender2.sendNextTopicAdverts() == 5);
         Assert.assertTrue(this.sender2.numInstanceMsgSent == 2);
-        Assert.assertTrue(this.sender2.numTopicMsgsSent == 7);
-        Assert.assertTrue(this.sender2.numTopicSocketMsgSent == 7);
+        Assert.assertTrue(this.sender2.numTopicMsgsSent == 8);
+        Assert.assertTrue(this.sender2.numTopicSocketMsgSent == 8);
 
     }
 

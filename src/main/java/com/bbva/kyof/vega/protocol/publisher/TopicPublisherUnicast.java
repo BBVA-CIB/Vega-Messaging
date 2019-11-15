@@ -71,6 +71,11 @@ class TopicPublisherUnicast extends AbstractTopicPublisher
 
         boolean hasBackPressure = false;
 
+        if(this.aeronPublishers.getNumElements() == 0)
+        {
+            return PublishResult.AERON_PUBLISHERS_NOT_FOUND;
+        }
+
         for (int i = 0; i < this.aeronPublishers.getNumElements(); i++)
         {
             final PublishResult sendResult = publishers[i].sendMessage(msgType, this.getUniqueId(), message, sequenceNumber, offset, length);
@@ -103,6 +108,11 @@ class TopicPublisherUnicast extends AbstractTopicPublisher
         final IAeronPublisher[] publishers = this.aeronPublishers.getInternalArray();
 
         boolean hasBackPressure = false;
+
+        if(this.aeronPublishers.getNumElements() == 0)
+        {
+            return PublishResult.AERON_PUBLISHERS_NOT_FOUND;
+        }
 
         for (int i = 0; i < this.aeronPublishers.getNumElements(); i++)
         {

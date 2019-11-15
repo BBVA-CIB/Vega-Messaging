@@ -58,6 +58,12 @@ public abstract class AbstractAutodiscSender implements Closeable
     /** Variable used to control to print a warning each second when does not exists a valid publication, **/
     private long lastPublicationNullWarn = System.currentTimeMillis();
 
+    /** Handle the sending of discovery topic adverts */
+    private final IAdvertsUniformSender<AutoDiscTopicInfo> advertsUniformTopicSender;
+
+    /** Handle the sending of discovery topicSocket adverts */
+    private final IAdvertsUniformSender<AutoDiscTopicSocketInfo> advertsUniformTopicSocketSender;
+
     /**
      * Constructor to create a new auto-discovery abstract publisher
      *
@@ -77,6 +83,10 @@ public abstract class AbstractAutodiscSender implements Closeable
 
         // Prepare the reusable buffer serializer
         this.sendBufferSerializer.wrap(ByteBuffer.allocate(SEND_BUFFER_SIZE));
+
+        //Initialize the adverts Senders
+        this.advertsUniformTopicSender = new AdvertsUniformSender(this.config);
+        this.advertsUniformTopicSocketSender = new AdvertsUniformSender(this.config);
     }
 
     /**
@@ -198,10 +208,21 @@ public abstract class AbstractAutodiscSender implements Closeable
         // Get current time
         final long currentTime = System.currentTimeMillis();
 
-        // Check topic info and topic socket info and send
+        // Send topics and topicSocket adverts uniformly
         int numAdvertsSent =
-                this.sendMessageIfNotNull(MsgType.AUTO_DISC_TOPIC, this.registeredTopicInfos.getNextIfShouldSend(currentTime)) +
-                this.sendMessageIfNotNull(MsgType.AUTO_DISC_TOPIC_SOCKET, this.registeredTopicSocketInfos.getNextIfShouldSend(currentTime));
+                this.advertsUniformTopicSender.sendBurstAdverts(this.registeredTopicInfos,
+                    info -> sendMessageIfNotNull(MsgType.AUTO_DISC_TOPIC, info))
+                + this.advertsUniformTopicSocketSender.sendBurstAdverts(this.registeredTopicSocketInfos,
+                    info -> sendMessageIfNotNull(MsgType.AUTO_DISC_TOPIC_SOCKET, info));
+
+        // Check topic info and topic socket info and send (topics may remain unsent at the last interval)
+        // Only send adverts on allowed intervals
+        if(numAdvertsSent > 0)
+        {
+            numAdvertsSent += this.sendMessageIfNotNull(MsgType.AUTO_DISC_TOPIC, this.registeredTopicInfos.getNextIfShouldSend(currentTime))
+                    + this.sendMessageIfNotNull(MsgType.AUTO_DISC_TOPIC_SOCKET, this.registeredTopicSocketInfos.getNextIfShouldSend(currentTime));
+        }
+
 
         // Check instance info and send
         final RegisteredInfo<AutoDiscInstanceInfo> instanceInfo = this.registeredInstanceInfo;

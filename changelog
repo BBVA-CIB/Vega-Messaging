@@ -1,5 +1,9 @@
 Changelog
 ---------
+2.4.0
+-----
+- Distribute discovery burst messages uniformly
+- Add AERON_PUBLISHERS_NOT_FOUND error when the aeron conection is down
 
 2.3.0
 -----

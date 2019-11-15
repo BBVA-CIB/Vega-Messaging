@@ -152,4 +152,91 @@ public class RegisteredInfoQueueTest
 
         Assert.assertTrue(numElementsConsumed.get() == 0);
     }
+
+    @Test
+    public void testRegisteredInfoQueueSize()
+    {
+        RegisteredInfoQueue<AutoDiscTopicInfo> registeredInfoQueue = new RegisteredInfoQueue(1000);
+        Assert.assertEquals(0, registeredInfoQueue.size());
+        registeredInfoQueue.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(), "topic1"));
+        Assert.assertEquals(1, registeredInfoQueue.size());
+        registeredInfoQueue.add(new AutoDiscTopicInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(), "topic2"));
+        Assert.assertEquals(2, registeredInfoQueue.size());
+    }
+
+
+
+    @Test
+    public void testResetNextSendTimeAndMultipleConsume() throws Exception
+    {
+        final AtomicLong numElementsConsumed = new AtomicLong(0);
+
+        final UUID instanceId = UUID.randomUUID();
+
+        final UUID uniqueId1 = UUID.randomUUID();
+        final UUID uniqueId2 = UUID.randomUUID();
+        final UUID uniqueId3 = UUID.randomUUID();
+        final UUID uniqueId4 = UUID.randomUUID();
+
+        // Create the queue and add 3 elements, one every 100 milliseconds
+        final RegisteredInfoQueue<AutoDiscTopicInfo> queue = new RegisteredInfoQueue<>(300);
+
+        // Send one element in the interval with the queue empty
+        queue.resetNextSendTimeAndMultipleConsume(System.currentTimeMillis(),
+                1,
+                (element) -> numElementsConsumed.getAndIncrement());
+
+        Assert.assertTrue(numElementsConsumed.get() == 0);
+
+        queue.add(new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.PUB_IPC, uniqueId1, "topic1"));
+        queue.add(new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.PUB_IPC, uniqueId2, "topic2"));
+        queue.add(new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.SUB_IPC, uniqueId3, "topic1"));
+        queue.add(new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.SUB_IPC, uniqueId4, "topic2"));
+
+
+        Thread.sleep(400);
+
+        // Send only one element in the interval
+        queue.resetNextSendTimeAndMultipleConsume(System.currentTimeMillis(),
+                1,
+                (element) -> numElementsConsumed.getAndIncrement());
+
+        Assert.assertTrue(numElementsConsumed.get() == 1);
+        Assert.assertEquals(queue.getNextIfShouldSend(System.currentTimeMillis()).getUniqueId(), uniqueId2);
+        Assert.assertEquals(queue.getNextIfShouldSend(System.currentTimeMillis()).getUniqueId(), uniqueId3);
+        Assert.assertEquals(queue.getNextIfShouldSend(System.currentTimeMillis()).getUniqueId(), uniqueId4);
+        Assert.assertNull(queue.getNextIfShouldSend(System.currentTimeMillis()));
+
+        ///////////////////////////////////////////////////////////////////////////
+        //Repeat sending two elements in the interval
+        Thread.sleep(400);
+
+        //Initialize numElementsConsumed
+        numElementsConsumed.set(0);
+
+        // All should be ready to send, but let's reset time for the first element
+        queue.resetNextSendTimeAndMultipleConsume(System.currentTimeMillis(),
+                2,
+                (element) -> numElementsConsumed.getAndIncrement());
+
+        Assert.assertTrue(numElementsConsumed.get() == 2);
+        Assert.assertEquals(queue.getNextIfShouldSend(System.currentTimeMillis()).getUniqueId(), uniqueId3);
+        Assert.assertEquals(queue.getNextIfShouldSend(System.currentTimeMillis()).getUniqueId(), uniqueId4);
+        Assert.assertNull(queue.getNextIfShouldSend(System.currentTimeMillis()));
+
+        ///////////////////////////////////////////////////////////////////////////
+        //Repeat sending 4 elements in the interval
+        Thread.sleep(400);
+
+        //Initialize numElementsConsumed
+        numElementsConsumed.set(0);
+
+        // All should be ready to send, but let's reset time for the first element
+        queue.resetNextSendTimeAndMultipleConsume(System.currentTimeMillis(),
+                4,
+                (element) -> numElementsConsumed.getAndIncrement());
+
+        Assert.assertTrue(numElementsConsumed.get() == 4);
+        Assert.assertNull(queue.getNextIfShouldSend(System.currentTimeMillis()));
+    }
 }

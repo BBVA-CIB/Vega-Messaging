@@ -23,6 +23,7 @@ import com.bbva.kyof.vega.protocol.common.VegaContext;
 import com.bbva.kyof.vega.protocol.common.VegaInstanceParams;
 import com.bbva.kyof.vega.protocol.publisher.ITopicPublisher;
 import com.bbva.kyof.vega.protocol.subscriber.ITopicSubListener;
+import com.bbva.kyof.vega.testUtils.ReflectionUtils;
 import com.bbva.kyof.vega.util.net.InetUtil;
 import com.bbva.kyof.vega.util.net.SubnetAddress;
 import io.aeron.Aeron;
@@ -351,22 +352,6 @@ abstract class AbstractAutodiscoveryTest
 
     /*********************************************PUBLISHER && SUBSCRIBER COMMON METHODS*******************************/
     /**
-     * Using reflection, take the object field from an origin
-     * @param origin the object that contains the searched attribute
-     * @param fieldName the name of the searched atribute
-     * @return the object searched
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     */
-    private static Object getObjectByReflection(Object origin, String fieldName)
-            throws NoSuchFieldException, IllegalAccessException
-    {
-        Field field = origin.getClass().getDeclaredField(fieldName);
-        field.setAccessible(true);
-        return field.get(origin);
-    }
-
-    /**
      * Create a list with all the IPs and Ports of the daemon discovery configured in this test
      * @return the list with address and ips
      */
@@ -426,9 +411,9 @@ abstract class AbstractAutodiscoveryTest
             throws NoSuchFieldException, IllegalAccessException, VegaException
     {
         //Get necessary instances
-        VegaContext vegaContext = (VegaContext)getObjectByReflection(instance, "vegaContext");
-        Aeron aeron = (Aeron)getObjectByReflection(vegaContext, "aeron");
-        GlobalConfiguration globalConfiguration = (GlobalConfiguration) getObjectByReflection(vegaContext, "instanceConfig");
+        VegaContext vegaContext = (VegaContext) ReflectionUtils.getObjectByReflection(instance, "vegaContext");
+        Aeron aeron = (Aeron)ReflectionUtils.getObjectByReflection(vegaContext, "aeron");
+        GlobalConfiguration globalConfiguration = (GlobalConfiguration) ReflectionUtils.getObjectByReflection(vegaContext, "instanceConfig");
 
         //Replace the configuration from multicast to unicast
         Field autodiscConfigField = globalConfiguration.getClass().getDeclaredField("autodiscConfig");
@@ -438,7 +423,7 @@ abstract class AbstractAutodiscoveryTest
 
         //Create the publicationsManager for unicast, to use in the AutodiscUnicastReceiver and AutodiscUnicastSender
         PublicationsManager publicationsManager = new PublicationsManager(aeron, autoDiscoveryConfig);
-        AutodiscManager autodiscoveryManager = (AutodiscManager)getObjectByReflection(vegaContext, "autodiscoveryManager");
+        AutodiscManager autodiscoveryManager = (AutodiscManager)ReflectionUtils.getObjectByReflection(vegaContext, "autodiscoveryManager");
 
         //Create the AutodiscUnicastReceiver and AutodiscUnicastSender
         AbstractAutodiscReceiver autodiscSub = new AutodiscUnicastReceiver(instance.getInstanceId(), aeron, autoDiscoveryConfig, autodiscoveryManager, publicationsManager);
@@ -447,9 +432,9 @@ abstract class AbstractAutodiscoveryTest
         //Close the multicast receiver & sender, they will not been used
         log.debug("\n");
         log.debug("Closing multicast receiver & sender");
-        AbstractAutodiscReceiver abstractAutodiscReceiver = (AbstractAutodiscReceiver) getObjectByReflection(autodiscoveryManager, "autodiscSub");
+        AbstractAutodiscReceiver abstractAutodiscReceiver = (AbstractAutodiscReceiver) ReflectionUtils.getObjectByReflection(autodiscoveryManager, "autodiscSub");
         abstractAutodiscReceiver.close();
-        AbstractAutodiscSender abstractAutodiscSender = (AbstractAutodiscSender) getObjectByReflection(autodiscoveryManager, "autodiscPub");
+        AbstractAutodiscSender abstractAutodiscSender = (AbstractAutodiscSender) ReflectionUtils.getObjectByReflection(autodiscoveryManager, "autodiscPub");
         abstractAutodiscSender.close();
         log.debug("Closed multicast receiver & sender\n");
 
