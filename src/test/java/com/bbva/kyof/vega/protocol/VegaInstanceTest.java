@@ -82,7 +82,7 @@ public class VegaInstanceTest
             final ITopicPublisher mtopic2Pub = pubInstance.createPublisher("mtopic2");
 
             // Wait to give the auto-discovery time to work
-            Thread.sleep(3000);
+            Thread.sleep(4000);
 
             // Test send receive
             this.testSendReceive(utopic1Pub, utopic1Listener, true);
@@ -164,7 +164,7 @@ public class VegaInstanceTest
             final ITopicPublisher mtopic2Pub = instance.createPublisher("mtopic2");
 
             // Wait to give the auto-discovery time to work
-            Thread.sleep(3000);
+            Thread.sleep(4000);
 
             // Test send receive
             this.testSendReceive(utopic1Pub, utopic1Listener, true);
@@ -235,7 +235,7 @@ public class VegaInstanceTest
             final ITopicPublisher mtopic2Pub = pubInstance.createPublisher("mtopic2");
 
             // Wait to give the auto-discovery time to work
-            Thread.sleep(3000);
+            Thread.sleep(4000);
 
             // Test send receive
             this.testSendReceive(utopic1Pub, listener, true);
@@ -303,7 +303,7 @@ public class VegaInstanceTest
             final ITopicPublisher utopic1Pub = instance.createPublisher("utopic1");
 
             // Wait to give the auto-discovery time to work
-            Thread.sleep(3000);
+            Thread.sleep(4000);
 
             // Test send receive
             this.testSendReceive(utopic1Pub, utopic1Listener, true);

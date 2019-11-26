@@ -59,7 +59,7 @@ public class InstanceHeartbeatTest
             final IVegaInstance pubInstance = VegaInstance.createNewInstance(params2))
         {
             // Wait to for the initialization of the instances
-            Thread.sleep(2000);
+            Thread.sleep(4000);
 
             final ClientListener clientListener = new ClientListener();
 
@@ -82,7 +82,7 @@ public class InstanceHeartbeatTest
             utopic1Pub.activateHeartbeats(clientListener, HeartbeatParameters.builder().heartbeatRate(200).build());
 
             // Wait to give the auto-discovery time to work and for at least a heartbeat to arrive
-            Thread.sleep(3000);
+            Thread.sleep(6000);
 
             // The client should be there
             Assert.assertTrue(clientListener.clients.size() == 1);

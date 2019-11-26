@@ -75,7 +75,7 @@ public class VegaInstanceHeartbeatsTest
             subInstance.subscribeToTopic("utopic1", new ReceiverListener());
 
             // Wait a bit, the client should be discovered
-            Thread.sleep(3000);
+            Thread.sleep(5000);
             Assert.assertTrue(connectionListener.activeClientInstancesByTopicIc.containsValue("utopic1", subInstance.getInstanceId()));
 
             // Add another instance by using a second subscription

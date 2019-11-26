@@ -93,7 +93,7 @@ public class VegaInstanceSecurityTest
             final ITopicPublisher stopic1Pub = pubInstance.createPublisher("stopic1");
 
             // Wait to give the auto-discovery time to work and the session key to be discovered
-            Thread.sleep(5000);
+            Thread.sleep(6000);
 
             // Test send receive
             this.testSendReceive(stopic1Pub, stopic1Listener, true);
@@ -144,7 +144,7 @@ public class VegaInstanceSecurityTest
             final ITopicPublisher utopic1Pub = pubInstance.createPublisher("stopic1");
 
             // Wait to give the auto-discovery time to work
-            Thread.sleep(5000);
+            Thread.sleep(6000);
 
             // Test send receive
             this.testSendReceive(utopic1Pub, listener, true);
