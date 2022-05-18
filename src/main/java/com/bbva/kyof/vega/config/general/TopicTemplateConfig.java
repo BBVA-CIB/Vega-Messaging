@@ -92,7 +92,6 @@ public class TopicTemplateConfig implements IConfiguration
         this.checkName();
         this.checkRcvPoller();
         this.checkTransportType();
-        this.checkHostname();
 
         if (this.transportType == TransportMediaType.UNICAST)
         {
@@ -108,6 +107,7 @@ public class TopicTemplateConfig implements IConfiguration
         if (transportType != TransportMediaType.IPC)
         {
             this.checkSubnet();
+            this.checkHostname();
         }
     }
 
