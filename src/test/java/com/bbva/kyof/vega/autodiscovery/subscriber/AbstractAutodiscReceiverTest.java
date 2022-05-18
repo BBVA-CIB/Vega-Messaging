@@ -1,5 +1,6 @@
 package com.bbva.kyof.vega.autodiscovery.subscriber;
 
+import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.Version;
 import com.bbva.kyof.vega.autodiscovery.model.*;
 import com.bbva.kyof.vega.config.general.AutoDiscoType;
@@ -34,7 +35,7 @@ public class AbstractAutodiscReceiverTest implements IAutodiscGlobalEventListene
     private static Publication PUBLICATION;
 
     private static AutoDiscReceiverImpl RECEIVER;
-    private static GlobalEventListener GLOBAL_EVENT_LISTENER = new GlobalEventListener();
+    private static final GlobalEventListener GLOBAL_EVENT_LISTENER = new GlobalEventListener();
 
     @BeforeClass
     public static void beforeClass() throws Exception
@@ -82,7 +83,7 @@ public class AbstractAutodiscReceiverTest implements IAutodiscGlobalEventListene
     @Test
     public void testWrongReceptions() throws Exception
     {
-        final AutoDiscInstanceInfo instanceInfo = new AutoDiscInstanceInfo("instance1", UUID.randomUUID(), 12, 23, 55, 12, 23, 56);
+        final AutoDiscInstanceInfo instanceInfo = new AutoDiscInstanceInfo("instance1", UUID.randomUUID(), 12, 23, 55,TestConstants.EMPTY_HOSTNAME, 12, 23, 56,TestConstants.EMPTY_HOSTNAME);
 
         // Wrong message type
         this.sendMessage((byte)128, instanceInfo);
@@ -101,7 +102,7 @@ public class AbstractAutodiscReceiverTest implements IAutodiscGlobalEventListene
     @Test
     public void testInstanceSubscriptionUnsubscription() throws Exception
     {
-        final AutoDiscInstanceInfo instanceInfo = new AutoDiscInstanceInfo("instance1", UUID.randomUUID(), 12, 23, 55, 12, 23, 56);
+        final AutoDiscInstanceInfo instanceInfo = new AutoDiscInstanceInfo("instance1", UUID.randomUUID(), 12, 23, 55, TestConstants.EMPTY_HOSTNAME, 12, 23, 56,TestConstants.EMPTY_HOSTNAME);
         final AutoDiscInstanceListener listener = new AutoDiscInstanceListener();
 
         Assert.assertTrue(RECEIVER.subscribeToInstances(listener));
@@ -170,7 +171,7 @@ public class AbstractAutodiscReceiverTest implements IAutodiscGlobalEventListene
     public void testTopicSubscriptionUnsubscription() throws Exception
     {
         final AutoDiscTopicInfo topicInfo = new AutoDiscTopicInfo(SENDER_INSTANCE_ID, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic");
-        final AutoDiscTopicSocketInfo topicSocketInfo = new AutoDiscTopicSocketInfo(SENDER_INSTANCE_ID, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic", UUID.randomUUID(), 1, 2, 4);
+        final AutoDiscTopicSocketInfo topicSocketInfo = new AutoDiscTopicSocketInfo(SENDER_INSTANCE_ID, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic", UUID.randomUUID(), 1, 2, 4, TestConstants.EMPTY_HOSTNAME);
         final AutoDiscTopicListener listener = new AutoDiscTopicListener();
 
         Assert.assertTrue(RECEIVER.subscribeToTopic("topic", AutoDiscTransportType.PUB_MUL, listener));

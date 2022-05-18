@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.security.KeyPair;
 import java.security.PublicKey;
@@ -32,7 +33,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 11/11/2016.
  */
-public class ControlMsgsPollerAndPublisherTest
+public class ControlMsgsPollerAndPublisherByHostnameTest
 {
     private final static UUID OWN_INSTANCE_ID = UUID.randomUUID();
     private final static UUID TARGET_INSTANCE_ID = UUID.randomUUID();
@@ -74,10 +75,12 @@ public class ControlMsgsPollerAndPublisherTest
 
         final int ucastIp = InetUtil.convertIpAddressToInt(subnetAddress.getIpAddres().getHostAddress());
 
-        final ControlSubscriberParams controlSubscriberParams = new ControlSubscriberParams(ucastIp, 29333, 2, subnetAddress, TestConstants.EMPTY_HOSTNAME);
+        final String hostname = subnetAddress.getIpAddres().getHostName();
+
+        final ControlSubscriberParams controlSubscriberParams = new ControlSubscriberParams(ucastIp, 29333, 2, subnetAddress, hostname);
         CONTROL_SUB = new ControlSubscriber(vegaContext, controlSubscriberParams);
 
-        final ControlPublisherParams controlPubParams = new ControlPublisherParams(ucastIp, 29333, 2, subnetAddress, TestConstants.EMPTY_HOSTNAME);
+        final ControlPublisherParams controlPubParams = new ControlPublisherParams(ucastIp, 29333, 2, subnetAddress, hostname);
         CONTROL_PUB = new ControlPublisher(vegaContext, controlPubParams);
 
         Assert.assertEquals(CONTROL_PUB.getParams(), controlPubParams);

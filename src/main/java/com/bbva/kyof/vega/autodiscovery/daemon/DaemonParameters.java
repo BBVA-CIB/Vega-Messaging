@@ -40,6 +40,8 @@ public class DaemonParameters
     @Getter private Integer port;
     /** Subnet address calculated using the given subnet string, if null it will use the ip of the first ip4 interface of the machine */
     @Getter private SubnetAddress subnetAddress;
+    /** Hostname of server, used to obtain a public or external ip, if null it will be loaded by OS */
+    @Getter private String hostname;
 
     /**
      * Complete the null parameters that are optional using the default parameters. It will also validate the parameters and
@@ -64,6 +66,11 @@ public class DaemonParameters
         this.validateSubnet();
 
         this.ipAddress = this.subnetAddress.getIpAddres().getHostAddress();
+
+        if (this.hostname == null)
+        {
+            this.hostname = InetUtil.getHostnameByIpAddress(this.ipAddress);
+        }
     }
 
     /**

@@ -59,7 +59,7 @@ public class PublicationsManager implements IPublicationsManager
     {
         log.debug("Creating {} uniscast publications", config.getUnicastInfoArray().size());
 
-        //Create all the publications for unicast daemons for Hight Availability embedded in PublicationInfo class
+        //Create all the publications for unicast daemons for High Availability embedded in PublicationInfo class
         //Initialize structures
         this.publicationsInfoByUUID = new LinkedHashMap<>();
         this.enabledPublicationsInfo = new NativeArraySet(PublicationInfo.class, config.getUnicastInfoArray().size());
@@ -183,9 +183,7 @@ public class PublicationsManager implements IPublicationsManager
     private PublicationInfo searchPublicationInfoInAllConfigured(final AutoDiscDaemonServerInfo autoDiscDaemonServerInfo){
         //Search the publication info
         PublicationInfo publicationInfo = Arrays.stream(publicationsInfoArray)
-                .filter(publicationInfoParam ->
-                        publicationInfoParam.getUnicastResolverServerIp() == autoDiscDaemonServerInfo.getUnicastResolverServerIp() &&
-                        publicationInfoParam.getUnicastResolverServerPort() == autoDiscDaemonServerInfo.getUnicastResolverServerPort())
+                .filter(publicationInfoParam -> validatePublicationInfo(publicationInfoParam, autoDiscDaemonServerInfo))
                 .findFirst().get();
         publicationInfo.setUniqueId(autoDiscDaemonServerInfo.getUniqueId());
         if(log.isInfoEnabled())
@@ -211,5 +209,33 @@ public class PublicationsManager implements IPublicationsManager
             publicationsInfoByUUID.entrySet()
                     .removeIf(entry -> !entry.getKey().equals(entry.getValue().getUniqueId()) );
         }
+    }
+
+    /**
+     * Validate if the publicationInfo match with the IP and Port of the message autoDiscDaemonServerInfo
+     *
+     * @param publicationInfoParam publicationInfo to validate
+     * @param autoDiscDaemonServerInfo message from the unicast discovery server
+     * @return true if the publicationInfo match with the IP and Port of the message autoDiscDaemonServerInfo
+     */
+    private boolean validatePublicationInfo(final PublicationInfo publicationInfoParam, final AutoDiscDaemonServerInfo autoDiscDaemonServerInfo)
+    {
+        if(publicationInfoParam.getUnicastResolverServerPort() != autoDiscDaemonServerInfo.getUnicastResolverServerPort())
+        {
+            //if Port does not match with the publicationInfo, is not the same daemon
+            return false;
+        }
+
+        boolean isValid = false;
+        if (publicationInfoParam.getUnicastResolverServerIp() == autoDiscDaemonServerInfo.getUnicastResolverServerIp() )
+        {
+            isValid = true;
+        } else if (autoDiscDaemonServerInfo.getUnicastResolverHostname() != null)
+        {
+            int alternativeIp = InetUtil.getIpAddressAsIntByHostnameOrDefault(autoDiscDaemonServerInfo.getUnicastResolverHostname(), autoDiscDaemonServerInfo.getUnicastResolverServerIp());
+            isValid = alternativeIp == publicationInfoParam.getUnicastResolverServerIp();
+        }
+
+        return isValid;
     }
 }

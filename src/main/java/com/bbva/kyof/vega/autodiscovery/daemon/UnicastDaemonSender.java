@@ -6,9 +6,9 @@ import com.bbva.kyof.vega.autodiscovery.model.AutoDiscDaemonServerInfo;
 import com.bbva.kyof.vega.msg.BaseHeader;
 import com.bbva.kyof.vega.msg.MsgType;
 import com.bbva.kyof.vega.serialization.UnsafeBufferSerializer;
-import com.bbva.kyof.vega.util.net.AeronChannelHelper;
 import com.bbva.kyof.vega.util.collection.HashMapOfHashSet;
 import com.bbva.kyof.vega.util.collection.NativeArraySet;
+import com.bbva.kyof.vega.util.net.AeronChannelHelper;
 import com.bbva.kyof.vega.util.net.InetUtil;
 import io.aeron.Aeron;
 import io.aeron.Publication;
@@ -31,7 +31,7 @@ import java.util.UUID;
 class UnicastDaemonSender implements IDaemonReceiverListener, Closeable
 {
     /** Buffer size needed to sendBufferServerInfo */
-    private static final int SEND_BUFFER_SERVER_INFO_SIZE = 32;
+    private static final int SEND_BUFFER_SERVER_INFO_SIZE = 64;
 
     /** Store all the AeronPublishers by the parameters used to create it */
     private final Map<PublicationParams, Publication> publicationsByParams = new HashMap<>();
@@ -90,7 +90,8 @@ class UnicastDaemonSender implements IDaemonReceiverListener, Closeable
                 = new AutoDiscDaemonServerInfo(
                 uuid,
                 InetUtil.convertIpAddressToInt(parameters.getIpAddress()),
-                parameters.getPort()
+                parameters.getPort(),
+                parameters.getHostname()
         );
 
         // Serialize the message
@@ -221,7 +222,8 @@ class UnicastDaemonSender implements IDaemonReceiverListener, Closeable
         return new PublicationParams(
                 clientInfo.getUnicastResolverClientIp(),
                 clientInfo.getUnicastResolverClientPort(),
-                clientInfo.getUnicastResolverClientStreamId());
+                clientInfo.getUnicastResolverClientStreamId(),
+                clientInfo.getUnicastResolverHostname());
     }
 
     /**
@@ -232,7 +234,9 @@ class UnicastDaemonSender implements IDaemonReceiverListener, Closeable
      */
     private Publication createPublication(final PublicationParams params)
     {
-        final String channel = AeronChannelHelper.createUnicastChannelString(params.getIpAddress(), params.getPort(), this.parameters.getSubnetAddress());
+        final int ipAddress = InetUtil.getIpAddressAsIntByHostnameOrDefault(params.getHostname(), params.getIpAddress());
+
+        final String channel = AeronChannelHelper.createUnicastChannelString(ipAddress, params.getPort(), this.parameters.getSubnetAddress());
         final int streamId = params.getStreamId();
 
         log.info("Creating publication for channel {} and stream {}", channel, streamId);
@@ -254,5 +258,8 @@ class UnicastDaemonSender implements IDaemonReceiverListener, Closeable
 
         /** StreamId used by the publication */
         private final int streamId;
+
+        /** Daemon hostname */
+        private final String hostname;
     }
 }

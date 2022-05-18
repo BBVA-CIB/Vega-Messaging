@@ -1,5 +1,6 @@
 package com.bbva.kyof.vega.protocol.subscriber;
 
+import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.autodiscovery.daemon.CommandLineParserTest;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscInstanceInfo;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicInfo;
@@ -7,7 +8,13 @@ import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTransportType;
 import com.bbva.kyof.vega.config.general.ConfigReader;
 import com.bbva.kyof.vega.config.general.ConfigReaderTest;
 import com.bbva.kyof.vega.exception.VegaException;
-import com.bbva.kyof.vega.msg.*;
+import com.bbva.kyof.vega.msg.IRcvMessage;
+import com.bbva.kyof.vega.msg.IRcvRequest;
+import com.bbva.kyof.vega.msg.MsgReqHeader;
+import com.bbva.kyof.vega.msg.PublishResult;
+import com.bbva.kyof.vega.msg.RcvMessage;
+import com.bbva.kyof.vega.msg.RcvRequest;
+import com.bbva.kyof.vega.msg.RcvResponse;
 import com.bbva.kyof.vega.msg.lost.IMsgLostReport;
 import com.bbva.kyof.vega.protocol.AutoDiscManagerMock;
 import com.bbva.kyof.vega.protocol.common.AsyncRequestManager;
@@ -31,7 +38,9 @@ import org.junit.Test;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Created by cnebrera on 11/08/16.
@@ -45,6 +54,7 @@ public class ReceiveManagerTest
     private static Aeron AERON;
     private static SubnetAddress SUBNET_ADDRESS;
     private static int IP_ADDRESS;
+    private static String HOSTNAME;
     private static VegaContext VEGA_CONTEXT;
     private static AutoDiscManagerMock AUTO_DISC_MANAGER_MOCK;
 
@@ -62,6 +72,8 @@ public class ReceiveManagerTest
 
         SUBNET_ADDRESS = InetUtil.getDefaultSubnet();
         IP_ADDRESS = InetUtil.convertIpAddressToInt(SUBNET_ADDRESS.getIpAddres().getHostAddress());
+        HOSTNAME = SUBNET_ADDRESS.getIpAddres().getHostName();
+
         VEGA_CONTEXT = new VegaContext(AERON, ConfigReader.readConfiguration(validConfigFile));
 
         final AsyncRequestManager requestManager = EasyMock.createNiceMock(AsyncRequestManager.class);
@@ -389,14 +401,14 @@ public class ReceiveManagerTest
         receiveManager.close();
         receiveManager.onNewPubTopicForPattern(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"topic"), "topic");
         receiveManager.onPubTopicForPatternRemoved(new AutoDiscTopicInfo(VEGA_CONTEXT.getInstanceUniqueId(), AutoDiscTransportType.PUB_UNI, UUID.randomUUID(),"topic"), "topic");
-        receiveManager.onNewAutoDiscInstanceInfo(new AutoDiscInstanceInfo("name", UUID.randomUUID(), 23, 345, 12, 33, 44, 55));
-        receiveManager.onTimedOutAutoDiscInstanceInfo(new AutoDiscInstanceInfo("name", UUID.randomUUID(), 23, 345, 12, 33, 44, 55));
+        receiveManager.onNewAutoDiscInstanceInfo(new AutoDiscInstanceInfo("name", UUID.randomUUID(), 23, 345, 12, HOSTNAME,33, 44, 55, HOSTNAME));
+        receiveManager.onTimedOutAutoDiscInstanceInfo(new AutoDiscInstanceInfo("name", UUID.randomUUID(), 23, 345, 12, HOSTNAME, 33, 44, 55,HOSTNAME));
     }
 
     @Test
     public void testNewAutodiscInstanceInfo() throws Exception
     {
-        final AutoDiscInstanceInfo instanceInfo1 = new AutoDiscInstanceInfo("instName1", UUID.randomUUID(), IP_ADDRESS, 33333, 2, IP_ADDRESS, 33333, 3);
+        final AutoDiscInstanceInfo instanceInfo1 = new AutoDiscInstanceInfo("instName1", UUID.randomUUID(), IP_ADDRESS, 33333, 2, HOSTNAME, IP_ADDRESS, 33333, 3, HOSTNAME);
 
         // Add response publishers and check
         RECEIVER_MANAGER.onNewAutoDiscInstanceInfo(instanceInfo1);
@@ -666,7 +678,7 @@ public class ReceiveManagerTest
         assertNull(listener.receivedReq);
 
         // Now add the response publisher info!
-        RECEIVER_MANAGER.onNewAutoDiscInstanceInfo(new AutoDiscInstanceInfo("intanceName", remoteRequesterInstanceId, IP_ADDRESS, 25555, 8, IP_ADDRESS, 25555, 9));
+        RECEIVER_MANAGER.onNewAutoDiscInstanceInfo(new AutoDiscInstanceInfo("intanceName", remoteRequesterInstanceId, IP_ADDRESS, 25555, 8, HOSTNAME, IP_ADDRESS, 25555, 9, HOSTNAME));
 
         // Send the request again, it should still not arrive because it cannot find the topic name
         RECEIVER_MANAGER.onDataRequestMsgReceived(rcvRequest);

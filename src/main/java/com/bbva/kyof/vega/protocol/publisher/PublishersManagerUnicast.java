@@ -119,7 +119,8 @@ class PublishersManagerUnicast extends AbstractPublishersManager<TopicPublisherU
                 subcriberInfo.getIpAddress(),
                 subcriberInfo.getPort(),
                 subcriberInfo.getStreamId(),
-                topicPublisher.getTopicConfig().getSubnetAddress());
+                topicPublisher.getTopicConfig().getSubnetAddress(),
+                subcriberInfo.getHostname());
     }
 
     @Override

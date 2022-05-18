@@ -153,7 +153,7 @@ final class SubscribersManagerUnicast extends AbstractSubscribersManager
         final int portNumber = AeronChannelHelper.selectPortFromRange(topicName, templateCfg.getMinPort(), templateCfg.getMaxPort());
 
         // Create the parameters
-        return new AeronSubscriberParams(TransportMediaType.UNICAST, InetUtil.convertIpAddressToInt(ipAddress), portNumber, streamId, templateCfg.getSubnetAddress());
+        return new AeronSubscriberParams(TransportMediaType.UNICAST, InetUtil.convertIpAddressToInt(ipAddress), portNumber, streamId, templateCfg.getSubnetAddress(),templateCfg.getHostname() );
     }
 
     /**
@@ -172,6 +172,7 @@ final class SubscribersManagerUnicast extends AbstractSubscribersManager
                 aeronSubscriberParams.getIpAddress(),
                 aeronSubscriberParams.getPort(),
                 aeronSubscriberParams.getStreamId(),
+                aeronSubscriberParams.getHostname(),
                 topicSubscriber.hasSecurity() ? this.getVegaContext().getSecurityContext().getSecurityId() : AutoDiscTopicInfo.NO_SECURED_CONSTANT);
 
         this.registeredTopicSocketInfosByTopicId.put(topicSubscriber.getUniqueId(), autoDiscTopicSocketInfo);
@@ -216,7 +217,8 @@ final class SubscribersManagerUnicast extends AbstractSubscribersManager
         final int portNumber = AeronChannelHelper.selectPortFromRange(instanceIdHash, responsesConfig.getMinPort(), responsesConfig.getMaxPort());
 
         // Create the parameters
-        final AeronSubscriberParams params = new AeronSubscriberParams(TransportMediaType.UNICAST, InetUtil.convertIpAddressToInt(ipAddress), portNumber, streamId, responsesConfig.getSubnetAddress());
+        final AeronSubscriberParams params = new AeronSubscriberParams(TransportMediaType.UNICAST, InetUtil.convertIpAddressToInt(ipAddress), portNumber, streamId,
+                responsesConfig.getSubnetAddress(), responsesConfig.getHostname());
 
         // Create the subscriber
         final AeronSubscriber subscriber = new AeronSubscriber(getVegaContext(), params);

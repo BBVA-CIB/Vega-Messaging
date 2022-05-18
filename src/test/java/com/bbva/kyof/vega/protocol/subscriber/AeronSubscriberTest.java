@@ -1,5 +1,6 @@
 package com.bbva.kyof.vega.protocol.subscriber;
 
+import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.config.general.GlobalConfiguration;
 import com.bbva.kyof.vega.config.general.TransportMediaType;
 import com.bbva.kyof.vega.util.net.AeronChannelHelper;
@@ -58,9 +59,9 @@ public class AeronSubscriberTest
         final int mcastIp = InetUtil.convertIpAddressToInt("224.1.1.1");
         final int ucastIp = InetUtil.convertIpAddressToInt(SUBNET_ADDRESS.getIpAddres().getHostAddress());
 
-        final AeronSubscriberParams ipcSubscriberParams = new AeronSubscriberParams(TransportMediaType.IPC, mcastIp, 0, 2, null);
-        final AeronSubscriberParams mcastSubscriberParams = new AeronSubscriberParams(TransportMediaType.MULTICAST, mcastIp, 28889, 2, SUBNET_ADDRESS);
-        final AeronSubscriberParams unicastSubscriberParams = new AeronSubscriberParams(TransportMediaType.UNICAST, ucastIp, 29333, 2, SUBNET_ADDRESS);
+        final AeronSubscriberParams ipcSubscriberParams = new AeronSubscriberParams(TransportMediaType.IPC, mcastIp, 0, 2, null, null);
+        final AeronSubscriberParams mcastSubscriberParams = new AeronSubscriberParams(TransportMediaType.MULTICAST, mcastIp, 28889, 2, SUBNET_ADDRESS, null);
+        final AeronSubscriberParams unicastSubscriberParams = new AeronSubscriberParams(TransportMediaType.UNICAST, ucastIp, 29333, 2, SUBNET_ADDRESS, SUBNET_ADDRESS.getIpAddres().getHostName());
 
         final AeronSubscriber ipcSubscriber = new AeronSubscriber(VEGA_CONTEXT, ipcSubscriberParams);
         final AeronSubscriber mcastSubscriber = new AeronSubscriber(VEGA_CONTEXT, mcastSubscriberParams);
@@ -94,11 +95,11 @@ public class AeronSubscriberTest
         // Poll!!!
         AtomicInteger lastPolledMessage = new AtomicInteger();
         ipcSubscriber.poll((directBuffer, i, i1, header) -> lastPolledMessage.set(directBuffer.getInt(i)), 1);
-        Assert.assertTrue(lastPolledMessage.get() == 11);
+        Assert.assertEquals(11, lastPolledMessage.get());
         mcastSubscriber.poll((directBuffer, i, i1, header) -> lastPolledMessage.set(directBuffer.getInt(i)), 1);
-        Assert.assertTrue(lastPolledMessage.get() == 22);
+        Assert.assertEquals(22, lastPolledMessage.get());
         ucastSubscriber.poll((directBuffer, i, i1, header) -> lastPolledMessage.set(directBuffer.getInt(i)), 1);
-        Assert.assertTrue(lastPolledMessage.get() == 33);
+        Assert.assertEquals(33, lastPolledMessage.get());
 
         // Close them and send messages again
         ipcSubscriber.close();
@@ -117,11 +118,11 @@ public class AeronSubscriberTest
         // Poll, there should be nothing this time
         lastPolledMessage.set(0);
         ipcSubscriber.poll((directBuffer, i, i1, header) -> lastPolledMessage.set(directBuffer.getInt(i)), 1);
-        Assert.assertTrue(lastPolledMessage.get() == 0);
+        Assert.assertEquals(0, lastPolledMessage.get());
         mcastSubscriber.poll((directBuffer, i, i1, header) -> lastPolledMessage.set(directBuffer.getInt(i)), 1);
-        Assert.assertTrue(lastPolledMessage.get() == 0);
+        Assert.assertEquals(0, lastPolledMessage.get());
         ucastSubscriber.poll((directBuffer, i, i1, header) -> lastPolledMessage.set(directBuffer.getInt(i)), 1);
-        Assert.assertTrue(lastPolledMessage.get() == 0);
+        Assert.assertEquals(0, lastPolledMessage.get());
 
         // Close the publications
         ipcPublication.close();

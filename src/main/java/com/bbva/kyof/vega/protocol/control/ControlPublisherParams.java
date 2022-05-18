@@ -24,4 +24,7 @@ class ControlPublisherParams
 
     /** Subnet for the publication  */
     @Getter private final SubnetAddress subnetAddress;
+
+    /** Subnet for the publication  */
+    @Getter private final String hostname;
 }

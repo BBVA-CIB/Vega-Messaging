@@ -1,5 +1,6 @@
 package com.bbva.kyof.vega.autodiscovery.subscriber;
 
+import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicInfo;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicSocketInfo;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTransportType;
@@ -77,70 +78,71 @@ public class SubscribedTopicsTest
         // Non registered due to transport or topic, nothing should happen
         subTopics.onNewTopicInfo(new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.SUB_MUL, UUID.randomUUID(), "topic"));
         subTopics.onNewTopicInfo(new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic55"));
-        Assert.assertTrue(listener1.numNewTopicCalls == 0);
-        Assert.assertTrue(listener2.numNewTopicCalls == 0);
+        Assert.assertEquals(0, listener1.numNewTopicCalls);
+        Assert.assertEquals(0, listener2.numNewTopicCalls);
 
         // Now try on topic with pub ipc, should update both listeners
         subTopics.onNewTopicInfo(new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic"));
-        Assert.assertTrue(listener1.numNewTopicCalls == 1);
-        Assert.assertTrue(listener2.numNewTopicCalls == 1);
+        Assert.assertEquals(1, listener1.numNewTopicCalls);
+        Assert.assertEquals(1, listener2.numNewTopicCalls);
 
         // Now try on topic2 with sub mul, should update only listener 2
         subTopics.onNewTopicInfo(new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.SUB_MUL, UUID.randomUUID(), "topic2"));
-        Assert.assertTrue(listener1.numNewTopicCalls == 1);
-        Assert.assertTrue(listener2.numNewTopicCalls == 2);
+        Assert.assertEquals(1, listener1.numNewTopicCalls);
+        Assert.assertEquals(2, listener2.numNewTopicCalls);
 
         // ---------------------------- Repeat for time outs ----------------------------------------
         // Non registered due to transport or topic, nothing should happen
         subTopics.onTimedOutTopicInfo(new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.SUB_MUL, UUID.randomUUID(), "topic"));
         subTopics.onTimedOutTopicInfo(new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic55"));
-        Assert.assertTrue(listener1.numTimeoutTopicCalls == 0);
-        Assert.assertTrue(listener2.numTimeoutTopicCalls == 0);
+        Assert.assertEquals(0, listener1.numTimeoutTopicCalls);
+        Assert.assertEquals(0, listener2.numTimeoutTopicCalls);
 
         // Now try on topic with pub ipc, should update both listeners
         subTopics.onTimedOutTopicInfo(new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic"));
-        Assert.assertTrue(listener1.numTimeoutTopicCalls == 1);
-        Assert.assertTrue(listener2.numTimeoutTopicCalls == 1);
+        Assert.assertEquals(1, listener1.numTimeoutTopicCalls);
+        Assert.assertEquals(1, listener2.numTimeoutTopicCalls);
 
         // Now try on topic2 with sub mul, should update only listener 2
         subTopics.onTimedOutTopicInfo(new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.SUB_MUL, UUID.randomUUID(), "topic2"));
-        Assert.assertTrue(listener1.numTimeoutTopicCalls == 1);
-        Assert.assertTrue(listener2.numTimeoutTopicCalls == 2);
+        Assert.assertEquals(1, listener1.numTimeoutTopicCalls);
+        Assert.assertEquals(2, listener2.numTimeoutTopicCalls);
 
         // ---------------------------- Repeat for topic sockets ----------------------------------------
-        subTopics.onNewTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_MUL, UUID.randomUUID(), "topic", UUID.randomUUID(), 1, 2, 3));
-        subTopics.onNewTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic55", UUID.randomUUID(), 1, 2, 3));
-        Assert.assertTrue(listener1.numNewTopicSocketCalls == 0);
-        Assert.assertTrue(listener2.numNewTopicSocketCalls == 0);
+        subTopics.onNewTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_MUL, UUID.randomUUID(), "topic", UUID.randomUUID(), 1, 2, 3, TestConstants.EMPTY_HOSTNAME));
+        subTopics.onNewTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic55", UUID.randomUUID(), 1, 2, 3, TestConstants.EMPTY_HOSTNAME));
+        Assert.assertEquals(0, listener1.numNewTopicSocketCalls);
+        Assert.assertEquals(0, listener2.numNewTopicSocketCalls);
 
         // Now try on topic with pub ipc, should update both listeners
-        subTopics.onNewTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic", UUID.randomUUID(), 1, 2, 3));
-        Assert.assertTrue(listener1.numNewTopicSocketCalls == 1);
-        Assert.assertTrue(listener2.numNewTopicSocketCalls == 1);
+        subTopics.onNewTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic", UUID.randomUUID(), 1, 2, 3, TestConstants.EMPTY_HOSTNAME));
+        Assert.assertEquals(1, listener1.numNewTopicSocketCalls);
+        Assert.assertEquals(1, listener2.numNewTopicSocketCalls);
 
         // Now try on topic2 with sub mul, should update only listener 2
-        subTopics.onNewTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_MUL, UUID.randomUUID(), "topic2", UUID.randomUUID(), 1, 2, 3));
-        Assert.assertTrue(listener1.numNewTopicSocketCalls == 1);
-        Assert.assertTrue(listener2.numNewTopicSocketCalls == 2);
+        subTopics.onNewTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_MUL, UUID.randomUUID(), "topic2", UUID.randomUUID(), 1, 2, 3, TestConstants.EMPTY_HOSTNAME));
+        Assert.assertEquals(1, listener1.numNewTopicSocketCalls);
+        Assert.assertEquals(2, listener2.numNewTopicSocketCalls);
 
         // ---------------------------- Repeat for topic sockets timeouts ----------------------------------------
-        subTopics.onTimedOutTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_MUL, UUID.randomUUID(), "topic", UUID.randomUUID(), 1, 2, 3));
-        subTopics.onTimedOutTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic55", UUID.randomUUID(), 1, 2, 3));
-        Assert.assertTrue(listener1.numTimeoutTopicSocketCalls == 0);
-        Assert.assertTrue(listener2.numTimeoutTopicSocketCalls == 0);
+        subTopics.onTimedOutTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_MUL, UUID.randomUUID(), "topic", UUID.randomUUID(), 1, 2, 3, TestConstants.EMPTY_HOSTNAME));
+        subTopics.onTimedOutTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic55", UUID.randomUUID(), 1, 2,
+                3, TestConstants.EMPTY_HOSTNAME));
+        Assert.assertEquals(0, listener1.numTimeoutTopicSocketCalls);
+        Assert.assertEquals(0, listener2.numTimeoutTopicSocketCalls);
 
         // Now try on topic with pub ipc, should update both listeners
-        subTopics.onTimedOutTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic", UUID.randomUUID(), 1, 2, 3));
-        Assert.assertTrue(listener1.numTimeoutTopicSocketCalls == 1);
-        Assert.assertTrue(listener2.numTimeoutTopicSocketCalls == 1);
+        subTopics.onTimedOutTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic", UUID.randomUUID(), 1, 2, 3, TestConstants.EMPTY_HOSTNAME));
+        Assert.assertEquals(1, listener1.numTimeoutTopicSocketCalls);
+        Assert.assertEquals(1, listener2.numTimeoutTopicSocketCalls);
 
         // Now try on topic2 with sub mul, should update only listener 2
-        subTopics.onTimedOutTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_MUL, UUID.randomUUID(), "topic2", UUID.randomUUID(), 1, 2, 3));
-        Assert.assertTrue(listener1.numTimeoutTopicSocketCalls == 1);
-        Assert.assertTrue(listener2.numTimeoutTopicSocketCalls == 2);
+        subTopics.onTimedOutTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_MUL, UUID.randomUUID(), "topic2", UUID.randomUUID(), 1, 2, 3, TestConstants.EMPTY_HOSTNAME));
+        Assert.assertEquals(1, listener1.numTimeoutTopicSocketCalls);
+        Assert.assertEquals(2, listener2.numTimeoutTopicSocketCalls);
     }
 
-    public class ListenerImpl implements IAutodiscTopicSubListener
+    public static class ListenerImpl implements IAutodiscTopicSubListener
     {
         public int numNewTopicCalls = 0;
         public int numNewTopicSocketCalls = 0;

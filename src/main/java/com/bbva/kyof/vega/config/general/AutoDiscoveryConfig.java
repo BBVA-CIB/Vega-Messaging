@@ -105,6 +105,10 @@ public class AutoDiscoveryConfig implements IConfiguration
     @XmlTransient
     @Getter private SubnetAddress subnetAddress;
 
+    /** (Optional) The hostname  to use */
+    @XmlElement(name = "unicast_alternative_hostname")
+    @Getter private String hostname;
+
     @Override
     public void completeAndValidateConfig() throws VegaException
     {
@@ -122,7 +126,10 @@ public class AutoDiscoveryConfig implements IConfiguration
         {
             this.validateMulticastConfig();
         }
+
+        this.checkHostname();
     }
+
 
     /** @return the default stream id for auto-discovery communication */
     public int getDefaultStreamId()
@@ -281,6 +288,18 @@ public class AutoDiscoveryConfig implements IConfiguration
             //Initialize both fields to ensure that them are not used
             this.resolverDaemonAddress = null;
             this.resolverDaemonPort=null;
+        }
+    }
+
+    /**
+     * Checks if the hostname is configured. If is not configured, the hostname is set by subnet by default
+     */
+    private void checkHostname()
+    {
+        if(this.hostname == null)
+        {
+            //avoid null
+            this.hostname = subnetAddress.getIpAddres().getHostName();
         }
     }
 }

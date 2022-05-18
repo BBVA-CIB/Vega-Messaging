@@ -1,9 +1,14 @@
 package com.bbva.kyof.vega.protocol.publisher;
 
+import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.Version;
 import com.bbva.kyof.vega.config.general.GlobalConfiguration;
 import com.bbva.kyof.vega.config.general.TransportMediaType;
-import com.bbva.kyof.vega.msg.*;
+import com.bbva.kyof.vega.msg.IRcvMessage;
+import com.bbva.kyof.vega.msg.IRcvRequest;
+import com.bbva.kyof.vega.msg.IRcvResponse;
+import com.bbva.kyof.vega.msg.MsgType;
+import com.bbva.kyof.vega.msg.PublishResult;
 import com.bbva.kyof.vega.protocol.common.VegaContext;
 import com.bbva.kyof.vega.util.net.InetUtil;
 import com.bbva.kyof.vega.util.net.SubnetAddress;
@@ -18,7 +23,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Random;
 import java.util.UUID;
 
@@ -74,7 +78,8 @@ public class AeronPublisherTest
                 InetUtil.convertIpAddressToInt(SUBNET_ADDRESS.getIpAddres().getHostAddress()),
                 28005,
                 10,
-                SUBNET_ADDRESS);
+                SUBNET_ADDRESS,
+                TestConstants.EMPTY_HOSTNAME);
 
         final AeronPublisher publisher = new AeronPublisher(VEGA_CONTEXT, params);
 
@@ -118,7 +123,8 @@ public class AeronPublisherTest
                 InetUtil.convertIpAddressToInt("224.1.1.1"),
                 28001,
                 4,
-                SUBNET_ADDRESS);
+                SUBNET_ADDRESS,
+                TestConstants.EMPTY_HOSTNAME);
 
         final AeronPublisher publisher = new AeronPublisher(VEGA_CONTEXT, params);
 
@@ -145,7 +151,8 @@ public class AeronPublisherTest
                 InetUtil.convertIpAddressToInt(SUBNET_ADDRESS.getIpAddres().getHostAddress()),
                 28002,
                 5,
-                SUBNET_ADDRESS);
+                SUBNET_ADDRESS,
+                TestConstants.EMPTY_HOSTNAME);
 
         final AeronPublisher publisher = new AeronPublisher(VEGA_CONTEXT, params);
 
@@ -172,6 +179,7 @@ public class AeronPublisherTest
                 0,
                 0,
                 5,
+                null,
                 null);
 
         final AeronPublisher publisher = new AeronPublisher(VEGA_CONTEXT, params);
@@ -269,7 +277,7 @@ public class AeronPublisherTest
     {
         final byte[] resultArray = new byte[receivedContentLength];
         receivedContent.getBytes(receivedContentOffset, resultArray);
-        Assert.assertTrue(Arrays.equals(resultArray, sendMsg));
+        Assert.assertArrayEquals(resultArray, sendMsg);
     }
 
     private void testSendRequest(final AeronPublisher publisher, final SimpleReceiver subscription, final int msgSize) throws Exception

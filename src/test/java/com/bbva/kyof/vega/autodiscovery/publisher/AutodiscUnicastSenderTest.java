@@ -15,7 +15,6 @@ import org.powermock.api.easymock.PowerMock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -25,7 +24,7 @@ import java.util.UUID;
 @PrepareForTest(Aeron.class)
 public class AutodiscUnicastSenderTest
 {
-    final AutoDiscDaemonClientInfo daemonClientInfo = new AutoDiscDaemonClientInfo(UUID.randomUUID(), 12, 13, 14);
+    final AutoDiscDaemonClientInfo daemonClientInfo = new AutoDiscDaemonClientInfo(UUID.randomUUID(), 12, 13, 14, "unicast_host");
     boolean testIsClosed = false;
 
     @Test
@@ -35,7 +34,7 @@ public class AutodiscUnicastSenderTest
         final ConcurrentPublication publication = EasyMock.createNiceMock(ConcurrentPublication.class);
         final PublicationsManager publicationsManager = EasyMock.createNiceMock(PublicationsManager.class);
         final PublicationInfo publicationInfo =
-                new PublicationInfo(publication, null,0,0,true);
+                new PublicationInfo(publication, null, 0, 0, true);
         final PublicationInfo[] publicationInfoArray = {publicationInfo};
 
         EasyMock.expect(aeron.addPublication(EasyMock.anyObject(), EasyMock.anyInt())).andReturn(publication).anyTimes();
@@ -56,11 +55,11 @@ public class AutodiscUnicastSenderTest
                 daemonClientInfo,
                 publicationsManager);
 
-        Assert.assertTrue(sender.sendNextTopicAdverts() == 0);
+        Assert.assertEquals(0, sender.sendNextTopicAdverts());
 
         Thread.sleep(400);
 
-        Assert.assertTrue(sender.sendNextTopicAdverts() == 1);
+        Assert.assertEquals(1, sender.sendNextTopicAdverts());
     }
 
     @Test
@@ -70,7 +69,7 @@ public class AutodiscUnicastSenderTest
         final ConcurrentPublication publication = EasyMock.createNiceMock(ConcurrentPublication.class);
         final PublicationsManager publicationsManager = EasyMock.createNiceMock(PublicationsManager.class);
         final PublicationInfo publicationInfo =
-                new PublicationInfo(publication, null,0,0,true);
+                new PublicationInfo(publication, null, 0, 0, true);
 
         EasyMock.expect(aeron.addPublication(EasyMock.anyObject(), EasyMock.anyInt())).andReturn(publication).anyTimes();
         EasyMock.expect(publicationsManager.getRandomPublicationInfo()).andReturn(publicationInfo).anyTimes();
@@ -104,9 +103,9 @@ public class AutodiscUnicastSenderTest
         final ConcurrentPublication publication = EasyMock.createNiceMock(ConcurrentPublication.class);
         final PublicationsManager publicationsManager = EasyMock.createNiceMock(PublicationsManager.class);
         final PublicationInfo publicationInfoDisabled =
-                new PublicationInfo(null, null,0,0,false);
+                new PublicationInfo(null, null, 0, 0, false);
         final PublicationInfo publicationInfoEnabled =
-                new PublicationInfo(publication, null,0,0,false);
+                new PublicationInfo(publication, null, 0, 0, false);
 
         EasyMock.expect(aeron.addPublication(EasyMock.anyObject(), EasyMock.anyInt())).andReturn(publication).anyTimes();
         EasyMock.expect(publicationsManager.hasEnabledPublications()).andReturn(true).anyTimes();
@@ -146,7 +145,7 @@ public class AutodiscUnicastSenderTest
         final ConcurrentPublication publication = EasyMock.createNiceMock(ConcurrentPublication.class);
         final PublicationsManager publicationsManager = EasyMock.createNiceMock(PublicationsManager.class);
         final PublicationInfo publicationInfo =
-                new PublicationInfo(publication, null,0,0,true);
+                new PublicationInfo(publication, null, 0, 0, true);
         final PublicationInfo[] publicationInfoArray = {publicationInfo};
 
         EasyMock.expect(aeron.addPublication(EasyMock.anyObject(), EasyMock.anyInt())).andReturn(publication).anyTimes();

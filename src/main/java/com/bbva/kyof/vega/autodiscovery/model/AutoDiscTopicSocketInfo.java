@@ -57,6 +57,9 @@ public class AutoDiscTopicSocketInfo implements IAutoDiscTopicInfo
     /** Transport stream id */
     @Getter private int streamId;
 
+    /** Transport hostname  (empty for ipc transport) */
+    @Getter private String hostname;
+
     /** Security ID of the topic if security is activated, 0 if security is not active */
     @Getter private int securityId;
 
@@ -71,6 +74,7 @@ public class AutoDiscTopicSocketInfo implements IAutoDiscTopicInfo
      * @param ipAddress the ip address in integer representation
      * @param port the port number
      * @param streamId the stream id for the aeron connection
+     * @param hostname the hostname for the aeron connection
      */
     public AutoDiscTopicSocketInfo(final UUID instanceId,
                                    final AutoDiscTransportType transportType,
@@ -79,9 +83,10 @@ public class AutoDiscTopicSocketInfo implements IAutoDiscTopicInfo
                                    final UUID topicId,
                                    final int ipAddress,
                                    final int port,
-                                   final int streamId)
+                                   final int streamId,
+                                   final String hostname)
     {
-        this(instanceId, transportType, uniqueId, topicName, topicId, ipAddress, port, streamId, NO_SECURED_CONSTANT);
+        this(instanceId, transportType, uniqueId, topicName, topicId, ipAddress, port, streamId, hostname, NO_SECURED_CONSTANT);
     }
 
     /**
@@ -95,6 +100,7 @@ public class AutoDiscTopicSocketInfo implements IAutoDiscTopicInfo
      * @param ipAddress the ip address in integer representation
      * @param port the port number
      * @param streamId the stream id for the aeron connection
+     * @param hostname the hostname for the aeron connection
      * @param securityId the topic security id, 0 if no secured
      */
     public AutoDiscTopicSocketInfo(final UUID instanceId,
@@ -105,6 +111,7 @@ public class AutoDiscTopicSocketInfo implements IAutoDiscTopicInfo
                                    final int ipAddress,
                                    final int port,
                                    final int streamId,
+                                   final String hostname,
                                    final int securityId)
     {
         this.instanceId = instanceId;
@@ -115,6 +122,7 @@ public class AutoDiscTopicSocketInfo implements IAutoDiscTopicInfo
         this.ipAddress = ipAddress;
         this.port = port;
         this.streamId = streamId;
+        this.hostname = hostname;
         this.securityId = securityId;
     }
 
@@ -139,6 +147,7 @@ public class AutoDiscTopicSocketInfo implements IAutoDiscTopicInfo
         this.port = buffer.readInt();
         this.streamId = buffer.readInt();
         this.securityId = buffer.readInt();
+        this.hostname = buffer.readString();
     }
 
     @Override
@@ -153,12 +162,15 @@ public class AutoDiscTopicSocketInfo implements IAutoDiscTopicInfo
         buffer.writeInt(this.port);
         buffer.writeInt(this.streamId);
         buffer.writeInt(this.securityId);
+        buffer.writeString(this.hostname);
     }
 
     @Override
     public int serializedSize()
     {
-        return FIX_MEMBERS_SERIALIZED_SIZE + UnsafeBufferSerializer.serializedSize(this.topicName);
+        return FIX_MEMBERS_SERIALIZED_SIZE
+                + UnsafeBufferSerializer.serializedSize(this.topicName)
+                + UnsafeBufferSerializer.serializedSize(this.hostname);
     }
 
     @Override
@@ -198,6 +210,7 @@ public class AutoDiscTopicSocketInfo implements IAutoDiscTopicInfo
                 ", streamId=" + streamId +
                 ", securityId=" + securityId +
                 ", instanceId=" + instanceId +
+                ", hostname='" + hostname + '\'' +
                 '}';
     }
 }

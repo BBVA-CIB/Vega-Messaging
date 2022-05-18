@@ -8,6 +8,7 @@ import com.bbva.kyof.vega.msg.PublishResult;
 import com.bbva.kyof.vega.protocol.common.VegaContext;
 import com.bbva.kyof.vega.serialization.UnsafeBufferSerializer;
 import com.bbva.kyof.vega.util.net.AeronChannelHelper;
+import com.bbva.kyof.vega.util.net.InetUtil;
 import io.aeron.Publication;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +63,7 @@ class ControlPublisher implements Closeable
         // Create the aeron publisher channel
         final String publicationChannel = this.createPublicationChannel(params);
 
-        log.info("Creating ControlPublisher with params [{}], channel [{}]", params.toString(), publicationChannel);
+        log.info("Creating ControlPublisher with params [{}], channel [{}]", params, publicationChannel);
 
         // Create the aeron publisher
         this.publication = vegaContext.getAeron().addPublication(publicationChannel, params.getStreamId());
@@ -181,6 +182,9 @@ class ControlPublisher implements Closeable
      */
     private String createPublicationChannel(final ControlPublisherParams params)
     {
-        return AeronChannelHelper.createUnicastChannelString(params.getIpAddress(), params.getPort(), params.getSubnetAddress());
+        //it is always unicast.
+        // since 3.0.0: get ipAddress by hostname
+        final int ipAddress = InetUtil.getIpAddressAsIntByHostnameOrDefault(params.getHostname(), params.getIpAddress());
+        return AeronChannelHelper.createUnicastChannelString(ipAddress, params.getPort(), params.getSubnetAddress());
     }
 }  

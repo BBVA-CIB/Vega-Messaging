@@ -2,6 +2,7 @@ package com.bbva.kyof.vega.autodiscovery;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.autodiscovery.daemon.DaemonParameters;
 import com.bbva.kyof.vega.autodiscovery.daemon.UnicastDaemon;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicInfo;
@@ -133,7 +134,7 @@ public class AutodiscManagerThrousandTopicsTest
         for (int i = 0; i < NUM_TOPICS; i++)
         {
             topicsInfo[i] = new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic" + i);
-            topicsSocketsInfo[i] = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), topicsInfo[i].getTopicName(), topicsInfo[i].getUniqueId(), 34, 36, 33);
+            topicsSocketsInfo[i] = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), topicsInfo[i].getTopicName(), topicsInfo[i].getUniqueId(), 34, 36, 33, TestConstants.EMPTY_HOSTNAME);
         }
 
         // Start the managers and give it some time to be "discovered", it is really only required in unicast

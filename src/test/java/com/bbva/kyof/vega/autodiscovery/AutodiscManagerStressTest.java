@@ -2,6 +2,7 @@ package com.bbva.kyof.vega.autodiscovery;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.autodiscovery.daemon.DaemonParameters;
 import com.bbva.kyof.vega.autodiscovery.daemon.UnicastDaemon;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicInfo;
@@ -75,9 +76,11 @@ public class AutodiscManagerStressTest
         for (int i = 0; i < NUM_TOPICS; i++)
         {
             TOPICS_INFO_1[i] = new AutoDiscTopicInfo(instanceId1, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic" + i);
-            TOPIC_SOCKETS_INFO_1[i] = new AutoDiscTopicSocketInfo(instanceId1, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), TOPICS_INFO_1[i].getTopicName(), TOPICS_INFO_1[i].getUniqueId(), 34, 36, 33);
+            TOPIC_SOCKETS_INFO_1[i] = new AutoDiscTopicSocketInfo(instanceId1, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), TOPICS_INFO_1[i].getTopicName(), TOPICS_INFO_1[i].getUniqueId(), 34,
+                    36, 33, TestConstants.EMPTY_HOSTNAME);
             TOPICS_INFO_2[i] = new AutoDiscTopicInfo(instanceId2, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic" + i);
-            TOPIC_SOCKETS_INFO_2[i] = new AutoDiscTopicSocketInfo(instanceId2, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), TOPICS_INFO_2[i].getTopicName(), TOPICS_INFO_2[i].getUniqueId(), 34, 36, 33);
+            TOPIC_SOCKETS_INFO_2[i] = new AutoDiscTopicSocketInfo(instanceId2, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), TOPICS_INFO_2[i].getTopicName(), TOPICS_INFO_2[i].getUniqueId(), 34,
+                    36, 33, TestConstants.EMPTY_HOSTNAME);
         }
 
         MEDIA_DRIVER = MediaDriver.launchEmbedded();

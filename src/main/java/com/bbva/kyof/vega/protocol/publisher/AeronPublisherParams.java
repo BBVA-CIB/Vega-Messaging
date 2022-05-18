@@ -28,4 +28,7 @@ public class AeronPublisherParams
 
     /** Subnet for the publication (null for ipc) */
     @Getter private final SubnetAddress subnetAddress;
+
+    /** Hostname for the publication (null for ipc or multicast) */
+    @Getter private final String hostname;
 }

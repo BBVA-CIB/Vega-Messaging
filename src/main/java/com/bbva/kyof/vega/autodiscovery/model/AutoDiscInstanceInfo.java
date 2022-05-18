@@ -39,6 +39,9 @@ public class AutoDiscInstanceInfo implements IAutoDiscInfo
     /** Transport stream id for responses being sent to the vega instance represented by this object */
     @Getter private int responseTransportStreamId;
 
+    /** Transport hostname for responses being sent to the vega instance represented by this object */
+    @Getter private String responseTransportHostname;
+
     /** Transport ip for control messages receiver */
     @Getter private int controlRcvTransportIp;
 
@@ -47,6 +50,9 @@ public class AutoDiscInstanceInfo implements IAutoDiscInfo
 
     /** Transport stream id for for control messages receiver */
     @Getter private int controlRcvTransportStreamId;
+
+    /** Transport hostname for control messages receiver*/
+    @Getter private String controlRcvHostname;
 
     @Override
     public boolean equals(final Object target)
@@ -79,9 +85,11 @@ public class AutoDiscInstanceInfo implements IAutoDiscInfo
         this.responseTransportIp = buffer.readInt();
         this.responseTransportPort = buffer.readInt();
         this.responseTransportStreamId = buffer.readInt();
+        this.responseTransportHostname = buffer.readString();
         this.controlRcvTransportIp = buffer.readInt();
         this.controlRcvTransportPort = buffer.readInt();
         this.controlRcvTransportStreamId = buffer.readInt();
+        this.controlRcvHostname = buffer.readString();
     }
 
     @Override
@@ -92,15 +100,20 @@ public class AutoDiscInstanceInfo implements IAutoDiscInfo
         buffer.writeInt(this.responseTransportIp);
         buffer.writeInt(this.responseTransportPort);
         buffer.writeInt(this.responseTransportStreamId);
+        buffer.writeString(this.responseTransportHostname);
         buffer.writeInt(this.controlRcvTransportIp);
         buffer.writeInt(this.controlRcvTransportPort);
         buffer.writeInt(this.controlRcvTransportStreamId);
+        buffer.writeString(this.controlRcvHostname);
     }
 
     @Override
     public int serializedSize()
     {
-        return FIX_MEMBERS_SERIALIZED_SIZE + UnsafeBufferSerializer.serializedSize(this.instanceName);
+        return FIX_MEMBERS_SERIALIZED_SIZE
+                + UnsafeBufferSerializer.serializedSize(this.instanceName)
+                + UnsafeBufferSerializer.serializedSize(this.responseTransportHostname)
+                + UnsafeBufferSerializer.serializedSize(this.controlRcvHostname);
     }
 
     @Override
@@ -112,9 +125,11 @@ public class AutoDiscInstanceInfo implements IAutoDiscInfo
                 ", responseTransportIp=" + InetUtil.convertIntToIpAddress(responseTransportIp) +
                 ", responseTransportPort=" + responseTransportPort +
                 ", responseTransportStreamId=" + responseTransportStreamId +
+                ", responseTransportHostname='" + responseTransportHostname + '\'' +
                 ", controlRcvTransportIp=" + InetUtil.convertIntToIpAddress(controlRcvTransportIp) +
                 ", controlRcvTransportPort=" + controlRcvTransportPort +
                 ", controlRcvTransportStreamId=" + controlRcvTransportStreamId +
+                ", controlRcvHostname='" + controlRcvHostname + '\'' +
                 '}';
     }
 }

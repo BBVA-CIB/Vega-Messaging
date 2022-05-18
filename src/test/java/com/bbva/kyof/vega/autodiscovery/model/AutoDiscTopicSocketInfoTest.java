@@ -15,6 +15,7 @@ public class AutoDiscTopicSocketInfoTest
     final static int IP = 44;
     final static int PORT = 33;
     final static int STREAM_ID = 22;
+    final static String HOSTNAME = "host_234";
 
     @Test
     public void fromBinaryToBinary()
@@ -24,7 +25,7 @@ public class AutoDiscTopicSocketInfoTest
         final UUID uniqueId = UUID.randomUUID();
         final UUID topicId = UUID.randomUUID();
 
-        final AutoDiscTopicSocketInfo topicSocketInfo = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, uniqueId, "topic", topicId, IP, PORT, STREAM_ID);
+        final AutoDiscTopicSocketInfo topicSocketInfo = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, uniqueId, "topic", topicId, IP, PORT, STREAM_ID, HOSTNAME);
 
         // Create the buffer to serialize it
         final ByteBuffer buffer = ByteBuffer.allocate(1024);
@@ -35,7 +36,7 @@ public class AutoDiscTopicSocketInfoTest
         topicSocketInfo.toBinary(serializer);
 
         // Check the current offset, should be the serialization size
-        Assert.assertTrue(serializer.getOffset() == topicSocketInfo.serializedSize());
+        Assert.assertEquals(serializer.getOffset(), topicSocketInfo.serializedSize());
 
         // Flip the buffer
         buffer.limit(serializer.getOffset());
@@ -51,21 +52,23 @@ public class AutoDiscTopicSocketInfoTest
         Assert.assertEquals(topicSocketInfo, topicSocketInfo);
         Assert.assertEquals(topicSocketInfo, readedInfo);
         Assert.assertNotEquals(topicSocketInfo, null);
-        Assert.assertNotEquals(topicSocketInfo, new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic", topicId, IP, PORT, STREAM_ID));
+        Assert.assertNotEquals(topicSocketInfo, new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic", topicId, IP, PORT, STREAM_ID, "another_host"));
         Assert.assertNotNull(topicSocketInfo.toString());
-        Assert.assertTrue(topicSocketInfo.hashCode() == readedInfo.hashCode());
+        Assert.assertEquals(topicSocketInfo.hashCode(), readedInfo.hashCode());
         Assert.assertEquals(topicSocketInfo.getInstanceId(), instanceId);
         Assert.assertEquals(topicSocketInfo.getUniqueId(), uniqueId);
         Assert.assertEquals(topicSocketInfo.getTopicName(), "topic");
         Assert.assertEquals(topicSocketInfo.getTransportType(), AutoDiscTransportType.PUB_IPC);
         Assert.assertEquals(topicSocketInfo.getTopicId(), topicId);
-        Assert.assertTrue(topicSocketInfo.getIpAddress() == IP);
-        Assert.assertTrue(topicSocketInfo.getPort() == PORT);
-        Assert.assertTrue(topicSocketInfo.getStreamId() == STREAM_ID);
+        Assert.assertEquals(topicSocketInfo.getHostname(), HOSTNAME);
+        Assert.assertEquals(IP, topicSocketInfo.getIpAddress());
+        Assert.assertEquals(PORT, topicSocketInfo.getPort());
+        Assert.assertEquals(STREAM_ID, topicSocketInfo.getStreamId());
+        Assert.assertEquals(HOSTNAME, topicSocketInfo.getHostname());
         Assert.assertFalse(topicSocketInfo.hasSecurity());
 
         // Check again the limits
-        Assert.assertTrue(serializer.getOffset() == readedInfo.serializedSize());
+        Assert.assertEquals(serializer.getOffset(), readedInfo.serializedSize());
     }
 
     @Test
@@ -76,7 +79,7 @@ public class AutoDiscTopicSocketInfoTest
         final UUID uniqueId = UUID.randomUUID();
         final UUID topicId = UUID.randomUUID();
 
-        final AutoDiscTopicSocketInfo topicSocketInfo = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, uniqueId, "topic", topicId, IP, PORT, STREAM_ID, 22);
+        final AutoDiscTopicSocketInfo topicSocketInfo = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, uniqueId, "topic", topicId, IP, PORT, STREAM_ID, HOSTNAME,22);
 
         // Create the buffer to serialize it
         final ByteBuffer buffer = ByteBuffer.allocate(1024);
@@ -87,7 +90,7 @@ public class AutoDiscTopicSocketInfoTest
         topicSocketInfo.toBinary(serializer);
 
         // Check the current offset, should be the serialization size
-        Assert.assertTrue(serializer.getOffset() == topicSocketInfo.serializedSize());
+        Assert.assertEquals(serializer.getOffset(), topicSocketInfo.serializedSize());
 
         // Flip the buffer
         buffer.limit(serializer.getOffset());
@@ -103,21 +106,22 @@ public class AutoDiscTopicSocketInfoTest
         Assert.assertEquals(topicSocketInfo, topicSocketInfo);
         Assert.assertEquals(topicSocketInfo, readedInfo);
         Assert.assertNotEquals(topicSocketInfo, null);
-        Assert.assertNotEquals(topicSocketInfo, new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic", topicId, IP, PORT, STREAM_ID));
+        Assert.assertNotEquals(topicSocketInfo, new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic", topicId, IP, PORT, STREAM_ID, "another_host"));
         Assert.assertNotNull(topicSocketInfo.toString());
-        Assert.assertTrue(topicSocketInfo.hashCode() == readedInfo.hashCode());
+        Assert.assertEquals(topicSocketInfo.hashCode(), readedInfo.hashCode());
         Assert.assertEquals(topicSocketInfo.getInstanceId(), instanceId);
         Assert.assertEquals(topicSocketInfo.getUniqueId(), uniqueId);
         Assert.assertEquals(topicSocketInfo.getTopicName(), "topic");
         Assert.assertEquals(topicSocketInfo.getTransportType(), AutoDiscTransportType.PUB_IPC);
         Assert.assertEquals(topicSocketInfo.getTopicId(), topicId);
-        Assert.assertTrue(topicSocketInfo.getIpAddress() == IP);
-        Assert.assertTrue(topicSocketInfo.getPort() == PORT);
-        Assert.assertTrue(topicSocketInfo.getStreamId() == STREAM_ID);
+        Assert.assertEquals(IP, topicSocketInfo.getIpAddress());
+        Assert.assertEquals(PORT, topicSocketInfo.getPort());
+        Assert.assertEquals(STREAM_ID, topicSocketInfo.getStreamId());
+        Assert.assertEquals(HOSTNAME, topicSocketInfo.getHostname());
         Assert.assertTrue(topicSocketInfo.hasSecurity());
-        Assert.assertTrue(topicSocketInfo.getSecurityId() == 22);
+        Assert.assertEquals(22, topicSocketInfo.getSecurityId());
 
         // Check again the limits
-        Assert.assertTrue(serializer.getOffset() == readedInfo.serializedSize());
+        Assert.assertEquals(serializer.getOffset(), readedInfo.serializedSize());
     }
 }

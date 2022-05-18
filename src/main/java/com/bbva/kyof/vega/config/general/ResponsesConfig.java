@@ -55,6 +55,10 @@ public class ResponsesConfig implements IConfiguration
     @XmlTransient
     @Getter private SubnetAddress subnetAddress;
 
+    /**  Alternative hostname for Unicast*/
+    @XmlElement(name = "unicast_alternative_hostname")
+    @Getter private String hostname;
+
     @Override
     public void completeAndValidateConfig() throws VegaException
     {
@@ -62,6 +66,7 @@ public class ResponsesConfig implements IConfiguration
         this.checkNumStreams();
         this.checkSubnet();
         this.checkRcvPoller();
+        this.checkHostname();
     }
 
     /** Check name of the receiver poller */
@@ -106,5 +111,17 @@ public class ResponsesConfig implements IConfiguration
     {
         // Create the subnet address
         this.subnetAddress = ConfigUtils.getFullMaskSubnetFromStringOrDefault(this.subnet);
+    }
+
+    /**
+     * Checks if the hostname is configured. If is not configured, the hostname is set by subnet by default
+     */
+    private void checkHostname()
+    {
+        if(this.hostname == null)
+        {
+            //avoid null
+            this.hostname = subnetAddress.getIpAddres().getHostName();
+        }
     }
 }

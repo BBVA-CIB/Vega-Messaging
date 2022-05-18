@@ -22,10 +22,15 @@ import io.aeron.driver.MediaDriver;
 import org.agrona.CloseHelper;
 import org.agrona.concurrent.UnsafeBuffer;
 import org.easymock.EasyMock;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -128,7 +133,7 @@ public class PublishersManagerIpcMcastTest
         final AutoDiscTopicInfo topicInfo1 = new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.PUB_IPC, topicPublisher.getUniqueId(), "topic1");
         Assert.assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicInfos().contains(topicInfo1));
 
-        Assert.assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size() == 1);
+        Assert.assertEquals(1, AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size());
     }
 
     @Test
@@ -147,7 +152,8 @@ public class PublishersManagerIpcMcastTest
                 "224.1.1.1",
                 "224.1.1.2",
                 SUBNET_ADDRESS.toString(),
-                SUBNET_ADDRESS);
+                SUBNET_ADDRESS,
+                null);
 
         // Create several topic publishers
         final ITopicPublisher topicPublisher = publisherManager.createTopicPublisher("topic1", templateMcast, null);
@@ -168,32 +174,32 @@ public class PublishersManagerIpcMcastTest
         Assert.assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicInfos().contains(topicInfo4));
 
         // There should be 4 topic sockets, one per topic publisher but only 2 actual publishers are created
-        Assert.assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size() == 4);
+        Assert.assertEquals(4, AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size());
 
         // Review them
         AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().forEach((topicSocket) ->
         {
-            Assert.assertTrue(topicSocket.getPort() == 28000);
-            Assert.assertTrue(topicSocket.getTransportType() == AutoDiscTransportType.PUB_MUL);
+            Assert.assertEquals(28000, topicSocket.getPort());
+            Assert.assertSame(topicSocket.getTransportType(), AutoDiscTransportType.PUB_MUL);
             Assert.assertTrue(topicSocket.getStreamId() == 2 || topicSocket.getStreamId() == 3);
             Assert.assertTrue(topicSocket.getTopicName().startsWith("topic"));
         });
 
         // Now destroy them one by one...
         publisherManager.destroyTopicPublisher("topic1");
-        Assert.assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size() == 3);
+        Assert.assertEquals(3, AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size());
         Assert.assertFalse(AUTO_DISC_MANAGER_MOCK.getRegTopicInfos().contains(topicInfo1));
 
         publisherManager.destroyTopicPublisher("topic2");
-        Assert.assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size() == 2);
+        Assert.assertEquals(2, AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size());
         Assert.assertFalse(AUTO_DISC_MANAGER_MOCK.getRegTopicInfos().contains(topicInfo2));
 
         publisherManager.destroyTopicPublisher("topic3");
-        Assert.assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size() == 1);
+        Assert.assertEquals(1, AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size());
         Assert.assertFalse(AUTO_DISC_MANAGER_MOCK.getRegTopicInfos().contains(topicInfo3));
 
         publisherManager.destroyTopicPublisher("topic4");
-        Assert.assertTrue(AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size() == 0);
+        Assert.assertEquals(0, AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().size());
         Assert.assertFalse(AUTO_DISC_MANAGER_MOCK.getRegTopicInfos().contains(topicInfo4));
     }
 
@@ -211,7 +217,8 @@ public class PublishersManagerIpcMcastTest
                 "224.4.1.1",
                 "224.4.1.2",
                 SUBNET_ADDRESS.toString(),
-                SUBNET_ADDRESS);
+                SUBNET_ADDRESS,
+                null);
 
         // Create several topic publishers
         final ITopicPublisher topicPublisher = publisherManager.createTopicPublisher("topic1", templateMcast, null);
@@ -266,13 +273,14 @@ public class PublishersManagerIpcMcastTest
                 "224.4.1.1",
                 "224.4.1.2",
                 SUBNET_ADDRESS.toString(),
-                SUBNET_ADDRESS);
+                SUBNET_ADDRESS,
+                null);
 
         // Create a topic publisher
-        final Set<Integer> secureSubs = new HashSet<>(Arrays.asList(22222));
-        final Set<Integer> securePubs = new HashSet<>(Arrays.asList(11111));
+        final Set<Integer> secureSubs = new HashSet<>(Collections.singletonList(22222));
+        final Set<Integer> securePubs = new HashSet<>(Collections.singletonList(11111));
         final TopicSecurityTemplateConfig securityTemplateConfig = new TopicSecurityTemplateConfig("topic1", 100L, securePubs, secureSubs);
-        final SecureTopicPublisherIpcMcast topicPublisher = (SecureTopicPublisherIpcMcast)publisherManager.createTopicPublisher("topic1", templateMcast, securityTemplateConfig);
+        final SecureTopicPublisherIpcMcast topicPublisher = (SecureTopicPublisherIpcMcast) publisherManager.createTopicPublisher("topic1", templateMcast, securityTemplateConfig);
 
         // Create a receiver
         SimpleReceiver simpleReceiver1 = new SimpleReceiver(AERON, TransportMediaType.MULTICAST, "224.4.1.1", 28033, 2, SUBNET_ADDRESS);
@@ -322,11 +330,11 @@ public class PublishersManagerIpcMcastTest
     {
         if (simpleReceiver1.getReusableReceivedMsg().getTopicPublisherId() != null)
         {
-            Assert.assertTrue(topicPublisher.getUniqueId().equals(simpleReceiver1.getReusableReceivedMsg().getTopicPublisherId()));
+            Assert.assertEquals(topicPublisher.getUniqueId(), simpleReceiver1.getReusableReceivedMsg().getTopicPublisherId());
         }
         else
         {
-            Assert.assertTrue(topicPublisher.getUniqueId().equals(simpleReceiver2.getReusableReceivedMsg().getTopicPublisherId()));
+            Assert.assertEquals(topicPublisher.getUniqueId(), simpleReceiver2.getReusableReceivedMsg().getTopicPublisherId());
         }
 
         simpleReceiver1.reset();
@@ -364,7 +372,7 @@ public class PublishersManagerIpcMcastTest
 
     private static class OwnSecPubTopicsChangesListener implements IOwnSecPubTopicsChangesListener
     {
-        private Set<UUID> secureTopicPubAdded = new HashSet<>();
+        private final Set<UUID> secureTopicPubAdded = new HashSet<>();
 
         @Override
         public void onOwnSecureTopicPublisherAdded(UUID topicPubId, byte[] sessionKey, TopicSecurityTemplateConfig securityConfig)

@@ -259,6 +259,60 @@ public final class InetUtil
     }
 
     /**
+     * Given an IP, this method try to resolve the Hostname address by this IP.
+     * If IP is null or empty or there is any error resolving ip, it will return an empty hostname.
+     *
+     * @param ipAddress  Alternative hostname to be used to resolve ip.
+     * @return A valid ip to use into client discovery information.
+     * @since 3.0.0
+     */
+    public static String getHostnameByIpAddress(final String ipAddress)
+    {
+        InetAddress inetAddress = getInetAddressByName(ipAddress);
+        return inetAddress == null ? "" : inetAddress.getHostName();
+    }
+
+    /**
+     * Given a Hostname, this method try to resolve the IP address by this hostname and convert to Int.
+     * If hostname is null or empty or there is any error resolving ip, it will return the default IP, passed as param.
+     *
+     * @param hostname  Alternative hostname to be used to resolve ip.
+     * @param defaultIp int ip resolved by subnet, to return as default
+     * @return A valid ip to use into client discovery information.
+     * @since 3.0.0
+     */
+    public static int getIpAddressAsIntByHostnameOrDefault(final String hostname, final int defaultIp)
+    {
+        InetAddress inetAddress = getInetAddressByName(hostname);
+        return inetAddress == null ? defaultIp : InetUtil.convertIpAddressToInt(inetAddress.getHostAddress());
+    }
+
+    /**
+     * Given a name (a valid hostname or a valid ip), return the InetAddress of this name.
+     *
+     * @param name Hostname or ip to resolve
+     * @return InetAddress of the hostname or null if there is any error.
+     * * @since 3.0.0
+     */
+    private static InetAddress getInetAddressByName(final String name)
+    {
+        if(name == null || name.isEmpty())
+        {
+            return null;
+        }
+
+        try
+        {
+            return InetAddress.getByName(name);
+        }
+        catch (final UnknownHostException e)
+        {
+            log.warn("Unexpected exception resolving hostname[{}]: ", name, e);
+            return null;
+        }
+    }
+
+    /**
      * Return all ip 4 interface address.
      *
      * @return all interface address that matches the given subnet

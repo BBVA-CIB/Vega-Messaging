@@ -7,6 +7,7 @@ import com.bbva.kyof.vega.protocol.common.VegaContext;
 import com.bbva.kyof.vega.serialization.IUnsafeSerializable;
 import com.bbva.kyof.vega.serialization.UnsafeBufferSerializer;
 import com.bbva.kyof.vega.util.net.AeronChannelHelper;
+import com.bbva.kyof.vega.util.net.InetUtil;
 import io.aeron.Publication;
 import io.aeron.logbuffer.BufferClaim;
 import lombok.Getter;
@@ -94,7 +95,7 @@ public class AeronPublisher implements IAeronPublisher, Closeable
         // Create the aeron publisher channel
         final String publicationChannel = this.createPublicationChannel(params);
 
-        log.info("Creating AeronPublisher with params [{}], channel [{}]", params.toString(), publicationChannel);
+        log.info("Creating AeronPublisher with params [{}], channel [{}]", params, publicationChannel);
 
         // Create the aeron publisher
         this.publication = vegaContext.getAeron().addPublication(publicationChannel, params.getStreamId());
@@ -324,7 +325,9 @@ public class AeronPublisher implements IAeronPublisher, Closeable
         switch (params.getTransportType())
         {
             case UNICAST:
-                return AeronChannelHelper.createUnicastChannelString(params.getIpAddress(), params.getPort(), params.getSubnetAddress());
+                // since 3.0.0: get ipAddress by hostname
+                final int ipAddress = InetUtil.getIpAddressAsIntByHostnameOrDefault(params.getHostname(), params.getIpAddress());
+                return AeronChannelHelper.createUnicastChannelString(ipAddress, params.getPort(), params.getSubnetAddress());
             case MULTICAST:
                 return AeronChannelHelper.createMulticastChannelString(params.getIpAddress(), params.getPort(), params.getSubnetAddress());
             case IPC:

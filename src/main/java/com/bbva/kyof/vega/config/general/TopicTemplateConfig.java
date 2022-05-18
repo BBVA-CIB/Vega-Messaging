@@ -82,12 +82,17 @@ public class TopicTemplateConfig implements IConfiguration
     @XmlTransient
     @Getter private SubnetAddress subnetAddress;
 
+    /** Alternative hostname to publish in unicast mode */
+    @XmlElement(name = "unicast_alternative_hostname")
+    @Getter private String hostname;
+
     @Override
     public void completeAndValidateConfig() throws VegaException
     {
         this.checkName();
         this.checkRcvPoller();
         this.checkTransportType();
+        this.checkHostname();
 
         if (this.transportType == TransportMediaType.UNICAST)
         {
@@ -208,5 +213,17 @@ public class TopicTemplateConfig implements IConfiguration
     private void checkSubnet() throws VegaException
     {
         this.subnetAddress = ConfigUtils.getFullMaskSubnetFromStringOrDefault(this.subnet);
+    }
+
+    /**
+     * Checks if the hostname is configured. If is not configured, the hostname is set by subnet by default
+     */
+    private void checkHostname()
+    {
+        if(this.hostname == null)
+        {
+            //avoid null
+            this.hostname = subnetAddress.getIpAddres().getHostName();
+        }
     }
 }

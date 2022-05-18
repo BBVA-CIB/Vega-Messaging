@@ -90,7 +90,8 @@ class ControlPublishers implements Closeable
                 info.getControlRcvTransportIp(),
                 info.getControlRcvTransportPort(),
                 info.getControlRcvTransportStreamId(),
-                vegaContext.getInstanceConfig().getControlRcvConfig().getSubnetAddress());
+                vegaContext.getInstanceConfig().getControlRcvConfig().getSubnetAddress(),
+                info.getControlRcvHostname());
 
         // Check if there is already a control publisher with that parameters
         ControlPublisher controlPublisher = this.controlPublishersByParams.get(params);
