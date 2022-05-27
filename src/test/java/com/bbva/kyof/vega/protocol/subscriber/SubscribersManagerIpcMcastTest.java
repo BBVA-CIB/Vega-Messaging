@@ -118,13 +118,13 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
         subscriberManager.subscribeToTopic("mtopic1", templateMcast, null, this);
 
         // Now create multiple "AeronPublishers"
-        final AeronPublisherParams pubParams1 = new AeronPublisherParams(TransportMediaType.MULTICAST, InetUtil.convertIpAddressToInt("224.1.1.1"), 28300, 2, SUBNET_ADDRESS, TestConstants.EMPTY_HOSTNAME);
+        final AeronPublisherParams pubParams1 = new AeronPublisherParams(TransportMediaType.MULTICAST, InetUtil.convertIpAddressToInt("224.1.1.1"), 28300, 2, SUBNET_ADDRESS);
         final AeronPublisher publisher1 = new AeronPublisher(VEGA_CONTEXT, pubParams1);
 
         final AutoDiscTopicSocketInfo topicSocketInfo1 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "mtopic1", UUID.randomUUID(),
                 pubParams1.getIpAddress(), pubParams1.getPort(), pubParams1.getStreamId(),TestConstants.EMPTY_HOSTNAME);
         final AutoDiscTopicSocketInfo topicSocketInfo2 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "mtopic1", UUID.randomUUID(),
-                pubParams1.getIpAddress(), pubParams1.getPort(), pubParams1.getStreamId(), pubParams1.getHostname());
+                pubParams1.getIpAddress(), pubParams1.getPort(), pubParams1.getStreamId(),TestConstants.EMPTY_HOSTNAME);
         final AutoDiscTopicSocketInfo secureTopicSocketInfo = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "mtopic1", UUID.randomUUID(),
                 pubParams1.getIpAddress(), pubParams1.getPort(), pubParams1.getStreamId(), TestConstants.EMPTY_HOSTNAME ,22);
 
@@ -188,22 +188,21 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
         subscriberManager.subscribeToTopic("mtopic2", templateMcast, null, this);
 
         // Now create multiple "AeronPublishers"
-        final AeronPublisherParams pubParams1 = new AeronPublisherParams(TransportMediaType.MULTICAST, InetUtil.convertIpAddressToInt("224.1.1.1"), 28300, 2, SUBNET_ADDRESS, TestConstants.EMPTY_HOSTNAME);
+        final AeronPublisherParams pubParams1 = new AeronPublisherParams(TransportMediaType.MULTICAST, InetUtil.convertIpAddressToInt("224.1.1.1"), 28300, 2, SUBNET_ADDRESS);
         final AeronPublisher publisher1 = new AeronPublisher(VEGA_CONTEXT, pubParams1);
-        final AeronPublisherParams pubParams2 = new AeronPublisherParams(TransportMediaType.MULTICAST, InetUtil.convertIpAddressToInt("224.1.1.1"), 28300, 4, SUBNET_ADDRESS,
-                TestConstants.EMPTY_HOSTNAME);
+        final AeronPublisherParams pubParams2 = new AeronPublisherParams(TransportMediaType.MULTICAST, InetUtil.convertIpAddressToInt("224.1.1.1"), 28300, 4, SUBNET_ADDRESS);
         final AeronPublisher publisher2 = new AeronPublisher(VEGA_CONTEXT, pubParams2);
-        final AeronPublisherParams pubParams3 = new AeronPublisherParams(TransportMediaType.MULTICAST, InetUtil.convertIpAddressToInt("224.1.1.3"), 28300, 2, SUBNET_ADDRESS,TestConstants.EMPTY_HOSTNAME);
+        final AeronPublisherParams pubParams3 = new AeronPublisherParams(TransportMediaType.MULTICAST, InetUtil.convertIpAddressToInt("224.1.1.3"), 28300, 2, SUBNET_ADDRESS);
         final AeronPublisher publisher3 = new AeronPublisher(VEGA_CONTEXT, pubParams3);
 
         final AutoDiscTopicSocketInfo topicSocketInfo1 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "mtopic1", UUID.randomUUID(),
-                pubParams1.getIpAddress(), pubParams1.getPort(), pubParams1.getStreamId(), pubParams1.getHostname());
+                pubParams1.getIpAddress(), pubParams1.getPort(), pubParams1.getStreamId(), TestConstants.EMPTY_HOSTNAME);
         final AutoDiscTopicSocketInfo topicSocketInfo2 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "mtopic1", UUID.randomUUID(),
-                pubParams2.getIpAddress(), pubParams2.getPort(), pubParams2.getStreamId(), pubParams2.getHostname());
+                pubParams2.getIpAddress(), pubParams2.getPort(), pubParams2.getStreamId(), TestConstants.EMPTY_HOSTNAME);
         final AutoDiscTopicSocketInfo topicSocketInfo3 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "mtopic1", UUID.randomUUID(),
-                pubParams3.getIpAddress(), pubParams3.getPort(), pubParams3.getStreamId(), pubParams3.getHostname());
+                pubParams3.getIpAddress(), pubParams3.getPort(), pubParams3.getStreamId(), TestConstants.EMPTY_HOSTNAME);
         final AutoDiscTopicSocketInfo topicSocketInfo4 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "mtopic2", UUID.randomUUID(),
-                pubParams3.getIpAddress(), pubParams3.getPort(), pubParams3.getStreamId(), pubParams3.getHostname());
+                pubParams3.getIpAddress(), pubParams3.getPort(), pubParams3.getStreamId(), TestConstants.EMPTY_HOSTNAME);
 
         // Wait a bit
         Thread.sleep(2000);
@@ -295,33 +294,33 @@ public class SubscribersManagerIpcMcastTest implements ITopicSubListener
         subscriberManager.subscribeToTopic("mtopic1", templateMcast, securityTemplateConfig, this);
 
         // Now create a publisher
-        final AeronPublisherParams pubParams1 = new AeronPublisherParams(TransportMediaType.MULTICAST, InetUtil.convertIpAddressToInt("224.1.1.1"), 28300, 2, SUBNET_ADDRESS,TestConstants.EMPTY_HOSTNAME);
+        final AeronPublisherParams pubParams1 = new AeronPublisherParams(TransportMediaType.MULTICAST, InetUtil.convertIpAddressToInt("224.1.1.1"), 28300, 2, SUBNET_ADDRESS);
         final AeronPublisher publisher1 = new AeronPublisher(VEGA_CONTEXT, pubParams1);
 
         // Notify with no security, the messages should not arrive
         AutoDiscTopicSocketInfo topicSocketInfo = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "mtopic1", UUID.randomUUID(), pubParams1.getIpAddress(),
-                pubParams1.getPort(), pubParams1.getStreamId(),pubParams1.getHostname());
+                pubParams1.getPort(), pubParams1.getStreamId(), TestConstants.EMPTY_HOSTNAME);
         subscriberManager.onNewAutoDiscTopicSocketInfo(topicSocketInfo);
         Thread.sleep(1000);
         sendMessageAndCheckArrival(publisher1, false);
 
         // Now a secured one, but with a wrong secure id
         topicSocketInfo = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "mtopic1", UUID.randomUUID(), pubParams1.getIpAddress(), pubParams1.getPort(),
-                pubParams1.getStreamId(), pubParams1.getHostname(), 88);
+                pubParams1.getStreamId(), TestConstants.EMPTY_HOSTNAME, 88);
         subscriberManager.onNewAutoDiscTopicSocketInfo(topicSocketInfo);
         Thread.sleep(1000);
         sendMessageAndCheckArrival(publisher1, false);
 
         // Now with the right security parameters, but wont work because the RSA don't have the pub key
         topicSocketInfo = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "mtopic1", UUID.randomUUID(), pubParams1.getIpAddress(), pubParams1.getPort(),
-                pubParams1.getStreamId(), pubParams1.getHostname(), 33333);
+                pubParams1.getStreamId(), TestConstants.EMPTY_HOSTNAME, 33333);
         subscriberManager.onNewAutoDiscTopicSocketInfo(topicSocketInfo);
         Thread.sleep(1000);
         sendMessageAndCheckArrival(publisher1, false);
 
         // Now with something really valid
         topicSocketInfo = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "mtopic1", UUID.randomUUID(), pubParams1.getIpAddress(), pubParams1.getPort(),
-                pubParams1.getStreamId(), pubParams1.getHostname(), 22222);
+                pubParams1.getStreamId(), TestConstants.EMPTY_HOSTNAME, 22222);
         subscriberManager.onNewAutoDiscTopicSocketInfo(topicSocketInfo);
         Thread.sleep(1000);
         sendMessageAndCheckArrival(publisher1, true);

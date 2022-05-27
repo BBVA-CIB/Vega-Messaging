@@ -61,7 +61,7 @@ class ControlPublisher implements Closeable
         this.params = params;
 
         // Create the aeron publisher channel
-        final String publicationChannel = this.createPublicationChannel(params);
+        final String publicationChannel =  AeronChannelHelper.createUnicastChannelString(params.getIpAddress(), params.getPort(), params.getSubnetAddress());
 
         log.info("Creating ControlPublisher with params [{}], channel [{}]", params, publicationChannel);
 
@@ -173,18 +173,5 @@ class ControlPublisher implements Closeable
 
         // Convert the result
         return PublishResult.fromAeronResult(offerResult);
-    }
-
-    /**
-     * Create the publication channel using the given parameters for the Control Publisher
-     * @param params parameters for the publisher
-     * @return the String representation of the channel
-     */
-    private String createPublicationChannel(final ControlPublisherParams params)
-    {
-        //it is always unicast.
-        // since 3.0.0: get ipAddress by hostname
-        final int ipAddress = InetUtil.getIpAddressAsIntByHostnameOrDefault(params.getHostname(), params.getIpAddress());
-        return AeronChannelHelper.createUnicastChannelString(ipAddress, params.getPort(), params.getSubnetAddress());
     }
 }  

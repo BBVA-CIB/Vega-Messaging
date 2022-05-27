@@ -22,6 +22,9 @@ public class AutoDiscTopicSocketInfo implements IAutoDiscTopicInfo
     /**Constant for security id when the topic is a non secured one */
     public static final int NO_SECURED_CONSTANT = 0;
 
+    /**Constant for hostname when the topic is not going to notify (icp or multicast) */
+    public static final String NO_HOSTNAME = "";
+
     /** Number of internal fields of type Integer */
     private static final int NUM_INT_FIELDS = 4;
 
@@ -57,7 +60,7 @@ public class AutoDiscTopicSocketInfo implements IAutoDiscTopicInfo
     /** Transport stream id */
     @Getter private int streamId;
 
-    /** Transport hostname  (empty for ipc transport) */
+    /** Transport hostname  (empty for ipc or multicast transport) */
     @Getter private String hostname;
 
     /** Security ID of the topic if security is activated, 0 if security is not active */

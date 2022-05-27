@@ -67,19 +67,18 @@ public class SubcribersPollerTest
 
         final int mcastIp = InetUtil.convertIpAddressToInt("224.1.1.1");
         final int ucastIp = InetUtil.convertIpAddressToInt(SUBNET_ADDRESS.getIpAddres().getHostAddress());
-        final String ucastHostname = SUBNET_ADDRESS.getIpAddres().getHostName();
 
-        final AeronSubscriberParams ipcSubscriberParams = new AeronSubscriberParams(TransportMediaType.IPC, mcastIp, 0, 2, null, null);
-        final AeronSubscriberParams mcastSubscriberParams = new AeronSubscriberParams(TransportMediaType.MULTICAST, mcastIp, 28889, 2, SUBNET_ADDRESS, null);
-        final AeronSubscriberParams unicastSubscriberParams = new AeronSubscriberParams(TransportMediaType.UNICAST, ucastIp, 29333, 2, SUBNET_ADDRESS, ucastHostname);
+        final AeronSubscriberParams ipcSubscriberParams = new AeronSubscriberParams(TransportMediaType.IPC, mcastIp, 0, 2, null);
+        final AeronSubscriberParams mcastSubscriberParams = new AeronSubscriberParams(TransportMediaType.MULTICAST, mcastIp, 28889, 2, SUBNET_ADDRESS);
+        final AeronSubscriberParams unicastSubscriberParams = new AeronSubscriberParams(TransportMediaType.UNICAST, ucastIp, 29333, 2, SUBNET_ADDRESS);
 
         IPC_SUBSCRIBER = new AeronSubscriber(VEGA_CONTEXT, ipcSubscriberParams);
         MCAST_SUBSCRIBER = new AeronSubscriber(VEGA_CONTEXT, mcastSubscriberParams);
         UCAST_SUBSCRIBER = new AeronSubscriber(VEGA_CONTEXT, unicastSubscriberParams);
 
-        final AeronPublisherParams ipcPubParams = new AeronPublisherParams(TransportMediaType.IPC, mcastIp, 0, 2, null, null);
-        final AeronPublisherParams mcastPubParams = new AeronPublisherParams(TransportMediaType.MULTICAST, mcastIp, 28889, 2, SUBNET_ADDRESS, null);
-        final AeronPublisherParams unicastPubParams = new AeronPublisherParams(TransportMediaType.UNICAST, ucastIp, 29333, 2, SUBNET_ADDRESS, ucastHostname);
+        final AeronPublisherParams ipcPubParams = new AeronPublisherParams(TransportMediaType.IPC, mcastIp, 0, 2, null);
+        final AeronPublisherParams mcastPubParams = new AeronPublisherParams(TransportMediaType.MULTICAST, mcastIp, 28889, 2, SUBNET_ADDRESS);
+        final AeronPublisherParams unicastPubParams = new AeronPublisherParams(TransportMediaType.UNICAST, ucastIp, 29333, 2, SUBNET_ADDRESS);
 
         IPC_PUBLISHER = new AeronPublisher(VEGA_CONTEXT, ipcPubParams);
         MCAST_PUBLISHER = new AeronPublisher(VEGA_CONTEXT, mcastPubParams);

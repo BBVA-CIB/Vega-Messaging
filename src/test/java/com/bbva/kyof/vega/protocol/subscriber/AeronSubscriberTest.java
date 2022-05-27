@@ -1,10 +1,9 @@
 package com.bbva.kyof.vega.protocol.subscriber;
 
-import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.config.general.GlobalConfiguration;
 import com.bbva.kyof.vega.config.general.TransportMediaType;
-import com.bbva.kyof.vega.util.net.AeronChannelHelper;
 import com.bbva.kyof.vega.protocol.common.VegaContext;
+import com.bbva.kyof.vega.util.net.AeronChannelHelper;
 import com.bbva.kyof.vega.util.net.InetUtil;
 import com.bbva.kyof.vega.util.net.SubnetAddress;
 import io.aeron.Aeron;
@@ -59,9 +58,9 @@ public class AeronSubscriberTest
         final int mcastIp = InetUtil.convertIpAddressToInt("224.1.1.1");
         final int ucastIp = InetUtil.convertIpAddressToInt(SUBNET_ADDRESS.getIpAddres().getHostAddress());
 
-        final AeronSubscriberParams ipcSubscriberParams = new AeronSubscriberParams(TransportMediaType.IPC, mcastIp, 0, 2, null, null);
-        final AeronSubscriberParams mcastSubscriberParams = new AeronSubscriberParams(TransportMediaType.MULTICAST, mcastIp, 28889, 2, SUBNET_ADDRESS, null);
-        final AeronSubscriberParams unicastSubscriberParams = new AeronSubscriberParams(TransportMediaType.UNICAST, ucastIp, 29333, 2, SUBNET_ADDRESS, SUBNET_ADDRESS.getIpAddres().getHostName());
+        final AeronSubscriberParams ipcSubscriberParams = new AeronSubscriberParams(TransportMediaType.IPC, mcastIp, 0, 2, null);
+        final AeronSubscriberParams mcastSubscriberParams = new AeronSubscriberParams(TransportMediaType.MULTICAST, mcastIp, 28889, 2, SUBNET_ADDRESS);
+        final AeronSubscriberParams unicastSubscriberParams = new AeronSubscriberParams(TransportMediaType.UNICAST, ucastIp, 29333, 2, SUBNET_ADDRESS);
 
         final AeronSubscriber ipcSubscriber = new AeronSubscriber(VEGA_CONTEXT, ipcSubscriberParams);
         final AeronSubscriber mcastSubscriber = new AeronSubscriber(VEGA_CONTEXT, mcastSubscriberParams);

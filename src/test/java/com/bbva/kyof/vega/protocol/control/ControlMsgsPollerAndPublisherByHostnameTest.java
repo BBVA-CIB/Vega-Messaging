@@ -1,6 +1,5 @@
 package com.bbva.kyof.vega.protocol.control;
 
-import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.config.general.GlobalConfiguration;
 import com.bbva.kyof.vega.exception.VegaException;
 import com.bbva.kyof.vega.msg.MsgSecurityErrorResp;
@@ -22,7 +21,6 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.security.KeyPair;
 import java.security.PublicKey;
@@ -75,12 +73,10 @@ public class ControlMsgsPollerAndPublisherByHostnameTest
 
         final int ucastIp = InetUtil.convertIpAddressToInt(subnetAddress.getIpAddres().getHostAddress());
 
-        final String hostname = subnetAddress.getIpAddres().getHostName();
-
-        final ControlSubscriberParams controlSubscriberParams = new ControlSubscriberParams(ucastIp, 29333, 2, subnetAddress, hostname);
+        final ControlSubscriberParams controlSubscriberParams = new ControlSubscriberParams(ucastIp, 29333, 2, subnetAddress);
         CONTROL_SUB = new ControlSubscriber(vegaContext, controlSubscriberParams);
 
-        final ControlPublisherParams controlPubParams = new ControlPublisherParams(ucastIp, 29333, 2, subnetAddress, hostname);
+        final ControlPublisherParams controlPubParams = new ControlPublisherParams(ucastIp, 29333, 2, subnetAddress);
         CONTROL_PUB = new ControlPublisher(vegaContext, controlPubParams);
 
         Assert.assertEquals(CONTROL_PUB.getParams(), controlPubParams);
@@ -228,9 +224,12 @@ public class ControlMsgsPollerAndPublisherByHostnameTest
 
     private static class Listener implements ISecurityRequestListener, ISecurityResponseListener
     {
-        @Getter MsgSecurityReq rcvRequest = null;
-        @Getter MsgSecurityResp rcvResp = null;
-        @Getter MsgSecurityErrorResp rcvErrorResp = null;
+        @Getter
+        MsgSecurityReq rcvRequest = null;
+        @Getter
+        MsgSecurityResp rcvResp = null;
+        @Getter
+        MsgSecurityErrorResp rcvErrorResp = null;
 
         @Override
         public void onSecurityRequestReceived(MsgSecurityReq securityReq)

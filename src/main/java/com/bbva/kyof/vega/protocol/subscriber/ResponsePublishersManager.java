@@ -84,8 +84,7 @@ class ResponsePublishersManager implements Closeable
                 info.getResponseTransportIp(),
                 info.getResponseTransportPort(),
                 info.getResponseTransportStreamId(),
-                vegaContext.getInstanceConfig().getResponsesConfig().getSubnetAddress(),
-                info.getResponseTransportHostname());
+                vegaContext.getInstanceConfig().getResponsesConfig().getSubnetAddress());
 
         // Check if there is already a response publisher with that parameters
         AeronPublisher responsePublisher = this.responsePublishersByParams.get(params);

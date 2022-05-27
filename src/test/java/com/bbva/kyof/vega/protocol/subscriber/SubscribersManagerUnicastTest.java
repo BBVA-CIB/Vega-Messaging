@@ -190,7 +190,7 @@ public class SubscribersManagerUnicastTest implements ITopicSubListener
         AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().forEach((autoDiscTopicSocketInfo ->
         {
             final AeronPublisherParams pubParams = new AeronPublisherParams(TransportMediaType.UNICAST, autoDiscTopicSocketInfo.getIpAddress(), autoDiscTopicSocketInfo.getPort(),
-                    autoDiscTopicSocketInfo.getStreamId(), SUBNET_ADDRESS, autoDiscTopicSocketInfo.getHostname());
+                    autoDiscTopicSocketInfo.getStreamId(), SUBNET_ADDRESS);
             final AeronPublisher publisher = new AeronPublisher(VEGA_CONTEXT, pubParams);
             publishersByTopic.put(autoDiscTopicSocketInfo.getTopicName(), publisher);
         }));

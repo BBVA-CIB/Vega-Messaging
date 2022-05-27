@@ -193,8 +193,7 @@ class SubscribersManagerIpcMcast extends AbstractSubscribersManager
                 topicSocketInfo.getIpAddress(),
                 topicSocketInfo.getPort(),
                 topicSocketInfo.getStreamId(),
-                topicSubscriber.getTopicConfig().getSubnetAddress(),
-                null);
+                topicSubscriber.getTopicConfig().getSubnetAddress());
     }
 
     /**

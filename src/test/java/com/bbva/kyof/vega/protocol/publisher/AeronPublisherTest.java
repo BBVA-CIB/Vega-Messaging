@@ -1,6 +1,5 @@
 package com.bbva.kyof.vega.protocol.publisher;
 
-import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.Version;
 import com.bbva.kyof.vega.config.general.GlobalConfiguration;
 import com.bbva.kyof.vega.config.general.TransportMediaType;
@@ -78,8 +77,7 @@ public class AeronPublisherTest
                 InetUtil.convertIpAddressToInt(SUBNET_ADDRESS.getIpAddres().getHostAddress()),
                 28005,
                 10,
-                SUBNET_ADDRESS,
-                TestConstants.EMPTY_HOSTNAME);
+                SUBNET_ADDRESS);
 
         final AeronPublisher publisher = new AeronPublisher(VEGA_CONTEXT, params);
 
@@ -95,12 +93,12 @@ public class AeronPublisherTest
 
         // Create a topic ID
         final UUID topicId = UUID.randomUUID();
-        
+
         // Create a sequence number
         final long sequenceNumber = new Random().nextLong();
-        
+
         // Send the message
-        while(true)
+        while (true)
         {
             if (publisher.sendMessage(MsgType.DATA, topicId, sendBuffer, sequenceNumber, 0, 1024) == PublishResult.BACK_PRESSURED)
             {
@@ -123,8 +121,7 @@ public class AeronPublisherTest
                 InetUtil.convertIpAddressToInt("224.1.1.1"),
                 28001,
                 4,
-                SUBNET_ADDRESS,
-                TestConstants.EMPTY_HOSTNAME);
+                SUBNET_ADDRESS);
 
         final AeronPublisher publisher = new AeronPublisher(VEGA_CONTEXT, params);
 
@@ -151,8 +148,7 @@ public class AeronPublisherTest
                 InetUtil.convertIpAddressToInt(SUBNET_ADDRESS.getIpAddres().getHostAddress()),
                 28002,
                 5,
-                SUBNET_ADDRESS,
-                TestConstants.EMPTY_HOSTNAME);
+                SUBNET_ADDRESS);
 
         final AeronPublisher publisher = new AeronPublisher(VEGA_CONTEXT, params);
 
@@ -179,7 +175,6 @@ public class AeronPublisherTest
                 0,
                 0,
                 5,
-                null,
                 null);
 
         final AeronPublisher publisher = new AeronPublisher(VEGA_CONTEXT, params);
@@ -249,10 +244,10 @@ public class AeronPublisherTest
 
         // Create a topic ID
         final UUID topicId = UUID.randomUUID();
-        
+
         // Create a sequence number
         final long sequenceNumber = new Random().nextLong();
-        
+
         // Send the message
         Assert.assertSame(publisher.sendMessage(MsgType.DATA, topicId, sendBuffer, sequenceNumber, 0, msgSize), PublishResult.OK);
 

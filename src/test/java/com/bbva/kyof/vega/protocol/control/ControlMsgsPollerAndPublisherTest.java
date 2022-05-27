@@ -74,10 +74,10 @@ public class ControlMsgsPollerAndPublisherTest
 
         final int ucastIp = InetUtil.convertIpAddressToInt(subnetAddress.getIpAddres().getHostAddress());
 
-        final ControlSubscriberParams controlSubscriberParams = new ControlSubscriberParams(ucastIp, 29333, 2, subnetAddress, TestConstants.EMPTY_HOSTNAME);
+        final ControlSubscriberParams controlSubscriberParams = new ControlSubscriberParams(ucastIp, 29333, 2, subnetAddress);
         CONTROL_SUB = new ControlSubscriber(vegaContext, controlSubscriberParams);
 
-        final ControlPublisherParams controlPubParams = new ControlPublisherParams(ucastIp, 29333, 2, subnetAddress, TestConstants.EMPTY_HOSTNAME);
+        final ControlPublisherParams controlPubParams = new ControlPublisherParams(ucastIp, 29333, 2, subnetAddress);
         CONTROL_PUB = new ControlPublisher(vegaContext, controlPubParams);
 
         Assert.assertEquals(CONTROL_PUB.getParams(), controlPubParams);

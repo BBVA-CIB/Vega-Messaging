@@ -1,5 +1,6 @@
 package com.bbva.kyof.vega.protocol.control;
 
+import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.autodiscovery.AutodiscManager;
 import com.bbva.kyof.vega.autodiscovery.daemon.CommandLineParserTest;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscInstanceInfo;
@@ -111,19 +112,19 @@ public class ControlMsgsManagerTest
         // Create the instance info for the simulated apps
         INSTANCE1_INFO = new AutoDiscInstanceInfo("instance1",
                 VEGA_CONTEXT1.getInstanceUniqueId(),
-                0, 0, 0, null,
+                0, 0, 0, TestConstants.EMPTY_HOSTNAME,
                 CONTRL_MSGS_MNG_1.getControlMsgsSubscriberParams().getIpAddress(),
                 CONTRL_MSGS_MNG_1.getControlMsgsSubscriberParams().getPort(),
                 CONTRL_MSGS_MNG_1.getControlMsgsSubscriberParams().getStreamId(),
-                CONTRL_MSGS_MNG_1.getControlMsgsSubscriberParams().getHostname());
+                TestConstants.EMPTY_HOSTNAME);
 
         INSTANCE2_INFO = new AutoDiscInstanceInfo("instance2",
                 VEGA_CONTEXT2.getInstanceUniqueId(),
-                0, 0, 0, null,
+                0, 0, 0, TestConstants.EMPTY_HOSTNAME,
                 CONTRL_MSGS_MNG_2.getControlMsgsSubscriberParams().getIpAddress(),
                 CONTRL_MSGS_MNG_2.getControlMsgsSubscriberParams().getPort(),
                 CONTRL_MSGS_MNG_2.getControlMsgsSubscriberParams().getStreamId(),
-                CONTRL_MSGS_MNG_2.getControlMsgsSubscriberParams().getHostname());
+                TestConstants.EMPTY_HOSTNAME);
     }
 
     private static void initializeSecurity() throws VegaException

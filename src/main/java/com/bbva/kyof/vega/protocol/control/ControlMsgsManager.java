@@ -150,8 +150,7 @@ public class ControlMsgsManager implements Closeable, IAutodiscInstanceListener
         final int portNumber = AeronChannelHelper.selectPortFromRange(instanceIdHash, controlRcvConfig.getMinPort(), controlRcvConfig.getMaxPort());
 
         // Create the parameters
-        final ControlSubscriberParams params = new ControlSubscriberParams(InetUtil.convertIpAddressToInt(ipAddress), portNumber, streamId, controlRcvConfig.getSubnetAddress(),
-                controlRcvConfig.getHostname());
+        final ControlSubscriberParams params = new ControlSubscriberParams(InetUtil.convertIpAddressToInt(ipAddress), portNumber, streamId, controlRcvConfig.getSubnetAddress());
 
         // Create the subscriber
         return new ControlSubscriber(this.vegaContext, params);

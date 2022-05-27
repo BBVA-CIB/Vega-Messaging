@@ -325,9 +325,7 @@ public class AeronPublisher implements IAeronPublisher, Closeable
         switch (params.getTransportType())
         {
             case UNICAST:
-                // since 3.0.0: get ipAddress by hostname
-                final int ipAddress = InetUtil.getIpAddressAsIntByHostnameOrDefault(params.getHostname(), params.getIpAddress());
-                return AeronChannelHelper.createUnicastChannelString(ipAddress, params.getPort(), params.getSubnetAddress());
+                return AeronChannelHelper.createUnicastChannelString(params.getIpAddress(), params.getPort(), params.getSubnetAddress());
             case MULTICAST:
                 return AeronChannelHelper.createMulticastChannelString(params.getIpAddress(), params.getPort(), params.getSubnetAddress());
             case IPC:

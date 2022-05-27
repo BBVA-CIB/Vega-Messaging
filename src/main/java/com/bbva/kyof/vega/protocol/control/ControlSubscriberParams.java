@@ -24,7 +24,4 @@ public class ControlSubscriberParams
 
     /** Subnet for the publication (null for ipc) */
     @Getter private final SubnetAddress subnetAddress;
-
-    /** Alternative hostname to publish (null  for ipc)*/
-    @Getter private final String hostname;
 }  

@@ -170,11 +170,11 @@ public final class VegaInstance implements IVegaInstance, AvailableImageHandler,
                 responseSubscriberParams.getIpAddress(),
                 responseSubscriberParams.getPort(),
                 responseSubscriberParams.getStreamId(),
-                responseSubscriberParams.getHostname(),
+                config.getResponsesConfig().getHostname(),
                 controlMsgsSubscriberParams.getIpAddress(),
                 controlMsgsSubscriberParams.getPort(),
                 controlMsgsSubscriberParams.getStreamId(),
-                controlMsgsSubscriberParams.getHostname());
+                config.getControlRcvConfig().getHostname());
 
         autodiscoManager.registerInstanceInfo(autoDiscInstanceInfo);
     }

@@ -13,14 +13,13 @@ public class AeronSubscriberParamsTest
     @Test
     public void testMethods()
     {
-        final AeronSubscriberParams params1 = new AeronSubscriberParams(TransportMediaType.UNICAST, 5678, 34, 12, new SubnetAddress("192.168.1.1/24"),"subscriber_host_1");
-        final AeronSubscriberParams params2 = new AeronSubscriberParams(TransportMediaType.UNICAST, 5678, 34, 12, new SubnetAddress("192.168.1.2/24"),"subscriber_host_1");
-        final AeronSubscriberParams params3 = new AeronSubscriberParams(TransportMediaType.UNICAST, 5678, 34, 12, new SubnetAddress("192.168.1.1/24"),"subscriber_host_1");
+        final AeronSubscriberParams params1 = new AeronSubscriberParams(TransportMediaType.UNICAST, 5678, 34, 12, new SubnetAddress("192.168.1.1/24"));
+        final AeronSubscriberParams params2 = new AeronSubscriberParams(TransportMediaType.UNICAST, 5678, 34, 12, new SubnetAddress("192.168.1.2/24"));
+        final AeronSubscriberParams params3 = new AeronSubscriberParams(TransportMediaType.UNICAST, 5678, 34, 12, new SubnetAddress("192.168.1.1/24"));
 
         Assert.assertEquals(5678, params1.getIpAddress());
         Assert.assertEquals(12, params1.getStreamId());
         Assert.assertEquals(34, params1.getPort());
-        Assert.assertEquals("subscriber_host_1", params1.getHostname());
         Assert.assertSame(params1.getTransportType(), TransportMediaType.UNICAST);
         Assert.assertEquals(params1.getSubnetAddress(), new SubnetAddress("192.168.1.1/24"));
         Assert.assertEquals(params1, params3);

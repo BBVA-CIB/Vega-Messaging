@@ -164,11 +164,11 @@ class PublishersManagerIpcMcast extends AbstractPublishersManager<TopicPublisher
             final int portNumber = AeronChannelHelper.selectPortFromRange(topicName, templateCfg.getMinPort(), templateCfg.getMaxPort());
 
             // Create the parameters
-            return new AeronPublisherParams(TransportMediaType.MULTICAST, InetUtil.convertIpAddressToInt(ipAddress), portNumber, streamId, templateCfg.getSubnetAddress(), null);
+            return new AeronPublisherParams(TransportMediaType.MULTICAST, InetUtil.convertIpAddressToInt(ipAddress), portNumber, streamId, templateCfg.getSubnetAddress());
         }
         else
         {
-            return new AeronPublisherParams(TransportMediaType.IPC, 0, 0, streamId, null, null);
+            return new AeronPublisherParams(TransportMediaType.IPC, 0, 0, streamId, null);
         }
     }
 
@@ -189,7 +189,7 @@ class PublishersManagerIpcMcast extends AbstractPublishersManager<TopicPublisher
                 aeronPublisherParams.getIpAddress(),
                 aeronPublisherParams.getPort(),
                 aeronPublisherParams.getStreamId(),
-                aeronPublisherParams.getHostname(),
+                AutoDiscTopicSocketInfo.NO_HOSTNAME,
                 topicPublisher.hasSecurity() ? this.getVegaContext().getSecurityContext().getSecurityId() : AutoDiscTopicSocketInfo.NO_SECURED_CONSTANT);
 
         this.registeredTopicSocketInfosByTopicId.put(topicPublisher.getUniqueId(), autoDiscTopicSocketInfo);

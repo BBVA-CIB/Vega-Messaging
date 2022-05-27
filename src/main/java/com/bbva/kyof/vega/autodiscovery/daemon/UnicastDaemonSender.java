@@ -219,11 +219,17 @@ class UnicastDaemonSender implements IDaemonReceiverListener, Closeable
      */
     private PublicationParams createPublicationParams(final AutoDiscDaemonClientInfo clientInfo)
     {
-        return new PublicationParams(
-                clientInfo.getUnicastResolverClientIp(),
+        //by defualt ip address is getting from client info, but if hostname is different, check it
+        int ipAddress = clientInfo.getUnicastResolverClientIp();
+        if(!parameters.getHostname().equals(clientInfo.getUnicastResolverHostname()))
+        {
+            ipAddress = InetUtil.getIpAddressAsIntByHostnameOrDefault(clientInfo.getUnicastResolverHostname(), clientInfo.getUnicastResolverClientIp());
+            log.trace("PublicationParams ip address obtained by hostname: [{}] from [{}]", ipAddress, clientInfo);
+        }
+
+        return new PublicationParams( ipAddress,
                 clientInfo.getUnicastResolverClientPort(),
-                clientInfo.getUnicastResolverClientStreamId(),
-                clientInfo.getUnicastResolverHostname());
+                clientInfo.getUnicastResolverClientStreamId());
     }
 
     /**
@@ -234,9 +240,7 @@ class UnicastDaemonSender implements IDaemonReceiverListener, Closeable
      */
     private Publication createPublication(final PublicationParams params)
     {
-        final int ipAddress = InetUtil.getIpAddressAsIntByHostnameOrDefault(params.getHostname(), params.getIpAddress());
-
-        final String channel = AeronChannelHelper.createUnicastChannelString(ipAddress, params.getPort(), this.parameters.getSubnetAddress());
+        final String channel = AeronChannelHelper.createUnicastChannelString(params.getIpAddress(), params.getPort(), this.parameters.getSubnetAddress());
         final int streamId = params.getStreamId();
 
         log.info("Creating publication for channel {} and stream {}", channel, streamId);
@@ -258,8 +262,5 @@ class UnicastDaemonSender implements IDaemonReceiverListener, Closeable
 
         /** StreamId used by the publication */
         private final int streamId;
-
-        /** Daemon hostname */
-        private final String hostname;
     }
 }
