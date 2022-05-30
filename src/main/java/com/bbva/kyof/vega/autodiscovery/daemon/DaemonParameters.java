@@ -23,6 +23,7 @@ public class DaemonParameters
     static final int DEFAULT_PORT = 40300;
     /** Default timeout for the clients before considering them disconnected */
     static final long DEFAULT_CLIENT_TIMEOUT = 10000;
+    private static final String EMPTY_HOSTNAME = "";
 
     /** Timeout for client connections, the client will be considered disconnected if no message is received after the timeout period */
     @Getter private Long clientTimeout;
@@ -42,6 +43,10 @@ public class DaemonParameters
     @Getter private SubnetAddress subnetAddress;
     /** Hostname of server, used to obtain a public or external ip, if null it will be loaded by OS */
     @Getter private String hostname;
+
+    /** (Optional) Resolve hostname from clients to get ip address. By default false */
+    @Getter private boolean isResolveHostname;
+
 
     /**
      * Complete the null parameters that are optional using the default parameters. It will also validate the parameters and
@@ -69,7 +74,7 @@ public class DaemonParameters
 
         if (this.hostname == null)
         {
-            this.hostname = InetUtil.getHostnameByIpAddress(this.ipAddress);
+            this.hostname = this.isResolveHostname ? subnetAddress.getIpAddres().getHostName() : EMPTY_HOSTNAME;
         }
     }
 

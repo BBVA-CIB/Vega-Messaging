@@ -1,11 +1,14 @@
 package com.bbva.kyof.vega.protocol.subscriber;
 
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscInstanceInfo;
+import com.bbva.kyof.vega.config.general.ControlRcvConfig;
+import com.bbva.kyof.vega.config.general.ResponsesConfig;
 import com.bbva.kyof.vega.config.general.TransportMediaType;
 import com.bbva.kyof.vega.protocol.common.VegaContext;
 import com.bbva.kyof.vega.protocol.publisher.AeronPublisher;
 import com.bbva.kyof.vega.protocol.publisher.AeronPublisherParams;
 import com.bbva.kyof.vega.util.collection.HashMapOfHashSet;
+import com.bbva.kyof.vega.util.net.InetUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Closeable;
@@ -79,12 +82,7 @@ class ResponsePublishersManager implements Closeable
         }
 
         // Create the parameters for the response publisher
-        final AeronPublisherParams params = new AeronPublisherParams(
-                TransportMediaType.UNICAST,
-                info.getResponseTransportIp(),
-                info.getResponseTransportPort(),
-                info.getResponseTransportStreamId(),
-                vegaContext.getInstanceConfig().getResponsesConfig().getSubnetAddress());
+        final AeronPublisherParams params = createResponseAeronPublisherParams(info);
 
         // Check if there is already a response publisher with that parameters
         AeronPublisher responsePublisher = this.responsePublishersByParams.get(params);
@@ -157,5 +155,32 @@ class ResponsePublishersManager implements Closeable
     long getNumResponsePublishers()
     {
         return this.responsePublishersByInstanceId.values().stream().distinct().count();
+    }
+
+    /**
+     * Create a AeronPublisherParams by AutoDiscInstanceInfo for Response publishers
+     * The main reason of this method is to obtain the ResponsePublisher IP, resolved by hostname or get default ip sent by counterpart.
+     *
+     * @param info AutoDiscInstanceInfo of counterpart
+     * @return a well-formed AeronPublisherParams for Response publishers
+     */
+    private AeronPublisherParams createResponseAeronPublisherParams(AutoDiscInstanceInfo info)
+    {
+        //check the ip to use, by default informed ip
+        final ResponsesConfig myResponseConfig = vegaContext.getInstanceConfig().getResponsesConfig();
+
+        int addressIp = info.getResponseTransportIp();
+        if(myResponseConfig.getIsResolveHostname() && !myResponseConfig.getHostname().equals(info.getResponseTransportHostname()))
+        {
+            addressIp = InetUtil.getIpAddressAsIntByHostnameOrDefault(info.getResponseTransportHostname(), info.getResponseTransportIp());
+            log.trace("ResponsePublisher address ip obtained by hostname: [{}] from [{}]", addressIp, info);
+        }
+
+        return new AeronPublisherParams(
+                TransportMediaType.UNICAST,
+                addressIp,
+                info.getResponseTransportPort(),
+                info.getResponseTransportStreamId(),
+                vegaContext.getInstanceConfig().getResponsesConfig().getSubnetAddress());
     }
 }

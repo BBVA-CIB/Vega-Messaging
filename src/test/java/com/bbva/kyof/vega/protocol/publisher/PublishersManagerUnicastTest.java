@@ -1,6 +1,5 @@
 package com.bbva.kyof.vega.protocol.publisher;
 
-import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicInfo;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicSocketInfo;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTransportType;
@@ -45,7 +44,6 @@ public class PublishersManagerUnicastTest
 
     private static final long SEND_POLL_WAIT = 500;
     public static final int NEW_EVENT_WAIT_TIME = 500;
-
     private static MediaDriver MEDIA_DRIVER;
     private static Aeron AERON;
     private static SubnetAddress SUBNET_ADDRESS;
@@ -130,6 +128,8 @@ public class PublishersManagerUnicastTest
                 numStreamsPerPort(2).
                 minPort(28300).
                 maxPort(28302).
+                hostname("").
+                isResolveHostname(false).
                 subnetAddress(SUBNET_ADDRESS).build();
 
         // Create several topic publishers
@@ -161,14 +161,14 @@ public class PublishersManagerUnicastTest
         // The corresponding topic socket infos, the info 4 is repeated but since is other topic it should reuse the existing Socket
         final AutoDiscTopicSocketInfo topicSocketInfo1 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_UNI, UUID.randomUUID(), "topic1", UUID.randomUUID(), intAddress, 28300, 2,
                 hostname);
-        final AutoDiscTopicSocketInfo topicSocketInfo2 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_UNI, UUID.randomUUID(), "topic2", UUID.randomUUID(), intAddress, 28301, 2,hostname);
-        final AutoDiscTopicSocketInfo topicSocketInfo3 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_UNI, UUID.randomUUID(), "topic3", UUID.randomUUID(), intAddress, 28301, 3,hostname);
-        final AutoDiscTopicSocketInfo topicSocketInfo4 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_UNI, UUID.randomUUID(), "topic4", UUID.randomUUID(), intAddress, 28301, 3,hostname);
-        final AutoDiscTopicSocketInfo topicSocketInfo5 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_UNI, UUID.randomUUID(), "topic4", UUID.randomUUID(), intAddress, 28301, 3,hostname);
+        final AutoDiscTopicSocketInfo topicSocketInfo2 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_UNI, UUID.randomUUID(), "topic2", UUID.randomUUID(), intAddress, 28301, 2, hostname);
+        final AutoDiscTopicSocketInfo topicSocketInfo3 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_UNI, UUID.randomUUID(), "topic3", UUID.randomUUID(), intAddress, 28301, 3, hostname);
+        final AutoDiscTopicSocketInfo topicSocketInfo4 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_UNI, UUID.randomUUID(), "topic4", UUID.randomUUID(), intAddress, 28301, 3, hostname);
+        final AutoDiscTopicSocketInfo topicSocketInfo5 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_UNI, UUID.randomUUID(), "topic4", UUID.randomUUID(), intAddress, 28301, 3, hostname);
 
         // Try to add a secure topic socket, it should fail because the publisher is not secured
         final AutoDiscTopicSocketInfo securedTopicSocket = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_UNI, UUID.randomUUID(), "topic4", UUID.randomUUID(), intAddress, 28301,
-                3, hostname,33);
+                3, hostname, 33);
         this.publisherManager.onNewAutoDiscTopicSocketInfo(securedTopicSocket);
         Thread.sleep(NEW_EVENT_WAIT_TIME);
         this.sendMessageAndCheckArrival(topicPublisher, simpleReceiver1, false);
@@ -230,7 +230,7 @@ public class PublishersManagerUnicastTest
         // -----------------------------------------------------------------------
 
         // Add topic socket that dont correspond to any topic publisher
-        this.publisherManager.onNewAutoDiscTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_UNI, UUID.randomUUID(), "topic14", UUID.randomUUID(), 23, 343, 2323,hostname));
+        this.publisherManager.onNewAutoDiscTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_UNI, UUID.randomUUID(), "topic14", UUID.randomUUID(), 23, 343, 2323, hostname));
 
         // Add topic topic socket twice
         this.publisherManager.onNewAutoDiscTopicSocketInfo(topicSocketInfo1);
@@ -238,10 +238,10 @@ public class PublishersManagerUnicastTest
 
         // Remove a topic socket on non existing topic
         this.publisherManager.onTimedOutAutoDiscTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_UNI, UUID.randomUUID(), "topic14", UUID.randomUUID(), 23, 343, 2323
-                ,hostname));
+                , hostname));
 
         // Remove topic socket on existing topic but not exisint topic socket id
-        this.publisherManager.onTimedOutAutoDiscTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_UNI, UUID.randomUUID(), "topic1", UUID.randomUUID(), 23, 343, 2323,hostname));
+        this.publisherManager.onTimedOutAutoDiscTopicSocketInfo(new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_UNI, UUID.randomUUID(), "topic1", UUID.randomUUID(), 23, 343, 2323, hostname));
 
         // Non used events
         this.publisherManager.onNewAutoDiscTopicInfo(null);
@@ -278,28 +278,30 @@ public class PublishersManagerUnicastTest
                 numStreamsPerPort(2).
                 minPort(28300).
                 maxPort(28302).
-                subnetAddress(SUBNET_ADDRESS).build();
+                subnetAddress(SUBNET_ADDRESS).
+                hostname("").isResolveHostname(false).
+                build();
 
         // Create topic publisher
         final Set<Integer> secureSubs = new HashSet<>(Collections.singletonList(22222));
         final Set<Integer> securePubs = new HashSet<>(Collections.singletonList(11111));
         final TopicSecurityTemplateConfig securityTemplateConfig = new TopicSecurityTemplateConfig("topic1", 100L, securePubs, secureSubs);
         final ITopicPublisher topicPublisher = publisherManager.createTopicPublisher("topic1", templateUcast, securityTemplateConfig);
-        final AESCrypto aesCrypto = new AESCrypto(((SecureTopicPublisherUnicast)topicPublisher).getSessionKey());
+        final AESCrypto aesCrypto = new AESCrypto(((SecureTopicPublisherUnicast) topicPublisher).getSessionKey());
 
         // Create receiver and their corresponding "TopicSocketInfs"
         SimpleReceiver simpleReceiver1 = new SimpleReceiver(AERON, TransportMediaType.UNICAST, ipAddress, 28300, 2, SUBNET_ADDRESS);
 
         // Create a topic socket info, the secure id is not allowed, it should fail
         final AutoDiscTopicSocketInfo topicSocketInfo1 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_UNI, UUID.randomUUID(), "topic1", UUID.randomUUID(), intAddress, 28300, 2,
-                hostname,11111);
+                hostname, 11111);
         this.publisherManager.onNewAutoDiscTopicSocketInfo(topicSocketInfo1);
         Thread.sleep(NEW_EVENT_WAIT_TIME);
         this.sendSecureMessageAndCheckArrival(topicPublisher, aesCrypto, simpleReceiver1, false);
 
         // Create a topic socket info with no security, it should fail
         final AutoDiscTopicSocketInfo topicSocketInfoNonSecured = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_UNI, UUID.randomUUID(), "topic1", UUID.randomUUID(), intAddress,
-                28300, 2, hostname,0);
+                28300, 2, hostname, 0);
         this.publisherManager.onNewAutoDiscTopicSocketInfo(topicSocketInfoNonSecured);
         Thread.sleep(NEW_EVENT_WAIT_TIME);
         this.sendSecureMessageAndCheckArrival(topicPublisher, aesCrypto, simpleReceiver1, false);
@@ -309,7 +311,7 @@ public class PublishersManagerUnicastTest
 
         // Create a topic socket info, the secure id is allowed, it should work
         final AutoDiscTopicSocketInfo topicSocketInfo2 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.SUB_UNI, UUID.randomUUID(), "topic1", UUID.randomUUID(), intAddress, 28300, 2,
-                hostname,22222);
+                hostname, 22222);
         this.publisherManager.onNewAutoDiscTopicSocketInfo(topicSocketInfo2);
         Thread.sleep(NEW_EVENT_WAIT_TIME);
         this.sendSecureMessageAndCheckArrival(topicPublisher, aesCrypto, simpleReceiver1, true);

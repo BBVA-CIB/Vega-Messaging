@@ -221,7 +221,7 @@ class UnicastDaemonSender implements IDaemonReceiverListener, Closeable
     {
         //by defualt ip address is getting from client info, but if hostname is different, check it
         int ipAddress = clientInfo.getUnicastResolverClientIp();
-        if(!parameters.getHostname().equals(clientInfo.getUnicastResolverHostname()))
+        if(parameters.isResolveHostname() && !parameters.getHostname().equals(clientInfo.getUnicastResolverHostname()))
         {
             ipAddress = InetUtil.getIpAddressAsIntByHostnameOrDefault(clientInfo.getUnicastResolverHostname(), clientInfo.getUnicastResolverClientIp());
             log.trace("PublicationParams ip address obtained by hostname: [{}] from [{}]", ipAddress, clientInfo);

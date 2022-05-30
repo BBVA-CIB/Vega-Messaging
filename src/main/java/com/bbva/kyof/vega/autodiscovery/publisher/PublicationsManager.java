@@ -62,7 +62,7 @@ public class PublicationsManager implements IPublicationsManager
         //Create all the publications for unicast daemons for High Availability embedded in PublicationInfo class
         //Initialize structures
         this.publicationsInfoByUUID = new LinkedHashMap<>();
-        this.enabledPublicationsInfo = new NativeArraySet(PublicationInfo.class, config.getUnicastInfoArray().size());
+        this.enabledPublicationsInfo = new NativeArraySet<>(PublicationInfo.class, config.getUnicastInfoArray().size());
         this.publicationsInfoArray = new PublicationInfo[config.getUnicastInfoArray().size()];
 
         for(int i=0; i < config.getUnicastInfoArray().size(); i++)
@@ -230,7 +230,8 @@ public class PublicationsManager implements IPublicationsManager
         if (publicationInfoParam.getUnicastResolverServerIp() == autoDiscDaemonServerInfo.getUnicastResolverServerIp() )
         {
             isValid = true;
-        } else if (autoDiscDaemonServerInfo.getUnicastResolverHostname() != null)
+        }
+        else if (autoDiscDaemonServerInfo.getUnicastResolverHostname() != null)
         {
             int alternativeIp = InetUtil.getIpAddressAsIntByHostnameOrDefault(autoDiscDaemonServerInfo.getUnicastResolverHostname(), autoDiscDaemonServerInfo.getUnicastResolverServerIp());
             isValid = alternativeIp == publicationInfoParam.getUnicastResolverServerIp();

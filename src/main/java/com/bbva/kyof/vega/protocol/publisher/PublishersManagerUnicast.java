@@ -118,7 +118,7 @@ class PublishersManagerUnicast extends AbstractPublishersManager<TopicPublisherU
         String hostname = topicPublisher.getTopicConfig().getHostname();
 
         int ipAddress = subcriberInfo.getIpAddress();
-        if(hostname != null && !hostname.equals(subcriberInfo.getHostname()))
+        if(topicPublisher.getTopicConfig().getIsResolveHostname() && hostname != null && !hostname.equals(subcriberInfo.getHostname()))
         {
             ipAddress =  InetUtil.getIpAddressAsIntByHostnameOrDefault(subcriberInfo.getHostname(), subcriberInfo.getIpAddress());
             log.trace("AeronPublisherParams Unicast ip address obtained by hostname: [{}] from [{}]", ipAddress, subcriberInfo);

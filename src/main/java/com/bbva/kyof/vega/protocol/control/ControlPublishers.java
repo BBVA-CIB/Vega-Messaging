@@ -168,7 +168,7 @@ class ControlPublishers implements Closeable
         final ControlRcvConfig myControlRcvConfig = vegaContext.getInstanceConfig().getControlRcvConfig();
 
         int addressIp = info.getResponseTransportIp();
-        if(!myControlRcvConfig.getHostname().equals(info.getControlRcvHostname()))
+        if(myControlRcvConfig.getIsResolveHostname() && !myControlRcvConfig.getHostname().equals(info.getControlRcvHostname()))
         {
             addressIp = InetUtil.getIpAddressAsIntByHostnameOrDefault(info.getControlRcvHostname(), info.getControlRcvTransportIp());
             log.trace("ControlPublisher address ip obtained by hostname: [{}] from [{}]", addressIp, info);

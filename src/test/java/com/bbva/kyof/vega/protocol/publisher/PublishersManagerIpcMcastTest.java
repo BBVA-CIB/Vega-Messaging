@@ -111,7 +111,7 @@ public class PublishersManagerIpcMcastTest
     }
 
     @Test
-    public void testAutodiscEvents() throws VegaException
+    public void testAutodiscEvents()
     {
         this.publisherManager.onNewAutoDiscTopicInfo(null);
         this.publisherManager.onNewAutoDiscTopicSocketInfo(null);
@@ -153,7 +153,8 @@ public class PublishersManagerIpcMcastTest
                 "224.1.1.2",
                 SUBNET_ADDRESS.toString(),
                 SUBNET_ADDRESS,
-                null);
+                null,
+                false);
 
         // Create several topic publishers
         final ITopicPublisher topicPublisher = publisherManager.createTopicPublisher("topic1", templateMcast, null);
@@ -218,7 +219,8 @@ public class PublishersManagerIpcMcastTest
                 "224.4.1.2",
                 SUBNET_ADDRESS.toString(),
                 SUBNET_ADDRESS,
-                null);
+                null,
+                false);
 
         // Create several topic publishers
         final ITopicPublisher topicPublisher = publisherManager.createTopicPublisher("topic1", templateMcast, null);
@@ -274,7 +276,8 @@ public class PublishersManagerIpcMcastTest
                 "224.4.1.2",
                 SUBNET_ADDRESS.toString(),
                 SUBNET_ADDRESS,
-                null);
+                null,
+                false);
 
         // Create a topic publisher
         final Set<Integer> secureSubs = new HashSet<>(Collections.singletonList(22222));
