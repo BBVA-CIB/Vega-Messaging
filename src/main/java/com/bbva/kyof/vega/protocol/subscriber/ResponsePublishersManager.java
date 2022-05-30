@@ -1,7 +1,6 @@
 package com.bbva.kyof.vega.protocol.subscriber;
 
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscInstanceInfo;
-import com.bbva.kyof.vega.config.general.ControlRcvConfig;
 import com.bbva.kyof.vega.config.general.ResponsesConfig;
 import com.bbva.kyof.vega.config.general.TransportMediaType;
 import com.bbva.kyof.vega.protocol.common.VegaContext;

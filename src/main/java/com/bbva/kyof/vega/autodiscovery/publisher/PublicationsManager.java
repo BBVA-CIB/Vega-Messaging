@@ -153,8 +153,12 @@ public class PublicationsManager implements IPublicationsManager
                 mappingFunction -> searchPublicationInfoInAllConfigured(autoDiscDaemonServerInfo)
         );
 
+        if(publicationInfo == null)
+        {
+            log.warn("AutoDiscDaemonServerInfo received does not match with any PublicationInfo. Please, review Autodiscovery configuration. Message received [{}]", autoDiscDaemonServerInfo);
+        }
         //If the publication is disabled, enable it.
-        if (!publicationInfo.getEnabled())
+        else if (!publicationInfo.getEnabled())
         {
             publicationInfo.setEnabled(Boolean.TRUE);
 
@@ -169,7 +173,6 @@ public class PublicationsManager implements IPublicationsManager
     }
 
     /**
-     *
      * Search the PublicationInfo inside the publicationsInfoArray that match with the IP and Port of the
      * message autoDiscDaemonServerInfo.
      *
@@ -178,18 +181,25 @@ public class PublicationsManager implements IPublicationsManager
      * the UUID is set.
      *
      * @param autoDiscDaemonServerInfo message from the unicast discovery server
-     * @return PublicationInfo that match IP and Port
+     * @return PublicationInfo that match IP and Port. {@code null} if there is no match
      */
     private PublicationInfo searchPublicationInfoInAllConfigured(final AutoDiscDaemonServerInfo autoDiscDaemonServerInfo){
         //Search the publication info
-        PublicationInfo publicationInfo = Arrays.stream(publicationsInfoArray)
+        Optional<PublicationInfo> optionalPublicationInfo = Arrays.stream(publicationsInfoArray)
                 .filter(publicationInfoParam -> validatePublicationInfo(publicationInfoParam, autoDiscDaemonServerInfo))
-                .findFirst().get();
-        publicationInfo.setUniqueId(autoDiscDaemonServerInfo.getUniqueId());
-        if(log.isInfoEnabled())
+                .findFirst();
+
+        PublicationInfo publicationInfo = null;
+        if(optionalPublicationInfo.isPresent())
         {
-            log.info("Initialized publicationInfo with data: {}", autoDiscDaemonServerInfo);
+            publicationInfo = optionalPublicationInfo.get();
+            publicationInfo.setUniqueId(autoDiscDaemonServerInfo.getUniqueId());
+            if(log.isInfoEnabled())
+            {
+                log.info("Initialized publicationInfo with data: {}", autoDiscDaemonServerInfo);
+            }
         }
+
         return publicationInfo;
     }
 
