@@ -22,8 +22,11 @@ class CommandLineParser
     private final Option embeddedDriverConfigFileOption  = new Option("edcf", "embeddedDriverConfigFile", true, "(Optional) Embedded driver configuration file");
     /** Timeout for client adverts before considering them disconnected */
     private final Option clientTimeoutOption  = new Option("ct", "clientTimeout", true, "(Optional) Client timeout in milliseconds. Default value: " + DaemonParameters.DEFAULT_CLIENT_TIMEOUT);
-    /** (Optional) alternative Hostname to be used for daemon to calculate alternatives ip (for vitual environment as containers) */
+    /** (Optional) alternative Hostname to be used for daemon to calculate alternatives ip (for virtual environment as containers) */
     private final Option hostnameOption  = new Option("hn", "hostname", true, "(Optional) Hostname to set for daemon ");
+
+    /** (Optional) use Hostname to resolve IP publication channels (for virtual environment as containers) */
+    private final Option isResolveHostname  = new Option("rhn", "resolveHostname", false, "(Optional) flag to Resolve IPs by hostname ");
 
 
     /** The command line with all the values parsed */
@@ -42,6 +45,7 @@ class CommandLineParser
         options.addOption(this.externalDriverDir);
         options.addOption(this.embeddedDriverConfigFileOption);
         options.addOption(this.hostnameOption);
+        options.addOption(this.isResolveHostname);
     }
 
     /**
@@ -90,6 +94,7 @@ class CommandLineParser
         final boolean useEmbeddedDriver = this.hasOption(this.embeddedDriverOption);
         final String embeddedDriverConfigString = this.getCmdStringOption(this.embeddedDriverConfigFileOption);
         final String hostname = this.getCmdStringOption(this.hostnameOption);
+        final boolean isResolveHostname = this.hasOption(this.isResolveHostname);
 
         DaemonParameters.AeronDriverType aeronDriverType;
 
@@ -110,6 +115,7 @@ class CommandLineParser
                 aeronDriverType(aeronDriverType).
                 externalDriverDir(externalDriverDirString).
                 hostname(hostname).
+                isResolveHostname(isResolveHostname).
                 embeddedDriverConfigFile(embeddedDriverConfigString).build();
 
         result.completeAndValidateParameters();

@@ -23,6 +23,8 @@ public class DaemonParameters
     static final int DEFAULT_PORT = 40300;
     /** Default timeout for the clients before considering them disconnected */
     static final long DEFAULT_CLIENT_TIMEOUT = 10000;
+
+    /** Default hostname value as empty */
     private static final String EMPTY_HOSTNAME = "";
 
     /** Timeout for client connections, the client will be considered disconnected if no message is received after the timeout period */
@@ -46,7 +48,6 @@ public class DaemonParameters
 
     /** (Optional) Resolve hostname from clients to get ip address. By default false */
     @Getter private boolean isResolveHostname;
-
 
     /**
      * Complete the null parameters that are optional using the default parameters. It will also validate the parameters and
