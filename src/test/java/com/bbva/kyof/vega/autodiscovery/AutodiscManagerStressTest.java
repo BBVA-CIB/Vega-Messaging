@@ -11,6 +11,7 @@ import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTransportType;
 import com.bbva.kyof.vega.autodiscovery.subscriber.IAutodiscTopicSubListener;
 import com.bbva.kyof.vega.config.general.AutoDiscoType;
 import com.bbva.kyof.vega.config.general.AutoDiscoveryConfig;
+import com.bbva.kyof.vega.config.general.UnicastInfo;
 import com.bbva.kyof.vega.exception.VegaException;
 import com.bbva.kyof.vega.util.net.InetUtil;
 import com.bbva.kyof.vega.util.net.SubnetAddress;
@@ -25,6 +26,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -294,12 +296,12 @@ public class AutodiscManagerStressTest
     private AutodiscManager createUnicastManager(final Aeron aeron) throws VegaException
     {
         // Create unicast autodiscovery manager
+        UnicastInfo unicastInfo = new UnicastInfo(IP,PORT_UNICAST_DAEMON);
         AutoDiscoveryConfig unicastConfig = AutoDiscoveryConfig.builder().
                 autoDiscoType(AutoDiscoType.UNICAST_DAEMON).
                 refreshInterval(100L).
                 timeout(5000L).
-                resolverDaemonAddress(IP).
-                resolverDaemonPort(PORT_UNICAST_DAEMON).
+                unicastInfoArray(Collections.singletonList(new UnicastInfo(IP,PORT_UNICAST_DAEMON))).
                 build();
         unicastConfig.completeAndValidateConfig();
 

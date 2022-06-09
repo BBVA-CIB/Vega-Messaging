@@ -118,7 +118,7 @@ public class ControlRcvConfig implements IConfiguration
         if(this.hostname == null)
         {
             //avoid null
-         this.hostname = this.isResolveHostname ? subnetAddress.getIpAddres().getHostName() : ConfigUtils.EMPTY_HOSTNAME;
+         this.hostname = this.isResolveHostname ? subnetAddress.getIpAddres().getCanonicalHostName() : ConfigUtils.EMPTY_HOSTNAME;
         }
 
     }

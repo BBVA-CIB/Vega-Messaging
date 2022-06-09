@@ -8,11 +8,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collections;
+
 /**
  * Created by cnebrera on 01/08/16.
  */
 public class AutoDiscoveryConfigTest
 {
+    public static final String TEST_RESOLVER_DAEMON_ADDRESS = "192.168.1.1";
+    public static final int TEST_RESOLVER_DAEMON_PORT = 37000;
     private AutoDiscoveryConfig.AutoDiscoveryConfigBuilder emptyBuilder;
     private AutoDiscoveryConfig.AutoDiscoveryConfigBuilder minimumMcastBuilder;
     private AutoDiscoveryConfig.AutoDiscoveryConfigBuilder minimumUcastBuilder;
@@ -70,7 +74,7 @@ public class AutoDiscoveryConfigTest
     public void validateUcastMinBuilderAndTestDefaultParams() throws Exception
     {
         // Set a daemon address to prevent it from failint
-        this.minimumUcastBuilder.resolverDaemonAddress("192.168.1.1");
+        this.minimumUcastBuilder.unicastInfoArray(Collections.singletonList(new UnicastInfo(TEST_RESOLVER_DAEMON_ADDRESS, TEST_RESOLVER_DAEMON_PORT)));
         final AutoDiscoveryConfig unicastConfig = this.minimumUcastBuilder.build();
 
         unicastConfig.completeAndValidateConfig();
@@ -83,8 +87,8 @@ public class AutoDiscoveryConfigTest
         Assert.assertEquals(AutoDiscoveryConfig.DEFAULT_EXPIRATION_TIMEOUT, (long) unicastConfig.getTimeout());
 
         // Unicast parameters
-        Assert.assertEquals(unicastConfig.getUnicastInfoArray().get(0).getResolverDaemonAddress(), "192.168.1.1");
-        Assert.assertEquals(AutoDiscoveryConfig.DEFAULT_RESOLVER_DAEMON_PORT, (int) unicastConfig.getUnicastInfoArray().get(0).getResolverDaemonPort());
+        Assert.assertEquals(unicastConfig.getUnicastInfoArray().get(0).getResolverDaemonAddress(), TEST_RESOLVER_DAEMON_ADDRESS);
+        Assert.assertEquals(TEST_RESOLVER_DAEMON_PORT, (int) unicastConfig.getUnicastInfoArray().get(0).getResolverDaemonPort());
         Assert.assertEquals(AutoDiscoveryConfig.DEFAULT_UNI_RSV_RCV_NUM_STREAMS, (int) unicastConfig.getUnicastResolverRcvNumStreams());
         Assert.assertEquals(AutoDiscoveryConfig.DEFAULT_UNI_RSV_RCV_MAX_PORT, (int) unicastConfig.getUnicastResolverRcvPortMax());
         Assert.assertEquals(AutoDiscoveryConfig.DEFAULT_UNI_RSV_RCV_MIN_PORT, (int) unicastConfig.getUnicastResolverRcvPortMin());
@@ -96,8 +100,7 @@ public class AutoDiscoveryConfigTest
         //default hostname as EMPTY
         final AutoDiscoveryConfig.AutoDiscoveryConfigBuilder builder = AutoDiscoveryConfig.builder();
         builder.autoDiscoType(AutoDiscoType.UNICAST_DAEMON);
-        builder.resolverDaemonAddress("192.168.1.1");
-
+        builder.unicastInfoArray(Collections.singletonList(new UnicastInfo(TEST_RESOLVER_DAEMON_ADDRESS,37000)));
 
         AutoDiscoveryConfig config =  builder.build();
         Assert.assertNull(config.getHostname());

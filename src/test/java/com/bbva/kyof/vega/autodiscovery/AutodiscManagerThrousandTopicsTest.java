@@ -11,6 +11,7 @@ import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTransportType;
 import com.bbva.kyof.vega.autodiscovery.subscriber.IAutodiscTopicSubListener;
 import com.bbva.kyof.vega.config.general.AutoDiscoType;
 import com.bbva.kyof.vega.config.general.AutoDiscoveryConfig;
+import com.bbva.kyof.vega.config.general.UnicastInfo;
 import com.bbva.kyof.vega.exception.VegaException;
 import com.bbva.kyof.vega.util.net.InetUtil;
 import com.bbva.kyof.vega.util.net.SubnetAddress;
@@ -195,8 +196,7 @@ public class AutodiscManagerThrousandTopicsTest
                 autoDiscoType(AutoDiscoType.UNICAST_DAEMON).
                 refreshInterval(1000L).
                 timeout(5000L).
-                resolverDaemonAddress(IP).
-                resolverDaemonPort(PORT_UNICAST_DAEMON).
+                unicastInfoArray(Collections.singletonList(new UnicastInfo(IP,PORT_UNICAST_DAEMON))).
                 build();
         unicastConfig.completeAndValidateConfig();
 

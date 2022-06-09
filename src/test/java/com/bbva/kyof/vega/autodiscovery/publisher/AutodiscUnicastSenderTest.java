@@ -3,6 +3,7 @@ package com.bbva.kyof.vega.autodiscovery.publisher;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscDaemonClientInfo;
 import com.bbva.kyof.vega.config.general.AutoDiscoType;
 import com.bbva.kyof.vega.config.general.AutoDiscoveryConfig;
+import com.bbva.kyof.vega.config.general.UnicastInfo;
 import com.bbva.kyof.vega.exception.VegaException;
 import io.aeron.Aeron;
 import io.aeron.ConcurrentPublication;
@@ -15,6 +16,7 @@ import org.powermock.api.easymock.PowerMock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.Collections;
 import java.util.UUID;
 
 /**
@@ -45,7 +47,7 @@ public class AutodiscUnicastSenderTest
         // Create the configuration, with 300 millis refresh interval
         final AutoDiscoveryConfig config = AutoDiscoveryConfig.builder()
                 .autoDiscoType(AutoDiscoType.UNICAST_DAEMON)
-                .resolverDaemonAddress("192.168.0.1")
+                .unicastInfoArray(Collections.singletonList(new UnicastInfo("192.168.1.1",37000)))
                 .refreshInterval(100L).build();
         config.completeAndValidateConfig();
 
@@ -80,7 +82,7 @@ public class AutodiscUnicastSenderTest
         // Create the configuration, with 300 millis refresh interval
         final AutoDiscoveryConfig config = AutoDiscoveryConfig.builder()
                 .autoDiscoType(AutoDiscoType.UNICAST_DAEMON)
-                .resolverDaemonAddress("192.168.0.1")
+                .unicastInfoArray(Collections.singletonList(new UnicastInfo("192.168.1.1",37000)))
                 .refreshInterval(100L).build();
         config.completeAndValidateConfig();
 
@@ -121,7 +123,7 @@ public class AutodiscUnicastSenderTest
         // Create the configuration, with 300 millis refresh interval
         final AutoDiscoveryConfig config = AutoDiscoveryConfig.builder()
                 .autoDiscoType(AutoDiscoType.UNICAST_DAEMON)
-                .resolverDaemonAddress("192.168.0.1")
+                .unicastInfoArray(Collections.singletonList(new UnicastInfo("192.168.1.1",37000)))
                 .refreshInterval(100L).build();
         config.completeAndValidateConfig();
 
@@ -160,7 +162,7 @@ public class AutodiscUnicastSenderTest
         // Create the configuration, with 300 millis refresh interval
         final AutoDiscoveryConfig config = AutoDiscoveryConfig.builder()
                 .autoDiscoType(AutoDiscoType.UNICAST_DAEMON)
-                .resolverDaemonAddress("192.168.0.1")
+                .unicastInfoArray(Collections.singletonList(new UnicastInfo("192.168.1.1",37000)))
                 .refreshInterval(100L).build();
         config.completeAndValidateConfig();
 
