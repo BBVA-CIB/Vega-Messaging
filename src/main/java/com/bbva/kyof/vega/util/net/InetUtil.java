@@ -307,7 +307,7 @@ public final class InetUtil
         }
         catch (final UnknownHostException e)
         {
-            log.warn("Unexpected exception resolving hostname[{}]: ", name, e);
+            log.warn("UnknownHostException resolving hostname: {}", name);
             return null;
         }
     }
