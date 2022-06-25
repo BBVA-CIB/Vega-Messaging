@@ -6,9 +6,9 @@ import com.bbva.kyof.vega.autodiscovery.model.AutoDiscDaemonServerInfo;
 import com.bbva.kyof.vega.msg.BaseHeader;
 import com.bbva.kyof.vega.msg.MsgType;
 import com.bbva.kyof.vega.serialization.UnsafeBufferSerializer;
-import com.bbva.kyof.vega.util.net.AeronChannelHelper;
 import com.bbva.kyof.vega.util.collection.HashMapOfHashSet;
 import com.bbva.kyof.vega.util.collection.NativeArraySet;
+import com.bbva.kyof.vega.util.net.AeronChannelHelper;
 import com.bbva.kyof.vega.util.net.InetUtil;
 import io.aeron.Aeron;
 import io.aeron.Publication;
@@ -31,7 +31,7 @@ import java.util.UUID;
 class UnicastDaemonSender implements IDaemonReceiverListener, Closeable
 {
     /** Buffer size needed to sendBufferServerInfo */
-    private static final int SEND_BUFFER_SERVER_INFO_SIZE = 32;
+    private static final int SEND_BUFFER_SERVER_INFO_SIZE = 64;
 
     /** Store all the AeronPublishers by the parameters used to create it */
     private final Map<PublicationParams, Publication> publicationsByParams = new HashMap<>();
@@ -90,7 +90,8 @@ class UnicastDaemonSender implements IDaemonReceiverListener, Closeable
                 = new AutoDiscDaemonServerInfo(
                 uuid,
                 InetUtil.convertIpAddressToInt(parameters.getIpAddress()),
-                parameters.getPort()
+                parameters.getPort(),
+                parameters.getHostname()
         );
 
         // Serialize the message
@@ -218,8 +219,15 @@ class UnicastDaemonSender implements IDaemonReceiverListener, Closeable
      */
     private PublicationParams createPublicationParams(final AutoDiscDaemonClientInfo clientInfo)
     {
-        return new PublicationParams(
-                clientInfo.getUnicastResolverClientIp(),
+        //by defualt ip address is getting from client info, but if hostname is different, check it
+        int ipAddress = clientInfo.getUnicastResolverClientIp();
+        if(parameters.isResolveHostname() && !parameters.getHostname().equals(clientInfo.getUnicastResolverHostname()))
+        {
+            ipAddress = InetUtil.getIpAddressAsIntByHostnameOrDefault(clientInfo.getUnicastResolverHostname(), clientInfo.getUnicastResolverClientIp());
+            log.trace("PublicationParams ip address obtained by hostname: [{}] from [{}]", ipAddress, clientInfo);
+        }
+
+        return new PublicationParams( ipAddress,
                 clientInfo.getUnicastResolverClientPort(),
                 clientInfo.getUnicastResolverClientStreamId());
     }

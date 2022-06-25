@@ -82,6 +82,14 @@ public class TopicTemplateConfig implements IConfiguration
     @XmlTransient
     @Getter private SubnetAddress subnetAddress;
 
+    /** Alternative hostname to publish in unicast mode */
+    @XmlElement(name = "unicast_alternative_hostname")
+    @Getter private String hostname;
+
+    /** (Optional) Resolve hostname from clients to get ip address */
+    @XmlElement(name = "resolve_unicast_hostname")
+    @Getter private Boolean isResolveHostname;
+
     @Override
     public void completeAndValidateConfig() throws VegaException
     {
@@ -103,6 +111,7 @@ public class TopicTemplateConfig implements IConfiguration
         if (transportType != TransportMediaType.IPC)
         {
             this.checkSubnet();
+            this.checkHostname();
         }
     }
 
@@ -208,5 +217,25 @@ public class TopicTemplateConfig implements IConfiguration
     private void checkSubnet() throws VegaException
     {
         this.subnetAddress = ConfigUtils.getFullMaskSubnetFromStringOrDefault(this.subnet);
+    }
+
+    /**
+     * Checks if the hostname is configured. If is not configured, the hostname is set by subnet by default
+     */
+    private void checkHostname()
+    {
+        if(isResolveHostname == null)
+        {
+            //by default, hostname is not desired
+            this.isResolveHostname = Boolean.FALSE;
+        }
+
+        // if hostname is not configured, check isResolveHostname flag to get by subnet.
+        // if hostname is not wanted to be resolved (but resolved client hostname is wanted), set it to empty string by configuration
+        if(this.hostname == null)
+        {
+            //avoid null
+            this.hostname = this.isResolveHostname ? subnetAddress.getIpAddres().getCanonicalHostName() : ConfigUtils.EMPTY_HOSTNAME;
+        }
     }
 }

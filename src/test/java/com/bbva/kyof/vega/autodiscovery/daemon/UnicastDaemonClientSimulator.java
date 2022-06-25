@@ -1,5 +1,6 @@
 package com.bbva.kyof.vega.autodiscovery.daemon;
 
+import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.Version;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscDaemonClientInfo;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicInfo;
@@ -64,7 +65,7 @@ public class UnicastDaemonClientSimulator extends RecurrentTask
         log.info("Creating publications on channel {} and stream {}", pubChannel, streamId);
         this.publication = aeron.addPublication(pubChannel, streamId);
 
-        this.clientInfo = new AutoDiscDaemonClientInfo(this.uniqueId, InetUtil.convertIpAddressToInt(ip), subPort, streamId);
+        this.clientInfo = new AutoDiscDaemonClientInfo(this.uniqueId, InetUtil.convertIpAddressToInt(ip), subPort, streamId, subnetAddress.getIpAddres().getHostName());
     }
 
     @Override

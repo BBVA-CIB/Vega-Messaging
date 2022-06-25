@@ -2,6 +2,7 @@ package com.bbva.kyof.vega.autodiscovery;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.autodiscovery.daemon.DaemonParameters;
 import com.bbva.kyof.vega.autodiscovery.daemon.UnicastDaemon;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicInfo;
@@ -10,6 +11,7 @@ import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTransportType;
 import com.bbva.kyof.vega.autodiscovery.subscriber.IAutodiscTopicSubListener;
 import com.bbva.kyof.vega.config.general.AutoDiscoType;
 import com.bbva.kyof.vega.config.general.AutoDiscoveryConfig;
+import com.bbva.kyof.vega.config.general.UnicastInfo;
 import com.bbva.kyof.vega.exception.VegaException;
 import com.bbva.kyof.vega.util.net.InetUtil;
 import com.bbva.kyof.vega.util.net.SubnetAddress;
@@ -133,7 +135,7 @@ public class AutodiscManagerThrousandTopicsTest
         for (int i = 0; i < NUM_TOPICS; i++)
         {
             topicsInfo[i] = new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic" + i);
-            topicsSocketsInfo[i] = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), topicsInfo[i].getTopicName(), topicsInfo[i].getUniqueId(), 34, 36, 33);
+            topicsSocketsInfo[i] = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), topicsInfo[i].getTopicName(), topicsInfo[i].getUniqueId(), 34, 36, 33, TestConstants.EMPTY_HOSTNAME);
         }
 
         // Start the managers and give it some time to be "discovered", it is really only required in unicast
@@ -194,8 +196,7 @@ public class AutodiscManagerThrousandTopicsTest
                 autoDiscoType(AutoDiscoType.UNICAST_DAEMON).
                 refreshInterval(1000L).
                 timeout(5000L).
-                resolverDaemonAddress(IP).
-                resolverDaemonPort(PORT_UNICAST_DAEMON).
+                unicastInfoArray(Collections.singletonList(new UnicastInfo(IP,PORT_UNICAST_DAEMON))).
                 build();
         unicastConfig.completeAndValidateConfig();
 

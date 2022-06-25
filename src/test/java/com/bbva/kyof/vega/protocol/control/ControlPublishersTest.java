@@ -1,5 +1,6 @@
 package com.bbva.kyof.vega.protocol.control;
 
+import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscInstanceInfo;
 import com.bbva.kyof.vega.config.general.ControlRcvConfig;
 import com.bbva.kyof.vega.config.general.GlobalConfiguration;
@@ -67,10 +68,11 @@ public class ControlPublishersTest
         final AutoDiscInstanceInfo instance1Info = new AutoDiscInstanceInfo(
                 "instance1",
                 UUID.randomUUID(),
-                0, 0, 0, // We don't care about the responses info for this test
+                0, 0, 0, null, // We don't care about the responses info for this test
                 SUBNET_INT_ADDRESS,
                 28888,
-                2);
+                2,
+                TestConstants.EMPTY_HOSTNAME);
 
         controlPublishers.onNewAutoDiscInstanceInfo(instance1Info);
 
@@ -85,10 +87,11 @@ public class ControlPublishersTest
         final AutoDiscInstanceInfo instance2Info = new AutoDiscInstanceInfo(
                 "instance2",
                 UUID.randomUUID(),
-                0, 0, 0, // We don't care about the responses info for this test
+                0, 0, 0, null,// We don't care about the responses info for this test
                 SUBNET_INT_ADDRESS,
                 28888,
-                2);
+                2,
+                TestConstants.EMPTY_HOSTNAME);
 
         controlPublishers.onNewAutoDiscInstanceInfo(instance2Info);
         final ControlPublisher instance2ControlPub = controlPublishers.getControlPublisherForInstance(instance2Info.getUniqueId());
@@ -104,10 +107,11 @@ public class ControlPublishersTest
         final AutoDiscInstanceInfo instance3Info = new AutoDiscInstanceInfo(
                 "instance3",
                 UUID.randomUUID(),
-                0, 0, 0, // We don't care about the responses info for this test
+                0, 0, 0, null,// We don't care about the responses info for this test
                 SUBNET_INT_ADDRESS,
                 28888,
-                5);
+                5,
+                TestConstants.EMPTY_HOSTNAME);
 
         controlPublishers.onNewAutoDiscInstanceInfo(instance3Info);
         final ControlPublisher instance3ControlPub = controlPublishers.getControlPublisherForInstance(instance3Info.getUniqueId());
@@ -149,24 +153,27 @@ public class ControlPublishersTest
         final AutoDiscInstanceInfo instance1Info = new AutoDiscInstanceInfo(
                 "instance1",
                 UUID.randomUUID(),
-                0, 0, 0, // We don't care about the responses info for this test
+                0, 0, 0, null, // We don't care about the responses info for this test
                 SUBNET_INT_ADDRESS,
                 28889,
-                2);
+                2,
+                TestConstants.EMPTY_HOSTNAME);
         final AutoDiscInstanceInfo instance2Info = new AutoDiscInstanceInfo(
                 "instance2",
                 UUID.randomUUID(),
-                0, 0, 0, // We don't care about the responses info for this test
+                0, 0, 0, null, // We don't care about the responses info for this test
                 SUBNET_INT_ADDRESS,
                 28889,
-                2);
+                2,
+                TestConstants.EMPTY_HOSTNAME);
         final AutoDiscInstanceInfo instance3Info = new AutoDiscInstanceInfo(
                 "instance3",
                 UUID.randomUUID(),
-                0, 0, 0, // We don't care about the responses info for this test
+                0, 0, 0, null,// We don't care about the responses info for this test
                 SUBNET_INT_ADDRESS,
                 28889,
-                3);
+                3,
+                TestConstants.EMPTY_HOSTNAME);
 
         controlPublishers.onNewAutoDiscInstanceInfo(instance1Info);
         controlPublishers.onNewAutoDiscInstanceInfo(instance2Info);

@@ -2,8 +2,8 @@ package com.bbva.kyof.vega.protocol.subscriber;
 
 import com.bbva.kyof.vega.config.general.GlobalConfiguration;
 import com.bbva.kyof.vega.config.general.TransportMediaType;
-import com.bbva.kyof.vega.util.net.AeronChannelHelper;
 import com.bbva.kyof.vega.protocol.common.VegaContext;
+import com.bbva.kyof.vega.util.net.AeronChannelHelper;
 import com.bbva.kyof.vega.util.net.InetUtil;
 import com.bbva.kyof.vega.util.net.SubnetAddress;
 import io.aeron.Aeron;
@@ -94,11 +94,11 @@ public class AeronSubscriberTest
         // Poll!!!
         AtomicInteger lastPolledMessage = new AtomicInteger();
         ipcSubscriber.poll((directBuffer, i, i1, header) -> lastPolledMessage.set(directBuffer.getInt(i)), 1);
-        Assert.assertTrue(lastPolledMessage.get() == 11);
+        Assert.assertEquals(11, lastPolledMessage.get());
         mcastSubscriber.poll((directBuffer, i, i1, header) -> lastPolledMessage.set(directBuffer.getInt(i)), 1);
-        Assert.assertTrue(lastPolledMessage.get() == 22);
+        Assert.assertEquals(22, lastPolledMessage.get());
         ucastSubscriber.poll((directBuffer, i, i1, header) -> lastPolledMessage.set(directBuffer.getInt(i)), 1);
-        Assert.assertTrue(lastPolledMessage.get() == 33);
+        Assert.assertEquals(33, lastPolledMessage.get());
 
         // Close them and send messages again
         ipcSubscriber.close();
@@ -117,11 +117,11 @@ public class AeronSubscriberTest
         // Poll, there should be nothing this time
         lastPolledMessage.set(0);
         ipcSubscriber.poll((directBuffer, i, i1, header) -> lastPolledMessage.set(directBuffer.getInt(i)), 1);
-        Assert.assertTrue(lastPolledMessage.get() == 0);
+        Assert.assertEquals(0, lastPolledMessage.get());
         mcastSubscriber.poll((directBuffer, i, i1, header) -> lastPolledMessage.set(directBuffer.getInt(i)), 1);
-        Assert.assertTrue(lastPolledMessage.get() == 0);
+        Assert.assertEquals(0, lastPolledMessage.get());
         ucastSubscriber.poll((directBuffer, i, i1, header) -> lastPolledMessage.set(directBuffer.getInt(i)), 1);
-        Assert.assertTrue(lastPolledMessage.get() == 0);
+        Assert.assertEquals(0, lastPolledMessage.get());
 
         // Close the publications
         ipcPublication.close();

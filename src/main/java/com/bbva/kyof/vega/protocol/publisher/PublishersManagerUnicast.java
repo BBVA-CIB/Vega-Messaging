@@ -10,6 +10,7 @@ import com.bbva.kyof.vega.exception.VegaException;
 import com.bbva.kyof.vega.protocol.common.VegaContext;
 import com.bbva.kyof.vega.protocol.control.IOwnSecPubTopicsChangesListener;
 import com.bbva.kyof.vega.util.collection.HashMapOfHashSet;
+import com.bbva.kyof.vega.util.net.InetUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -113,10 +114,20 @@ class PublishersManagerUnicast extends AbstractPublishersManager<TopicPublisherU
      */
     private AeronPublisherParams createAeronPublisherParams(final TopicPublisherUnicast topicPublisher, final AutoDiscTopicSocketInfo subcriberInfo)
     {
+        //hostname associated to how clients can find me
+        String hostname = topicPublisher.getTopicConfig().getHostname();
+
+        int ipAddress = subcriberInfo.getIpAddress();
+        if(topicPublisher.getTopicConfig().getIsResolveHostname() && hostname != null && !hostname.equals(subcriberInfo.getHostname()))
+        {
+            ipAddress =  InetUtil.getIpAddressAsIntByHostnameOrDefault(subcriberInfo.getHostname(), subcriberInfo.getIpAddress());
+            log.trace("AeronPublisherParams Unicast ip address obtained by hostname: [{}] from [{}]", ipAddress, subcriberInfo);
+        }
+
         // Create the aeron publisher parameters for the topic publisher
         return new AeronPublisherParams(
                 TransportMediaType.UNICAST,
-                subcriberInfo.getIpAddress(),
+                ipAddress,
                 subcriberInfo.getPort(),
                 subcriberInfo.getStreamId(),
                 topicPublisher.getTopicConfig().getSubnetAddress());

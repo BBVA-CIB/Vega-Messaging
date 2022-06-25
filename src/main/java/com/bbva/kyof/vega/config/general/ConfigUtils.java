@@ -9,6 +9,9 @@ import com.bbva.kyof.vega.util.net.SubnetAddress;
  */
 final class ConfigUtils
 {
+    /** If alternative hostname is not configured, set as empty by default  */
+    public static final String EMPTY_HOSTNAME = "";
+
     /** Private constructor to avoid instantiation */
     private ConfigUtils()
     {

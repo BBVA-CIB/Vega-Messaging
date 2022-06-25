@@ -1,5 +1,6 @@
 package com.bbva.kyof.vega.protocol.control;
 
+import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.autodiscovery.AutodiscManager;
 import com.bbva.kyof.vega.autodiscovery.daemon.CommandLineParserTest;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscInstanceInfo;
@@ -22,7 +23,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -40,7 +41,7 @@ public class ControlMsgsManagerTest
     private static VegaContext VEGA_CONTEXT2;
     private static ControlMsgsManager CONTRL_MSGS_MNG_1;
     private static ControlMsgsManager CONTRL_MSGS_MNG_2;
-    private static UUID SUB_TOPIC1_ID = UUID.randomUUID();
+    private static final UUID SUB_TOPIC1_ID = UUID.randomUUID();
     private static TopicSecurityTemplateConfig SUB_TOPIC1_SEC_CONFIG;
     private static TopicSecurityTemplateConfig PUB_TOPIC1_SEC_CONFIG;
     private static TopicSecurityTemplateConfig NO_PERM_PUB_TOPIC1_SEC_CONFIG;
@@ -92,12 +93,12 @@ public class ControlMsgsManagerTest
         CONTRL_MSGS_MNG_2 = new ControlMsgsManager(VEGA_CONTEXT2);
 
         // Create the resources for the rest of the tests
-        final Set<Integer> subTopic1SecureSubs = new HashSet<>(Arrays.asList(11111));
-        final Set<Integer> subTopic1SecurePubs = new HashSet<>(Arrays.asList(22222));
+        final Set<Integer> subTopic1SecureSubs = new HashSet<>(Collections.singletonList(11111));
+        final Set<Integer> subTopic1SecurePubs = new HashSet<>(Collections.singletonList(22222));
         SUB_TOPIC1_SEC_CONFIG = new TopicSecurityTemplateConfig("topic1", 100L, subTopic1SecureSubs, subTopic1SecurePubs);
 
-        final Set<Integer> pubTopic1SecureSubs = new HashSet<>(Arrays.asList(22222));
-        final Set<Integer> pubTopic1SecurePubs = new HashSet<>(Arrays.asList(11111));
+        final Set<Integer> pubTopic1SecureSubs = new HashSet<>(Collections.singletonList(22222));
+        final Set<Integer> pubTopic1SecurePubs = new HashSet<>(Collections.singletonList(11111));
         PUB_TOPIC1_SEC_CONFIG = new TopicSecurityTemplateConfig("topic1", 100L, pubTopic1SecureSubs, pubTopic1SecurePubs);
 
         final Set<Integer> noPermPubTopic1SecureSubs = new HashSet<>();
@@ -111,17 +112,19 @@ public class ControlMsgsManagerTest
         // Create the instance info for the simulated apps
         INSTANCE1_INFO = new AutoDiscInstanceInfo("instance1",
                 VEGA_CONTEXT1.getInstanceUniqueId(),
-                0, 0, 0,
+                0, 0, 0, TestConstants.EMPTY_HOSTNAME,
                 CONTRL_MSGS_MNG_1.getControlMsgsSubscriberParams().getIpAddress(),
                 CONTRL_MSGS_MNG_1.getControlMsgsSubscriberParams().getPort(),
-                CONTRL_MSGS_MNG_1.getControlMsgsSubscriberParams().getStreamId());
+                CONTRL_MSGS_MNG_1.getControlMsgsSubscriberParams().getStreamId(),
+                TestConstants.EMPTY_HOSTNAME);
 
         INSTANCE2_INFO = new AutoDiscInstanceInfo("instance2",
                 VEGA_CONTEXT2.getInstanceUniqueId(),
-                0, 0, 0,
+                0, 0, 0, TestConstants.EMPTY_HOSTNAME,
                 CONTRL_MSGS_MNG_2.getControlMsgsSubscriberParams().getIpAddress(),
                 CONTRL_MSGS_MNG_2.getControlMsgsSubscriberParams().getPort(),
-                CONTRL_MSGS_MNG_2.getControlMsgsSubscriberParams().getStreamId());
+                CONTRL_MSGS_MNG_2.getControlMsgsSubscriberParams().getStreamId(),
+                TestConstants.EMPTY_HOSTNAME);
     }
 
     private static void initializeSecurity() throws VegaException

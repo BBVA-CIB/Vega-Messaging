@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.xml.bind.annotation.*;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -59,20 +58,6 @@ public class AutoDiscoveryConfig implements IConfiguration
     @XmlElement(name = "timeout")
     @Getter private Long timeout;
 
-    /** (Optional, only unicast) The resolver daemon address (backward compatibility)
-     * This data will be inserted into unicastInfoArray and it will not used any more
-     */
-    @XmlElement(name = "resolver_daemon_address")
-    @Deprecated
-    private String resolverDaemonAddress;
-
-    /** (Optional, only unicast) The resolver daemon port  (backward compatibility)
-     * This data will be inserted into unicastInfoArray and it will not used any more
-     */
-    @XmlElement(name = "resolver_daemon_port")
-    @Deprecated
-    private Integer resolverDaemonPort;
-
     /** (Optional, only unicast) Address and port for all the resolver daemons */
     @XmlElement(name = "unicast_info")
     @Getter private List<UnicastInfo> unicastInfoArray;
@@ -105,6 +90,14 @@ public class AutoDiscoveryConfig implements IConfiguration
     @XmlTransient
     @Getter private SubnetAddress subnetAddress;
 
+    /** (Optional) The hostname  to use */
+    @XmlElement(name = "unicast_alternative_hostname")
+    @Getter private String hostname;
+
+    /** (Optional) Resolve hostname from clients to get ip address */
+    @XmlElement(name = "resolve_unicast_hostname")
+    @Getter private Boolean isResolveHostname;
+
     @Override
     public void completeAndValidateConfig() throws VegaException
     {
@@ -122,7 +115,10 @@ public class AutoDiscoveryConfig implements IConfiguration
         {
             this.validateMulticastConfig();
         }
+
+        this.checkHostname();
     }
+
 
     /** @return the default stream id for auto-discovery communication */
     public int getDefaultStreamId()
@@ -204,8 +200,10 @@ public class AutoDiscoveryConfig implements IConfiguration
      */
     private void validateUnicastDaemonConfig() throws VegaException
     {
-        //Move the old style unicast daemon address and port to the new structure.
-        saveOldStyleDaemonAddressAndPort();
+        //Check if is it some unicastInfo configured
+        if(unicastInfoArray == null || unicastInfoArray.isEmpty()){
+            throw new VegaException("The resolver daemon address is missing");
+        }
 
         //Check all the IPs and ports configurations
         for(UnicastInfo unicastInfo: unicastInfoArray){
@@ -223,11 +221,6 @@ public class AutoDiscoveryConfig implements IConfiguration
                 unicastInfo.setResolverDaemonPort(DEFAULT_RESOLVER_DAEMON_PORT);
             }
             ConfigUtils.validatePortNumber(unicastInfo.getResolverDaemonPort());
-        }
-
-        //Check if is it some unicastInfo configured
-        if(unicastInfoArray.isEmpty()){
-            throw new VegaException("The resolver daemon address is missing");
         }
 
         // Check reception port range
@@ -253,34 +246,22 @@ public class AutoDiscoveryConfig implements IConfiguration
     }
 
     /**
-     * With the new functionality of adding various unicast daemons, the configuration has change, adding an array of
-     * IPs and ports. But to maintain backward compatibility, the fields this.resolverDaemonAddress
-     * and this.resolverDaemonPort are still supported.
-     * This function is used to convert the old style configuration params to the new structure
+     * Checks if the hostname is configured. If is not configured, the hostname is set by subnet by default
      */
-    private void saveOldStyleDaemonAddressAndPort()
+    private void checkHostname()
     {
-    	//If there are only an old configuration, unicastInfoArray is null
-    	if(unicastInfoArray == null)
-		{
-			unicastInfoArray = new ArrayList<>();
-		}
-
-        //If old style address is not null, configure into the new structure
-        if (this.resolverDaemonAddress != null)
+        if(isResolveHostname == null)
         {
-            //If existe an old style address configured but there is not port, use default port
-            if (this.resolverDaemonPort == null)
-            {
-                this.resolverDaemonPort = DEFAULT_RESOLVER_DAEMON_PORT;
-            }
+            //by default, hostname is not desired
+            this.isResolveHostname = Boolean.FALSE;
+        }
 
-            //Insert the IP and port (old configuration style) into unicastInfoArray (new functionality)
-            this.unicastInfoArray.add( new UnicastInfo(this.resolverDaemonAddress, this.resolverDaemonPort) );
-
-            //Initialize both fields to ensure that them are not used
-            this.resolverDaemonAddress = null;
-            this.resolverDaemonPort=null;
+        // if hostname is not configured, check isResolveHostname flag to get by subnet.
+        // if hostname is not wanted to be resolved (but resolved client hostname is wanted), set it to empty string by configuration
+        if(this.hostname == null)
+        {
+            //avoid null
+            this.hostname = this.isResolveHostname ? subnetAddress.getIpAddres().getCanonicalHostName() : ConfigUtils.EMPTY_HOSTNAME;
         }
     }
 }

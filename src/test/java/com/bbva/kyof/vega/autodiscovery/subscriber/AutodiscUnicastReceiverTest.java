@@ -7,6 +7,7 @@ import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicInfo;
 import com.bbva.kyof.vega.autodiscovery.publisher.IPublicationsManager;
 import com.bbva.kyof.vega.config.general.AutoDiscoType;
 import com.bbva.kyof.vega.config.general.AutoDiscoveryConfig;
+import com.bbva.kyof.vega.config.general.UnicastInfo;
 import com.bbva.kyof.vega.exception.VegaException;
 import io.aeron.Aeron;
 import io.aeron.Subscription;
@@ -18,6 +19,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.UUID;
 
 import static org.junit.Assert.assertTrue;
@@ -39,8 +41,10 @@ public class AutodiscUnicastReceiverTest implements IAutodiscGlobalEventListener
         PowerMock.replayAll(aeron);
 
         // Create the configuration, with 300 millis refresh interval
-        final AutoDiscoveryConfig config = AutoDiscoveryConfig.builder().autoDiscoType(AutoDiscoType.UNICAST_DAEMON)
-                .resolverDaemonAddress("192.168.1.1").refreshInterval(100L).build();
+        final AutoDiscoveryConfig config = AutoDiscoveryConfig.builder()
+                .autoDiscoType(AutoDiscoType.UNICAST_DAEMON)
+                .unicastInfoArray(Collections.singletonList(new UnicastInfo("192.168.1.1",37000)))
+                .refreshInterval(100L).build();
         config.completeAndValidateConfig();
 
         return new AutodiscUnicastReceiver(UUID.randomUUID(), aeron, config, this, publicationsManager);

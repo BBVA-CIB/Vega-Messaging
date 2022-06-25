@@ -69,8 +69,18 @@ public final class VegaInstance implements IVegaInstance, AvailableImageHandler,
         // Get the unmanaged media driver if any
         final MediaDriver unmanagedMediaDriver = parameters.getUnmanagedMediaDriver();
 
-        // Load the configuration
-        final GlobalConfiguration config = ConfigReader.readConfiguration(parameters.getConfigurationFile());
+        // Load the configuration. The file configuration overrides the programmatic one.
+        final GlobalConfiguration config;
+        if (parameters.getConfigurationFile() != null)
+        {
+            // If the file exists, read the configuration file
+            config = ConfigReader.readConfiguration(parameters.getConfigurationFile());
+        }
+        else
+        {
+            // It the file does not exist, use the programmatic configuration
+            config = parameters.getGlobalConfiguration();
+        }
 
         // Make sure that if there are secure configured topics in configuration, the parameters also contains the security information
         if (config.hasAnySecureTopic() && parameters.getSecurityParams() == null)
@@ -160,9 +170,11 @@ public final class VegaInstance implements IVegaInstance, AvailableImageHandler,
                 responseSubscriberParams.getIpAddress(),
                 responseSubscriberParams.getPort(),
                 responseSubscriberParams.getStreamId(),
+                config.getResponsesConfig().getHostname(),
                 controlMsgsSubscriberParams.getIpAddress(),
                 controlMsgsSubscriberParams.getPort(),
-                controlMsgsSubscriberParams.getStreamId());
+                controlMsgsSubscriberParams.getStreamId(),
+                config.getControlRcvConfig().getHostname());
 
         autodiscoManager.registerInstanceInfo(autoDiscInstanceInfo);
     }

@@ -24,6 +24,9 @@ public class DaemonParameters
     /** Default timeout for the clients before considering them disconnected */
     static final long DEFAULT_CLIENT_TIMEOUT = 10000;
 
+    /** Default hostname value as empty */
+    private static final String EMPTY_HOSTNAME = "";
+
     /** Timeout for client connections, the client will be considered disconnected if no message is received after the timeout period */
     @Getter private Long clientTimeout;
     /** Aeron Driver Type to use */
@@ -40,6 +43,11 @@ public class DaemonParameters
     @Getter private Integer port;
     /** Subnet address calculated using the given subnet string, if null it will use the ip of the first ip4 interface of the machine */
     @Getter private SubnetAddress subnetAddress;
+    /** Hostname of server, used to obtain a public or external ip, if null it will be loaded by OS */
+    @Getter private String hostname;
+
+    /** (Optional) Resolve hostname from clients to get ip address. By default false */
+    @Getter private boolean isResolveHostname;
 
     /**
      * Complete the null parameters that are optional using the default parameters. It will also validate the parameters and
@@ -64,6 +72,11 @@ public class DaemonParameters
         this.validateSubnet();
 
         this.ipAddress = this.subnetAddress.getIpAddres().getHostAddress();
+
+        if (this.hostname == null)
+        {
+            this.hostname = this.isResolveHostname ? subnetAddress.getIpAddres().getHostName() : EMPTY_HOSTNAME;
+        }
     }
 
     /**

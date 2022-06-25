@@ -2,6 +2,7 @@ package com.bbva.kyof.vega.autodiscovery;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.autodiscovery.daemon.DaemonParameters;
 import com.bbva.kyof.vega.autodiscovery.daemon.UnicastDaemon;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicInfo;
@@ -10,6 +11,7 @@ import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTransportType;
 import com.bbva.kyof.vega.autodiscovery.subscriber.IAutodiscTopicSubListener;
 import com.bbva.kyof.vega.config.general.AutoDiscoType;
 import com.bbva.kyof.vega.config.general.AutoDiscoveryConfig;
+import com.bbva.kyof.vega.config.general.UnicastInfo;
 import com.bbva.kyof.vega.exception.VegaException;
 import com.bbva.kyof.vega.util.net.InetUtil;
 import com.bbva.kyof.vega.util.net.SubnetAddress;
@@ -24,6 +26,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -75,9 +78,11 @@ public class AutodiscManagerStressTest
         for (int i = 0; i < NUM_TOPICS; i++)
         {
             TOPICS_INFO_1[i] = new AutoDiscTopicInfo(instanceId1, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic" + i);
-            TOPIC_SOCKETS_INFO_1[i] = new AutoDiscTopicSocketInfo(instanceId1, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), TOPICS_INFO_1[i].getTopicName(), TOPICS_INFO_1[i].getUniqueId(), 34, 36, 33);
+            TOPIC_SOCKETS_INFO_1[i] = new AutoDiscTopicSocketInfo(instanceId1, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), TOPICS_INFO_1[i].getTopicName(), TOPICS_INFO_1[i].getUniqueId(), 34,
+                    36, 33, TestConstants.EMPTY_HOSTNAME);
             TOPICS_INFO_2[i] = new AutoDiscTopicInfo(instanceId2, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic" + i);
-            TOPIC_SOCKETS_INFO_2[i] = new AutoDiscTopicSocketInfo(instanceId2, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), TOPICS_INFO_2[i].getTopicName(), TOPICS_INFO_2[i].getUniqueId(), 34, 36, 33);
+            TOPIC_SOCKETS_INFO_2[i] = new AutoDiscTopicSocketInfo(instanceId2, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), TOPICS_INFO_2[i].getTopicName(), TOPICS_INFO_2[i].getUniqueId(), 34,
+                    36, 33, TestConstants.EMPTY_HOSTNAME);
         }
 
         MEDIA_DRIVER = MediaDriver.launchEmbedded();
@@ -291,12 +296,12 @@ public class AutodiscManagerStressTest
     private AutodiscManager createUnicastManager(final Aeron aeron) throws VegaException
     {
         // Create unicast autodiscovery manager
+        UnicastInfo unicastInfo = new UnicastInfo(IP,PORT_UNICAST_DAEMON);
         AutoDiscoveryConfig unicastConfig = AutoDiscoveryConfig.builder().
                 autoDiscoType(AutoDiscoType.UNICAST_DAEMON).
                 refreshInterval(100L).
                 timeout(5000L).
-                resolverDaemonAddress(IP).
-                resolverDaemonPort(PORT_UNICAST_DAEMON).
+                unicastInfoArray(Collections.singletonList(new UnicastInfo(IP,PORT_UNICAST_DAEMON))).
                 build();
         unicastConfig.completeAndValidateConfig();
 

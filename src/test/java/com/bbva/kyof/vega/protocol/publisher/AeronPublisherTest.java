@@ -3,7 +3,11 @@ package com.bbva.kyof.vega.protocol.publisher;
 import com.bbva.kyof.vega.Version;
 import com.bbva.kyof.vega.config.general.GlobalConfiguration;
 import com.bbva.kyof.vega.config.general.TransportMediaType;
-import com.bbva.kyof.vega.msg.*;
+import com.bbva.kyof.vega.msg.IRcvMessage;
+import com.bbva.kyof.vega.msg.IRcvRequest;
+import com.bbva.kyof.vega.msg.IRcvResponse;
+import com.bbva.kyof.vega.msg.MsgType;
+import com.bbva.kyof.vega.msg.PublishResult;
 import com.bbva.kyof.vega.protocol.common.VegaContext;
 import com.bbva.kyof.vega.util.net.InetUtil;
 import com.bbva.kyof.vega.util.net.SubnetAddress;
@@ -18,7 +22,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Random;
 import java.util.UUID;
 
@@ -90,12 +93,12 @@ public class AeronPublisherTest
 
         // Create a topic ID
         final UUID topicId = UUID.randomUUID();
-        
+
         // Create a sequence number
         final long sequenceNumber = new Random().nextLong();
-        
+
         // Send the message
-        while(true)
+        while (true)
         {
             if (publisher.sendMessage(MsgType.DATA, topicId, sendBuffer, sequenceNumber, 0, 1024) == PublishResult.BACK_PRESSURED)
             {
@@ -241,10 +244,10 @@ public class AeronPublisherTest
 
         // Create a topic ID
         final UUID topicId = UUID.randomUUID();
-        
+
         // Create a sequence number
         final long sequenceNumber = new Random().nextLong();
-        
+
         // Send the message
         Assert.assertSame(publisher.sendMessage(MsgType.DATA, topicId, sendBuffer, sequenceNumber, 0, msgSize), PublishResult.OK);
 
@@ -269,7 +272,7 @@ public class AeronPublisherTest
     {
         final byte[] resultArray = new byte[receivedContentLength];
         receivedContent.getBytes(receivedContentOffset, resultArray);
-        Assert.assertTrue(Arrays.equals(resultArray, sendMsg));
+        Assert.assertArrayEquals(resultArray, sendMsg);
     }
 
     private void testSendRequest(final AeronPublisher publisher, final SimpleReceiver subscription, final int msgSize) throws Exception

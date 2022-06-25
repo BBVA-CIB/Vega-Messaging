@@ -1,5 +1,6 @@
 package com.bbva.kyof.vega.protocol.common;
 
+import com.bbva.kyof.vega.config.general.GlobalConfiguration;
 import com.bbva.kyof.vega.exception.VegaException;
 import com.bbva.kyof.vega.util.file.FilePathUtil;
 import io.aeron.driver.MediaDriver;
@@ -22,6 +23,9 @@ public final class VegaInstanceParams
 
     /** path + name of the configuration xml file */
     @Getter private final String configurationFile;
+
+    /** Configuration loaded by code. It is overwritten by the configurationFile if the file is not null*/
+    @Getter private final GlobalConfiguration globalConfiguration;
 
     /** (Optional) Media driver in case we want to handle ourselfs the media driver lifecycle */
     @Getter private final MediaDriver unmanagedMediaDriver;
@@ -49,18 +53,28 @@ public final class VegaInstanceParams
         }
 
         // Validate configuration file
-        if (this.configurationFile == null)
+        if (this.configurationFile == null && this.globalConfiguration == null)
         {
-            throw new VegaException("Missing required parameter [configuration name]");
+            throw new VegaException("Missing required parameter [configuration file name or programmatic configuration]");
         }
 
-        try
+        // Check the configuration
+        if (this.configurationFile == null)
         {
-            FilePathUtil.verifyFilePath(this.configurationFile);
+            // If the configuration file does not exist, check the programmatic configuration
+            globalConfiguration.completeAndValidateConfig();
         }
-        catch (final IOException e)
+        else
         {
-            throw new VegaException("Error trying to access the configuration file " + this.configurationFile, e);
+            // If the configuration file exists, check it
+            try
+            {
+                FilePathUtil.verifyFilePath(this.configurationFile);
+            }
+            catch (final IOException e)
+            {
+                throw new VegaException("Error trying to access the configuration file " + this.configurationFile, e);
+            }
         }
 
         // Validate security parameters

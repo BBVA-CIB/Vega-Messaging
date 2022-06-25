@@ -1,5 +1,6 @@
 package com.bbva.kyof.vega.autodiscovery.daemon;
 
+import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.Version;
 import com.bbva.kyof.vega.autodiscovery.model.*;
 import com.bbva.kyof.vega.msg.BaseHeader;
@@ -74,7 +75,7 @@ public class UnicastDaemonReceiverTest
         LISTENER.reset();
 
         // Create a publication to send messages to the deaemon
-        final AutoDiscDaemonClientInfo daemonClientInfo = new AutoDiscDaemonClientInfo(UUID.randomUUID(), 34, 23, 33);
+        final AutoDiscDaemonClientInfo daemonClientInfo = new AutoDiscDaemonClientInfo(UUID.randomUUID(), 34, 23, 33, TestConstants.EMPTY_HOSTNAME);
 
         // Send a message
         this.sendMessage(MsgType.AUTO_DISC_DAEMON_CLIENT_INFO, daemonClientInfo);
@@ -87,7 +88,7 @@ public class UnicastDaemonReceiverTest
         Assert.assertEquals(LISTENER.receiveAutoDiscDaemonClientInfo, daemonClientInfo);
         LISTENER.reset();
         // Check if initialized correctly onReceiveAutoDiscDaemonClientInfo
-        Assert.assertEquals(LISTENER.receiveAutoDiscDaemonClientInfo, null);
+        Assert.assertNull(LISTENER.receiveAutoDiscDaemonClientInfo);
 
         // Now call again, since there has been no time out, there shouldn't be a new event
         this.sendMessage(MsgType.AUTO_DISC_DAEMON_CLIENT_INFO, daemonClientInfo);
@@ -110,7 +111,7 @@ public class UnicastDaemonReceiverTest
         Assert.assertEquals(LISTENER.clientInfoRemoved, daemonClientInfo);
         LISTENER.reset();
         // Check if initialized correctly onReceiveAutoDiscDaemonClientInfo
-        Assert.assertEquals(LISTENER.receiveAutoDiscDaemonClientInfo, null);
+        Assert.assertNull(LISTENER.receiveAutoDiscDaemonClientInfo);
 
         // If we send again, there should be a new element again
         this.sendMessage(MsgType.AUTO_DISC_DAEMON_CLIENT_INFO, daemonClientInfo);
@@ -128,9 +129,9 @@ public class UnicastDaemonReceiverTest
 
         Assert.assertFalse(LISTENER.msgToFordward);
 
-        final AutoDiscInstanceInfo instanceInfo = new AutoDiscInstanceInfo("instance1", UUID.randomUUID(), 12, 23, 55, 22, 33, 66);
+        final AutoDiscInstanceInfo instanceInfo = new AutoDiscInstanceInfo("instance1", UUID.randomUUID(), 12, 23, 55, TestConstants.EMPTY_HOSTNAME, 22, 33, 66, TestConstants.EMPTY_HOSTNAME);
         final AutoDiscTopicInfo topicInfo = new AutoDiscTopicInfo(SENDER_INSTANCE_ID, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic");
-        final AutoDiscTopicSocketInfo topicSocketInfo = new AutoDiscTopicSocketInfo(SENDER_INSTANCE_ID, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic", UUID.randomUUID(), 1, 2, 4);
+        final AutoDiscTopicSocketInfo topicSocketInfo = new AutoDiscTopicSocketInfo(SENDER_INSTANCE_ID, AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic", UUID.randomUUID(), 1, 2, 4, TestConstants.EMPTY_HOSTNAME);
 
         // Send a message
         this.sendMessage(MsgType.AUTO_DISC_TOPIC, topicInfo);

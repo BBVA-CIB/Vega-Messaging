@@ -89,7 +89,8 @@ public class PublicationsManagerTest
             autoDiscDaemonServerInfos[i] = new AutoDiscDaemonServerInfo(
                     UUID.randomUUID(),
                     InetUtil.convertIpAddressToInt(ucastIpHA),
-                    autodiscPortHA+i
+                    autodiscPortHA+i,
+                    null
             );
 
         }

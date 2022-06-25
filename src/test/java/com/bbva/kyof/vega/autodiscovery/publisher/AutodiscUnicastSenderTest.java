@@ -3,6 +3,7 @@ package com.bbva.kyof.vega.autodiscovery.publisher;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscDaemonClientInfo;
 import com.bbva.kyof.vega.config.general.AutoDiscoType;
 import com.bbva.kyof.vega.config.general.AutoDiscoveryConfig;
+import com.bbva.kyof.vega.config.general.UnicastInfo;
 import com.bbva.kyof.vega.exception.VegaException;
 import io.aeron.Aeron;
 import io.aeron.ConcurrentPublication;
@@ -15,7 +16,7 @@ import org.powermock.api.easymock.PowerMock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 
 /**
@@ -25,7 +26,7 @@ import java.util.UUID;
 @PrepareForTest(Aeron.class)
 public class AutodiscUnicastSenderTest
 {
-    final AutoDiscDaemonClientInfo daemonClientInfo = new AutoDiscDaemonClientInfo(UUID.randomUUID(), 12, 13, 14);
+    final AutoDiscDaemonClientInfo daemonClientInfo = new AutoDiscDaemonClientInfo(UUID.randomUUID(), 12, 13, 14, "unicast_host");
     boolean testIsClosed = false;
 
     @Test
@@ -35,7 +36,7 @@ public class AutodiscUnicastSenderTest
         final ConcurrentPublication publication = EasyMock.createNiceMock(ConcurrentPublication.class);
         final PublicationsManager publicationsManager = EasyMock.createNiceMock(PublicationsManager.class);
         final PublicationInfo publicationInfo =
-                new PublicationInfo(publication, null,0,0,true);
+                new PublicationInfo(publication, null, 0, 0, true);
         final PublicationInfo[] publicationInfoArray = {publicationInfo};
 
         EasyMock.expect(aeron.addPublication(EasyMock.anyObject(), EasyMock.anyInt())).andReturn(publication).anyTimes();
@@ -46,7 +47,7 @@ public class AutodiscUnicastSenderTest
         // Create the configuration, with 300 millis refresh interval
         final AutoDiscoveryConfig config = AutoDiscoveryConfig.builder()
                 .autoDiscoType(AutoDiscoType.UNICAST_DAEMON)
-                .resolverDaemonAddress("192.168.0.1")
+                .unicastInfoArray(Collections.singletonList(new UnicastInfo("192.168.1.1",37000)))
                 .refreshInterval(100L).build();
         config.completeAndValidateConfig();
 
@@ -56,11 +57,11 @@ public class AutodiscUnicastSenderTest
                 daemonClientInfo,
                 publicationsManager);
 
-        Assert.assertTrue(sender.sendNextTopicAdverts() == 0);
+        Assert.assertEquals(0, sender.sendNextTopicAdverts());
 
         Thread.sleep(400);
 
-        Assert.assertTrue(sender.sendNextTopicAdverts() == 1);
+        Assert.assertEquals(1, sender.sendNextTopicAdverts());
     }
 
     @Test
@@ -70,7 +71,7 @@ public class AutodiscUnicastSenderTest
         final ConcurrentPublication publication = EasyMock.createNiceMock(ConcurrentPublication.class);
         final PublicationsManager publicationsManager = EasyMock.createNiceMock(PublicationsManager.class);
         final PublicationInfo publicationInfo =
-                new PublicationInfo(publication, null,0,0,true);
+                new PublicationInfo(publication, null, 0, 0, true);
 
         EasyMock.expect(aeron.addPublication(EasyMock.anyObject(), EasyMock.anyInt())).andReturn(publication).anyTimes();
         EasyMock.expect(publicationsManager.getRandomPublicationInfo()).andReturn(publicationInfo).anyTimes();
@@ -81,7 +82,7 @@ public class AutodiscUnicastSenderTest
         // Create the configuration, with 300 millis refresh interval
         final AutoDiscoveryConfig config = AutoDiscoveryConfig.builder()
                 .autoDiscoType(AutoDiscoType.UNICAST_DAEMON)
-                .resolverDaemonAddress("192.168.0.1")
+                .unicastInfoArray(Collections.singletonList(new UnicastInfo("192.168.1.1",37000)))
                 .refreshInterval(100L).build();
         config.completeAndValidateConfig();
 
@@ -104,9 +105,9 @@ public class AutodiscUnicastSenderTest
         final ConcurrentPublication publication = EasyMock.createNiceMock(ConcurrentPublication.class);
         final PublicationsManager publicationsManager = EasyMock.createNiceMock(PublicationsManager.class);
         final PublicationInfo publicationInfoDisabled =
-                new PublicationInfo(null, null,0,0,false);
+                new PublicationInfo(null, null, 0, 0, false);
         final PublicationInfo publicationInfoEnabled =
-                new PublicationInfo(publication, null,0,0,false);
+                new PublicationInfo(publication, null, 0, 0, false);
 
         EasyMock.expect(aeron.addPublication(EasyMock.anyObject(), EasyMock.anyInt())).andReturn(publication).anyTimes();
         EasyMock.expect(publicationsManager.hasEnabledPublications()).andReturn(true).anyTimes();
@@ -122,7 +123,7 @@ public class AutodiscUnicastSenderTest
         // Create the configuration, with 300 millis refresh interval
         final AutoDiscoveryConfig config = AutoDiscoveryConfig.builder()
                 .autoDiscoType(AutoDiscoType.UNICAST_DAEMON)
-                .resolverDaemonAddress("192.168.0.1")
+                .unicastInfoArray(Collections.singletonList(new UnicastInfo("192.168.1.1",37000)))
                 .refreshInterval(100L).build();
         config.completeAndValidateConfig();
 
@@ -146,7 +147,7 @@ public class AutodiscUnicastSenderTest
         final ConcurrentPublication publication = EasyMock.createNiceMock(ConcurrentPublication.class);
         final PublicationsManager publicationsManager = EasyMock.createNiceMock(PublicationsManager.class);
         final PublicationInfo publicationInfo =
-                new PublicationInfo(publication, null,0,0,true);
+                new PublicationInfo(publication, null, 0, 0, true);
         final PublicationInfo[] publicationInfoArray = {publicationInfo};
 
         EasyMock.expect(aeron.addPublication(EasyMock.anyObject(), EasyMock.anyInt())).andReturn(publication).anyTimes();
@@ -161,7 +162,7 @@ public class AutodiscUnicastSenderTest
         // Create the configuration, with 300 millis refresh interval
         final AutoDiscoveryConfig config = AutoDiscoveryConfig.builder()
                 .autoDiscoType(AutoDiscoType.UNICAST_DAEMON)
-                .resolverDaemonAddress("192.168.0.1")
+                .unicastInfoArray(Collections.singletonList(new UnicastInfo("192.168.1.1",37000)))
                 .refreshInterval(100L).build();
         config.completeAndValidateConfig();
 

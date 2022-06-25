@@ -1,5 +1,6 @@
 package com.bbva.kyof.vega.protocol.subscriber;
 
+import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicInfo;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicSocketInfo;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTransportType;
@@ -7,7 +8,13 @@ import com.bbva.kyof.vega.config.general.ConfigReader;
 import com.bbva.kyof.vega.config.general.ConfigReaderTest;
 import com.bbva.kyof.vega.config.general.TopicTemplateConfig;
 import com.bbva.kyof.vega.config.general.TransportMediaType;
-import com.bbva.kyof.vega.msg.*;
+import com.bbva.kyof.vega.msg.IRcvMessage;
+import com.bbva.kyof.vega.msg.IRcvRequest;
+import com.bbva.kyof.vega.msg.MsgReqHeader;
+import com.bbva.kyof.vega.msg.MsgType;
+import com.bbva.kyof.vega.msg.RcvMessage;
+import com.bbva.kyof.vega.msg.RcvRequest;
+import com.bbva.kyof.vega.msg.RcvResponse;
 import com.bbva.kyof.vega.protocol.AutoDiscManagerMock;
 import com.bbva.kyof.vega.protocol.common.VegaContext;
 import com.bbva.kyof.vega.protocol.control.ISecurityRequesterNotifier;
@@ -20,12 +27,24 @@ import io.aeron.driver.MediaDriver;
 import org.agrona.CloseHelper;
 import org.agrona.concurrent.UnsafeBuffer;
 import org.easymock.EasyMock;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Objects;
+import java.util.Random;
+import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by cnebrera on 11/08/16.
@@ -40,8 +59,8 @@ public class SubscribersManagerUnicastTest implements ITopicSubListener
     private static VegaContext VEGA_CONTEXT;
     private static AutoDiscManagerMock AUTO_DISC_MANAGER_MOCK;
     private static SubscribersPollersManager POLLERS_MANAGER;
-    private static ReceiverListener POLLER_LISTENER = new ReceiverListener();
-    private static TopicSubAndTopicPubIdRelations RELATIONS = new TopicSubAndTopicPubIdRelations();
+    private static final ReceiverListener POLLER_LISTENER = new ReceiverListener();
+    private static final TopicSubAndTopicPubIdRelations RELATIONS = new TopicSubAndTopicPubIdRelations();
     private static TopicTemplateConfig TEMPLATE_UCAST;
 
     private SubscribersManagerUnicast subscriberManager;
@@ -110,9 +129,9 @@ public class SubscribersManagerUnicastTest implements ITopicSubListener
 
         // Subscribe to 4 TOPICS, since there are ony 2 ports some of the aeron subscribers will be repeated
         subscriberManager.subscribeToTopic("utopic1", TEMPLATE_UCAST, null, this);
-        subscriberManager.subscribeToTopic("utopic2", TEMPLATE_UCAST, null,this);
-        subscriberManager.subscribeToTopic("utopic3", TEMPLATE_UCAST, null,this);
-        subscriberManager.subscribeToTopic("utopic4", TEMPLATE_UCAST, null,this);
+        subscriberManager.subscribeToTopic("utopic2", TEMPLATE_UCAST, null, this);
+        subscriberManager.subscribeToTopic("utopic3", TEMPLATE_UCAST, null, this);
+        subscriberManager.subscribeToTopic("utopic4", TEMPLATE_UCAST, null, this);
 
         // These are the topic info for each created publisher
         final AutoDiscTopicInfo topicInfo1 = new AutoDiscTopicInfo(instanceId, AutoDiscTransportType.SUB_UNI, subscriberManager.getTopicSubscriberForTopicName("utopic1").getUniqueId(), "utopic1");
@@ -170,7 +189,8 @@ public class SubscribersManagerUnicastTest implements ITopicSubListener
         // Now create a publisher for each registered topic socket
         AUTO_DISC_MANAGER_MOCK.getRegTopicSocketInfos().forEach((autoDiscTopicSocketInfo ->
         {
-            final AeronPublisherParams pubParams = new AeronPublisherParams(TransportMediaType.UNICAST, autoDiscTopicSocketInfo.getIpAddress(), autoDiscTopicSocketInfo.getPort(), autoDiscTopicSocketInfo.getStreamId(), SUBNET_ADDRESS);
+            final AeronPublisherParams pubParams = new AeronPublisherParams(TransportMediaType.UNICAST, autoDiscTopicSocketInfo.getIpAddress(), autoDiscTopicSocketInfo.getPort(),
+                    autoDiscTopicSocketInfo.getStreamId(), SUBNET_ADDRESS);
             final AeronPublisher publisher = new AeronPublisher(VEGA_CONTEXT, pubParams);
             publishersByTopic.put(autoDiscTopicSocketInfo.getTopicName(), publisher);
         }));
@@ -196,7 +216,7 @@ public class SubscribersManagerUnicastTest implements ITopicSubListener
     public void testAdverts()
     {
         final UUID instanceId = UUID.randomUUID();
-        final AutoDiscTopicSocketInfo topicSocketInfo1 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "mtopic1", UUID.randomUUID(), 34, 34534, 23);
+        final AutoDiscTopicSocketInfo topicSocketInfo1 = new AutoDiscTopicSocketInfo(instanceId, AutoDiscTransportType.PUB_MUL, UUID.randomUUID(), "mtopic1", UUID.randomUUID(), 34, 34534, 23, TestConstants.EMPTY_HOSTNAME);
         subscriberManager.onNewAutoDiscTopicSocketInfo(topicSocketInfo1);
         subscriberManager.onTimedOutAutoDiscTopicSocketInfo(topicSocketInfo1);
     }

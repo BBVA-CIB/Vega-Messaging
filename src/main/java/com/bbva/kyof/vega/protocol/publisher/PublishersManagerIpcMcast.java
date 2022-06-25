@@ -189,6 +189,7 @@ class PublishersManagerIpcMcast extends AbstractPublishersManager<TopicPublisher
                 aeronPublisherParams.getIpAddress(),
                 aeronPublisherParams.getPort(),
                 aeronPublisherParams.getStreamId(),
+                AutoDiscTopicSocketInfo.NO_HOSTNAME,
                 topicPublisher.hasSecurity() ? this.getVegaContext().getSecurityContext().getSecurityId() : AutoDiscTopicSocketInfo.NO_SECURED_CONSTANT);
 
         this.registeredTopicSocketInfosByTopicId.put(topicPublisher.getUniqueId(), autoDiscTopicSocketInfo);

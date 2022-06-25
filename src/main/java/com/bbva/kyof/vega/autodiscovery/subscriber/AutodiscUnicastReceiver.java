@@ -93,7 +93,7 @@ public class AutodiscUnicastReceiver extends AbstractAutodiscReceiver implements
         final String channel = AeronChannelHelper.createUnicastChannelString(ipAddress, portNumber, config.getSubnetAddress());
 
         // Store the daemon client information with the subscription information that is about to be created
-        this.daemonClientInfo = new AutoDiscDaemonClientInfo(instanceId, InetUtil.convertIpAddressToInt(ipAddress), portNumber, streamId);
+        this.daemonClientInfo = new AutoDiscDaemonClientInfo(instanceId, InetUtil.convertIpAddressToInt(ipAddress), portNumber, streamId, config.getHostname());
 
         log.info("Creating auto-discovery unicast receiver aeron subscription on channel {} and stream id {}", channel, streamId);
 

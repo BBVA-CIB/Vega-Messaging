@@ -1,6 +1,5 @@
 package com.bbva.kyof.vega.protocol.control;
 
-import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.config.general.GlobalConfiguration;
 import com.bbva.kyof.vega.exception.VegaException;
 import com.bbva.kyof.vega.msg.MsgSecurityErrorResp;
@@ -32,7 +31,7 @@ import java.util.UUID;
 /**
  * Created by cnebrera on 11/11/2016.
  */
-public class ControlMsgsPollerAndPublisherTest
+public class ControlMsgsPollerAndPublisherByHostnameTest
 {
     private final static UUID OWN_INSTANCE_ID = UUID.randomUUID();
     private final static UUID TARGET_INSTANCE_ID = UUID.randomUUID();
@@ -225,9 +224,12 @@ public class ControlMsgsPollerAndPublisherTest
 
     private static class Listener implements ISecurityRequestListener, ISecurityResponseListener
     {
-        @Getter MsgSecurityReq rcvRequest = null;
-        @Getter MsgSecurityResp rcvResp = null;
-        @Getter MsgSecurityErrorResp rcvErrorResp = null;
+        @Getter
+        MsgSecurityReq rcvRequest = null;
+        @Getter
+        MsgSecurityResp rcvResp = null;
+        @Getter
+        MsgSecurityErrorResp rcvErrorResp = null;
 
         @Override
         public void onSecurityRequestReceived(MsgSecurityReq securityReq)

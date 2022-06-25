@@ -4,7 +4,12 @@ import com.bbva.kyof.vega.config.general.GlobalConfiguration;
 import com.bbva.kyof.vega.config.general.IdleStrategyType;
 import com.bbva.kyof.vega.config.general.RcvPollerConfig;
 import com.bbva.kyof.vega.config.general.TransportMediaType;
-import com.bbva.kyof.vega.msg.*;
+import com.bbva.kyof.vega.msg.IRcvMessage;
+import com.bbva.kyof.vega.msg.MsgReqHeader;
+import com.bbva.kyof.vega.msg.MsgType;
+import com.bbva.kyof.vega.msg.RcvMessage;
+import com.bbva.kyof.vega.msg.RcvRequest;
+import com.bbva.kyof.vega.msg.RcvResponse;
 import com.bbva.kyof.vega.protocol.common.VegaContext;
 import com.bbva.kyof.vega.protocol.publisher.AeronPublisher;
 import com.bbva.kyof.vega.protocol.publisher.AeronPublisherParams;
@@ -21,7 +26,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -140,7 +150,7 @@ public class SubcribersPollerTest
         final UUID responseId1 = UUID.randomUUID();
 
         // Send an unexpected type message, should not arrive
-        IPC_PUBLISHER.sendMessage((byte)66, topicId1, sendBuffer, 0, 0, 4);
+        IPC_PUBLISHER.sendMessage((byte) 66, topicId1, sendBuffer, 0, 0, 4);
 
         // Send IPD messages
         sendBuffer.putInt(0, 11);
@@ -159,7 +169,7 @@ public class SubcribersPollerTest
         final UUID topicId2 = UUID.randomUUID();
         final UUID requestId2 = UUID.randomUUID();
         final UUID responseId2 = UUID.randomUUID();
-        
+
         sendBuffer.putInt(0, 21);
         UCAST_PUBLISHER.sendMessage(MsgType.DATA, topicId2, sendBuffer, 5, 0, 4);
         sendBuffer.putInt(0, 22);
@@ -175,7 +185,7 @@ public class SubcribersPollerTest
         final UUID topicId3 = UUID.randomUUID();
         final UUID requestId3 = UUID.randomUUID();
         final UUID responseId3 = UUID.randomUUID();
-        
+
         sendBuffer.putInt(0, 31);
         MCAST_PUBLISHER.sendMessage(MsgType.DATA, topicId3, sendBuffer, 9, 0, 4);
         sendBuffer.putInt(0, 32);
@@ -311,17 +321,26 @@ public class SubcribersPollerTest
         poller.close();
     }
 
-    private class Listener implements ISubscribersPollerListener
+    private static class Listener implements ISubscribersPollerListener
     {
-        @Getter final Set<Integer> rcvMessagesContents = new HashSet<>();
-        @Getter final Set<Long> rcvMessagesSecuences = new HashSet<>();
-        @Getter final AtomicInteger rcvEncryptedMessagesCount = new AtomicInteger(0);
-        @Getter final Set<Integer> rcvRequestsByContentValue = new HashSet<>();
-        @Getter final Set<Long> rcvRequestsBySeqNumber = new HashSet<>();
-        @Getter final Set<UUID>  rcvHeartbeatRequestIds = new HashSet<>();
-        @Getter final Set<UUID>  rcvRequestIds = new HashSet<>();
-        @Getter final Set<Integer>  rcvResponses = new HashSet<>();
-        @Getter final Set<UUID>  rcvRespIds = new HashSet<>();
+        @Getter
+        final Set<Integer> rcvMessagesContents = new HashSet<>();
+        @Getter
+        final Set<Long> rcvMessagesSecuences = new HashSet<>();
+        @Getter
+        final AtomicInteger rcvEncryptedMessagesCount = new AtomicInteger(0);
+        @Getter
+        final Set<Integer> rcvRequestsByContentValue = new HashSet<>();
+        @Getter
+        final Set<Long> rcvRequestsBySeqNumber = new HashSet<>();
+        @Getter
+        final Set<UUID> rcvHeartbeatRequestIds = new HashSet<>();
+        @Getter
+        final Set<UUID> rcvRequestIds = new HashSet<>();
+        @Getter
+        final Set<Integer> rcvResponses = new HashSet<>();
+        @Getter
+        final Set<UUID> rcvRespIds = new HashSet<>();
 
         @Override
         public void onDataMsgReceived(RcvMessage msg)
@@ -359,9 +378,10 @@ public class SubcribersPollerTest
         }
     }
 
-    private class SimpleListener implements ISubscribersPollerListener
+    private static class SimpleListener implements ISubscribersPollerListener
     {
-        @Getter final List<IRcvMessage> rcvMessages = new LinkedList<>();
+        @Getter
+        final List<IRcvMessage> rcvMessages = new LinkedList<>();
 
         @Override
         public void onDataMsgReceived(RcvMessage msg)

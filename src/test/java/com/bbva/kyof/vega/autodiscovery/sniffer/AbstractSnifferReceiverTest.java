@@ -1,5 +1,6 @@
 package com.bbva.kyof.vega.autodiscovery.sniffer;
 
+import com.bbva.kyof.vega.TestConstants;
 import com.bbva.kyof.vega.Version;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscInstanceInfo;
 import com.bbva.kyof.vega.autodiscovery.model.AutoDiscTopicInfo;
@@ -84,7 +85,7 @@ public class AbstractSnifferReceiverTest
     @Test
     public void testInstance() throws InterruptedException
     {
-        final AutoDiscInstanceInfo instanceInfo = new AutoDiscInstanceInfo("instance1", UUID.randomUUID(), 12, 23, 55, 12, 23, 56);
+        final AutoDiscInstanceInfo instanceInfo = new AutoDiscInstanceInfo("instance1", UUID.randomUUID(), 12, 23, 55, TestConstants.EMPTY_HOSTNAME, 12, 23, 56, TestConstants.EMPTY_HOSTNAME);
 
         this.sendMessage(MsgType.AUTO_DISC_INSTANCE, instanceInfo);
 
@@ -117,7 +118,8 @@ public class AbstractSnifferReceiverTest
     @Test
     public void testTopicSockets() throws InterruptedException
     {
-        final AutoDiscTopicSocketInfo topicSocketInfo = new AutoDiscTopicSocketInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic", UUID.randomUUID(), 1, 2, 4);
+        final AutoDiscTopicSocketInfo topicSocketInfo = new AutoDiscTopicSocketInfo(UUID.randomUUID(), AutoDiscTransportType.PUB_IPC, UUID.randomUUID(), "topic", UUID.randomUUID(), 1, 2, 4,
+                TestConstants.EMPTY_HOSTNAME);
         this.sendMessage(MsgType.AUTO_DISC_TOPIC_SOCKET, topicSocketInfo);
 
         //Test new instance info received

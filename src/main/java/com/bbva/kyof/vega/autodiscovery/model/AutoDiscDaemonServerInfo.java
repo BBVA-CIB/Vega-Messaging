@@ -39,6 +39,9 @@ public class AutoDiscDaemonServerInfo implements IAutoDiscInfo
 	/** Unicast resolver client port where it received the resolver daemon messages */
 	@Getter private int unicastResolverServerPort;
 
+	/** Unicast resolver client hostname where it received the resolver daemon messages */
+	@Getter private String unicastResolverHostname;
+
 	@Override
 	public boolean equals(final Object target)
 	{
@@ -68,6 +71,7 @@ public class AutoDiscDaemonServerInfo implements IAutoDiscInfo
 		this.uniqueId = buffer.readUUID();
 		this.unicastResolverServerIp = buffer.readInt();
 		this.unicastResolverServerPort = buffer.readInt();
+		this.unicastResolverHostname = buffer.readString();
 	}
 
 	@Override
@@ -76,12 +80,13 @@ public class AutoDiscDaemonServerInfo implements IAutoDiscInfo
 		buffer.writeUUID(this.uniqueId);
 		buffer.writeInt(this.unicastResolverServerIp);
 		buffer.writeInt(this.unicastResolverServerPort);
+		buffer.writeString(this.unicastResolverHostname);
 	}
 
 	@Override
 	public int serializedSize()
 	{
-		return FIX_MEMBERS_SERIALIZED_SIZE;
+		return FIX_MEMBERS_SERIALIZED_SIZE + UnsafeBufferSerializer.serializedSize(this.unicastResolverHostname);
 	}
 
 	@Override
@@ -91,6 +96,7 @@ public class AutoDiscDaemonServerInfo implements IAutoDiscInfo
 				"uniqueId=" + uniqueId +
 				", unicastResolverServerIp=" + InetUtil.convertIntToIpAddress(unicastResolverServerIp) +
 				", unicastResolverServerPort=" + unicastResolverServerPort +
+				", unicastResolverHostname='" + unicastResolverHostname + '\'' +
 				'}';
 	}
 }
